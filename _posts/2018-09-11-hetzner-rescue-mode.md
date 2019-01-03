@@ -46,21 +46,11 @@ Where is `xxx.xxx.xxx.xxx` public IP of the server
 1. Activating a rescue mode for selected server in Hetzner [web panel][web-panel].
 Choose your ssh key for connecting to the rescue server without password.
 
-<figure>
-	<a href="/assets/images/hetzner-rescue/activate-rescue.png">
-    <img src="/assets/images/hetzner-rescue/activate-rescue.png">
-  </a>
-</figure>
-
+![activate-rescue]({{ site.url }}{{ site.baseurl }}/assets/images/hetzner-rescue/activate-rescue.png){: .align-center}
 
 2. Reset the server. Select first or second option
 
-<figure>
-	<a href="/assets/images/hetzner-rescue/send-reboot.png">
-    <img src="/assets/images/hetzner-rescue/send-reboot.png">
-  </a>
-</figure>
-
+![send-reboot]({{ site.url }}{{ site.baseurl }}/assets/images/hetzner-rescue/send-reboot.png){: .align-center}
 
 3. Connect to the server by ssh.
 Where is `xxx.xxx.xxx.xxx` public IP of the server (it showed in the web panel)

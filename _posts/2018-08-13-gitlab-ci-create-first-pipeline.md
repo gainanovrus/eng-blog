@@ -23,16 +23,8 @@ pipelines. I wrote an example Java application to demonstrate a possibility of C
 The application code is placed [here][java-servlet-hello].
 
 For using it in GitLab just clone and add as new project.
-<figure>
-	<a href="/assets/images/gitlab-ci/create-new-project.png">
-    <img src="/assets/images/gitlab-ci/create-new-project.png">
-  </a>
-</figure>
-<figure>
-	<a href="/assets/images/gitlab-ci/java-project-info.png">
-    <img src="/assets/images/gitlab-ci/java-project-info.png">
-  </a>
-</figure>
+![create-new-project]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/create-new-project.png){: .align-center}
+![java-project-info]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/java-project-info.png){: .align-center}
 
 
 ## About project
@@ -65,22 +57,13 @@ gitlab-runner ALL=(ALL) NOPASSWD: ALL
 
 In the end, enable a specific Runner to this project if you didn't do that yet.
 
-<figure>
-	<a href="/assets/images/gitlab-ci/configure-stand-runner.png">
-    <img src="/assets/images/gitlab-ci/configure-stand-runner.png">
-  </a>
-</figure>
-
+![configure-stand-runner]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/configure-stand-runner.png){: .align-center}
 
 ## Writing pipeline
 
 In this project I want to use two stages to build and deploy an application.
 
-<figure>
-	<a href="/assets/images/gitlab-ci/hello-pipeline.png">
-    <img src="/assets/images/gitlab-ci/hello-pipeline.png">
-  </a>
-</figure>
+![hello-pipeline]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/hello-pipeline.png){: .align-center}
 
 The stage `deploy` has two jobs to deploy the app into a stand and production
 servers. Runners on these servers have tags `prod-shell` and `stand-shell`.
@@ -138,39 +121,24 @@ deploy:prod:
 
 
 
-In the result we have an automation process that builds and deploy the web app
-to stand host for test purposes after every commit into a repo.
+In the result we have an automation process that builds and deploy the web app.
+The app is deployed to stand host for test purposes after every commit into a repo.
 
-<figure>
-	<a href="/assets/images/gitlab-ci/hello-gitlab-pipelines.png">
-    <img src="/assets/images/gitlab-ci/hello-gitlab-pipelines.png">
-  </a>
-</figure>
+![hello-gitlab-pipelines]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/hello-gitlab-pipelines.png){: .align-center}
 
 The result pipeline is:
 
-<figure>
-	<a href="/assets/images/gitlab-ci/hello-gitlab-pipeline.png">
-    <img src="/assets/images/gitlab-ci/hello-gitlab-pipeline.png">
-  </a>
-</figure>
-
+![java-project-info]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/java-project-info.png){: .align-center}
+![hello-gitlab-pipeline]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/hello-gitlab-pipeline.png){: .align-center}
 
 The app can be accessed by IP and PORT.  The PORT are dynamically generated and
 are showed in the `deploy:stand` job result:
 
-<figure>
-	<a href="/assets/images/gitlab-ci/hello-deploy-job-result.png">
-    <img src="/assets/images/gitlab-ci/hello-deploy-job-result.png">
-  </a>
-</figure>
+![hello-deploy-job-result]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/hello-deploy-job-result.png){: .align-center}
 
 In my job output port is `32768`. And the web app can be accessed by:
-<figure>
-	<a href="/assets/images/gitlab-ci/hello-result.png">
-    <img src="/assets/images/gitlab-ci/hello-result.png">
-  </a>
-</figure>
+
+![hello-result]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/hello-result.png){: .align-center}
 
 With this configuration you have tried to use CI/CD process with GitLab. Don't
 forget this simple pipeline doesn't provide jobs to stop stands. You should are
