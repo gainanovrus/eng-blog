@@ -4,22 +4,8 @@
 
 @charset "utf-8";
 
+# Change color of links to light blue (GR)
 $link-color: #52adc8 !default;
-
-.language-button{
-  background-color: transparent;
-  background-image: url(/eng-blog/assets/img/united-kingdom-flag-button-square-icon-32.png);
-  background-repeat: no-repeat;
-  background-position: left center;
-  transition: background 0.2s ease;
-  width: 32px;
-  height: 32px;
-}
-
-.language-button:hover {
-  background-image: url(/eng-blog/assets/img/russia-flag-button-square-icon-32.png);
-}
-
 
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials

@@ -1,0 +1,14 @@
+
+.language-button{
+  background-color: transparent;
+  background-image: url(/eng-blog/assets/img/united-kingdom-flag-button-square-icon-32.png);
+  background-repeat: no-repeat;
+  background-position: left center;
+  transition: background 0.2s ease;
+  width: 32px;
+  height: 32px;
+}
+
+.language-button:hover {
+  background-image: url(/eng-blog/assets/img/russia-flag-button-square-icon-32.png);
+}
