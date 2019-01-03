@@ -8,20 +8,16 @@ $link-color: #52adc8 !default;
 
 .language-button{
   background-color: transparent;
-  background-image: url(assets/img/united-kingdom-flag-button-square-icon-32.png);
+  background-image: url(/eng-blog/assets/img/united-kingdom-flag-button-square-icon-32.png);
   background-repeat: no-repeat;
   background-position: left center;
-  border: 0px !important;
-  display: block;
   transition: background 0.2s ease;
-  position: absolute;
-  top: 24px;
   width: 32px;
   height: 32px;
 }
 
 .language-button:hover {
-  background-image: url(assets/img/russia-flag-button-square-icon-32.png);
+  background-image: url(/eng-blog/assets/img/russia-flag-button-square-icon-32.png);
 }
 
 
