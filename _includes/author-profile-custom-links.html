@@ -1,0 +1,22 @@
+<!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      {% if author.vk %}
+        <li>
+          <a href="https://vk.com/{{ author.vk }}" itemprop="sameAs">
+            <i class="fab fa-fw fa-vk" aria-hidden="true"></i> VK
+          </a>
+        </li>
+      {% endif %}
+
+      {% if author.telegram %}
+        <li>
+          <a href="https://t.me/{{ author.telegram }}" itemprop="sameAs">
+            <i class="fab fa-fw fa-telegram" aria-hidden="true"></i> Telegram
+          </a>
+        </li>
+      {% endif %}
