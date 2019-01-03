@@ -12,4 +12,4 @@ But often this is associated with IT, Sysadmin and Software.
 
 And sorry for my language mistakes. With this blog, I hope I will know English better.
 
-For more information about me just follow to root of the site [GAINANOV.PRO](http://gainanov.pro).
+For more information about me just follow to root of the site [GAINANOV.PRO](http://gainanov.pro/en).
