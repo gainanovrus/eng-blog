@@ -4,7 +4,6 @@
 
 @charset "utf-8";
 
-# Change color of links to light blue (GR)
 $link-color: #52adc8 !default;
 
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
