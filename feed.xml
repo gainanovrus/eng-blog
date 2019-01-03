@@ -1,0 +1,1352 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="https://gainanovrus.github.io/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gainanovrus.github.io/blog/" rel="alternate" type="text/html" /><updated>2019-01-03T12:56:16+03:00</updated><id>https://gainanovrus.github.io/blog/feed.xml</id><title type="html">BLOG.GAINANOV.PRO</title><subtitle>Hi! I'm Ruslan. I'm interested in the development of software and administration of systems. This is another personal blog about IT, servers and software. I've made the site for writing my notes about everything I have ever done. I hope it is helpful to someone.</subtitle><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><entry><title type="html">GitLab CI/CD. Create simple pipeline</title><link href="https://gainanovrus.github.io/blog/devops/gitlab-ci-create-first-pipeline/" rel="alternate" type="text/html" title="GitLab CI/CD. Create simple pipeline" /><published>2018-08-13T00:00:00+03:00</published><updated>2018-08-13T00:00:00+03:00</updated><id>https://gainanovrus.github.io/blog/devops/gitlab-ci-create-first-pipeline</id><content type="html" xml:base="https://gainanovrus.github.io/blog/devops/gitlab-ci-create-first-pipeline/">&lt;p&gt;Today I want to show you how to build and run a simple web application with
+pipelines. I wrote an example Java application to demonstrate a possibility of CI.
+The application code is placed &lt;a href=&quot;https://github.com/GRomR1/java-servlet-hello&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;For using it in GitLab just clone and add as new project.&lt;/p&gt;
+&lt;figure&gt;
+	&lt;a href=&quot;/assets/images/gitlab-ci/create-new-project.png&quot;&gt;
+    &lt;img src=&quot;/assets/images/gitlab-ci/create-new-project.png&quot; /&gt;
+  &lt;/a&gt;
+&lt;/figure&gt;
+&lt;figure&gt;
+	&lt;a href=&quot;/assets/images/gitlab-ci/java-project-info.png&quot;&gt;
+    &lt;img src=&quot;/assets/images/gitlab-ci/java-project-info.png&quot; /&gt;
+  &lt;/a&gt;
+&lt;/figure&gt;
+
+&lt;h2 id=&quot;about-project&quot;&gt;About project&lt;/h2&gt;
+
+&lt;p&gt;This is a typical and simple web application that shows a web page with
+&lt;strong&gt;“Hello world”&lt;/strong&gt; when a user gets
+&lt;a href=&quot;http://localhost:8081/&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;http://localhost:8081/&lt;/code&gt;&lt;/a&gt; from browser.
+Firstly you should compile a project with Maven. In the result of it you have
+got a file &lt;code class=&quot;highlighter-rouge&quot;&gt;hello.war&lt;/code&gt;. For running the app copy this war file into a webapps
+folder and run Tomcat WebServer.&lt;/p&gt;
+
+&lt;h2 id=&quot;runner-host-preparing&quot;&gt;Runner host preparing&lt;/h2&gt;
+
+&lt;p&gt;It supposes you have &lt;a href=&quot;/devops/gitlab-ci-runner-install/&quot;&gt;configured&lt;/a&gt; a shell Runner and have
+installed Docker.&lt;/p&gt;
+
+&lt;p&gt;After that for allowing to manage docker containers by Runner you should add
+a gitlab-runner user into docker group.&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;usermod &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-G&lt;/span&gt; docker gitlab-runner
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In addition I setup gitlab-runner as sudo user to run protected linux commands
+without user passwords. Just add a next row into a file with a command
+&lt;code class=&quot;highlighter-rouge&quot;&gt;sudo visudo -f /etc/sudoers.d/gitlab-runner&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gitlab-runner ALL=(ALL) NOPASSWD: ALL
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In the end, enable a specific Runner to this project if you didn’t do that yet.&lt;/p&gt;
+
+&lt;figure&gt;
+	&lt;a href=&quot;/assets/images/gitlab-ci/configure-stand-runner.png&quot;&gt;
+    &lt;img src=&quot;/assets/images/gitlab-ci/configure-stand-runner.png&quot; /&gt;
+  &lt;/a&gt;
+&lt;/figure&gt;
+
+&lt;h2 id=&quot;writing-pipeline&quot;&gt;Writing pipeline&lt;/h2&gt;
+
+&lt;p&gt;In this project I want to use two stages to build and deploy an application.&lt;/p&gt;
+
+&lt;figure&gt;
+	&lt;a href=&quot;/assets/images/gitlab-ci/hello-pipeline.png&quot;&gt;
+    &lt;img src=&quot;/assets/images/gitlab-ci/hello-pipeline.png&quot; /&gt;
+  &lt;/a&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;The stage &lt;code class=&quot;highlighter-rouge&quot;&gt;deploy&lt;/code&gt; has two jobs to deploy the app into a stand and production
+servers. Runners on these servers have tags &lt;code class=&quot;highlighter-rouge&quot;&gt;prod-shell&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;stand-shell&lt;/code&gt;.
+The deploy to the production server requires a manual action. To build an app
+are used a docker maven container. The app is deploying with tomcat container.&lt;/p&gt;
+
+&lt;p&gt;Thus the next code will configure the defined pipeline.
+It requires to be inputted in &lt;code class=&quot;highlighter-rouge&quot;&gt;.gitlab-ci.yml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;stages&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;build&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;deploy&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;build_app&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;stage&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;build&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;dependencies&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[]&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;tags&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;stand-shell&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;script&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;docker run -i --rm --name hello-maven -v ${PWD}:/hello -w /hello maven&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;mvn clean install&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;cp target/hello.war hello.war&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;docker run -i --rm --name hello-maven -v ${PWD}:/hello -w /hello maven&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;mvn clean&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;artifacts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;paths&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;hello.war&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;expire_in&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;1 week&lt;/span&gt;
+
+&lt;span class=&quot;s&quot;&gt;deploy:stand&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;stage&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;deploy&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;dependencies&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;build_app&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;tags&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;stand-shell&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;script&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;docker run -d --rm --name hello-tomcat-${CI_COMMIT_SHA:0:8} -P&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;-v ${PWD}/hello.war:/usr/local/tomcat/webapps/hello.war&lt;/span&gt;   
+      &lt;span class=&quot;s&quot;&gt;tomcat:9.0-jre8-alpine&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;docker ps -f &quot;name=hello-tomcat-${CI_COMMIT_SHA:0:8}&quot; --format '{{.Ports}}'&lt;/span&gt;
+
+&lt;span class=&quot;s&quot;&gt;deploy:prod&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;stage&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;deploy&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;when&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;manual&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;dependencies&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;build_app&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;tags&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;prod-shell&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;script&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;docker run -d --rm --name hello-tomcat-${CI_COMMIT_SHA:0:8} -P&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;-v ${PWD}/hello.war:/usr/local/tomcat/webapps/hello.war&lt;/span&gt;   
+      &lt;span class=&quot;s&quot;&gt;tomcat:9.0-jre8-alpine&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;docker ps -f &quot;name=hello-tomcat-${CI_COMMIT_SHA:0:8}&quot; --format '{{.Ports}}'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In the result we have an automation process that builds and deploy the web app
+to stand host for test purposes after every commit into a repo.&lt;/p&gt;
+
+&lt;figure&gt;
+	&lt;a href=&quot;/assets/images/gitlab-ci/hello-gitlab-pipelines.png&quot;&gt;
+    &lt;img src=&quot;/assets/images/gitlab-ci/hello-gitlab-pipelines.png&quot; /&gt;
+  &lt;/a&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;The result pipeline is:&lt;/p&gt;
+
+&lt;figure&gt;
+	&lt;a href=&quot;/assets/images/gitlab-ci/hello-gitlab-pipeline.png&quot;&gt;
+    &lt;img src=&quot;/assets/images/gitlab-ci/hello-gitlab-pipeline.png&quot; /&gt;
+  &lt;/a&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;The app can be accessed by IP and PORT.  The PORT are dynamically generated and
+are showed in the &lt;code class=&quot;highlighter-rouge&quot;&gt;deploy:stand&lt;/code&gt; job result:&lt;/p&gt;
+
+&lt;figure&gt;
+	&lt;a href=&quot;/assets/images/gitlab-ci/hello-deploy-job-result.png&quot;&gt;
+    &lt;img src=&quot;/assets/images/gitlab-ci/hello-deploy-job-result.png&quot; /&gt;
+  &lt;/a&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;In my job output port is &lt;code class=&quot;highlighter-rouge&quot;&gt;32768&lt;/code&gt;. And the web app can be accessed by:&lt;/p&gt;
+&lt;figure&gt;
+	&lt;a href=&quot;/assets/images/gitlab-ci/hello-result.png&quot;&gt;
+    &lt;img src=&quot;/assets/images/gitlab-ci/hello-result.png&quot; /&gt;
+  &lt;/a&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;With this configuration you have tried to use CI/CD process with GitLab. Don’t
+forget this simple pipeline doesn’t provide jobs to stop stands. You should are
+stopping unused docker containers yourself.&lt;/p&gt;
+
+&lt;p&gt;Next you can change it to your complex configuration for own purposes.&lt;/p&gt;
+
+&lt;p&gt;In the future I will explain how to use &lt;a href=&quot;https://www.ansible.com/&quot;&gt;Ansible&lt;/a&gt;
+for CI/CD in the script block. It useful if you have a complex pipeline and you
+want write readable scripts.&lt;/p&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="gitlab" /><category term="devops" /><category term="java" /><summary type="html">With using CI/CD pipelines in GitLab project you can easily build, test and deploy your code. This post will describe how to make it step by step.</summary></entry><entry><title type="html">GitLab CI/CD. Install and configure Runner</title><link href="https://gainanovrus.github.io/blog/devops/gitlab-ci-runner-install/" rel="alternate" type="text/html" title="GitLab CI/CD. Install and configure Runner" /><published>2018-08-12T00:00:00+03:00</published><updated>2018-08-12T00:00:00+03:00</updated><id>https://gainanovrus.github.io/blog/devops/gitlab-ci-runner-install</id><content type="html" xml:base="https://gainanovrus.github.io/blog/devops/gitlab-ci-runner-install/">&lt;p&gt;In GitLab Runners run the jobs that you define in &lt;a href=&quot;https://docs.gitlab.com/ce/ci/yaml/README.html&quot;&gt;.gitlab-ci.yml&lt;/a&gt;.
+A Runner can be a virtual machine, a VPS, a bare-metal machine, a docker container
+or even a cluster of containers. GitLab and the Runners communicate through an API,
+so the only requirement is that the Runner’s machine has Internet access.&lt;/p&gt;
+
+&lt;p&gt;The official Runner supported by GitLab is written in Go and its documentation
+can be found at &lt;a href=&quot;https://docs.gitlab.com/runner&quot;&gt;https://docs.gitlab.com/runner/&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In order to have a functional Runner you need to follow two steps:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Install it&lt;/li&gt;
+  &lt;li&gt;Configure it&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Next I’ll show you how to install and configure the latest GitLab Runner with
+shell executor in CentOS system. Additional steps you can find in
+&lt;a href=&quot;https://docs.gitlab.com/runner/install/index.html&quot;&gt;official docs&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;install-runner&quot;&gt;Install Runner&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Add GitLab’s official &lt;a href=&quot;https://docs.gitlab.com/runner/install/linux-repository.html&quot;&gt;repository&lt;/a&gt; (for RHEL/CentOS/Fedora):
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh | sudo bash
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Install the Runner:
+    &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;yum install -y gitlab-runner
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;configure-runner&quot;&gt;Configure Runner&lt;/h2&gt;
+
+&lt;h3 id=&quot;register-runner&quot;&gt;Register Runner&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://docs.gitlab.com/runner/register&quot;&gt;Registering&lt;/a&gt; a Runner is the process that binds the Runner
+with a GitLab instance.&lt;/p&gt;
+
+&lt;p&gt;You can register a Runner in interactive mode with a command:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gitlab-runner register
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And reply to the questions of the wizard.&lt;/p&gt;
+
+&lt;p&gt;But I would prefer to register it with inserting answers in parameters:&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gitlab-runner register &lt;span class=&quot;nt&quot;&gt;-n&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;--url&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;https://YOUR_GITLAB_URL/&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;--registration-token&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;XXXXXXXXXXXXXXXXXXXXXXX&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;--description&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;nginx&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;--tag-list&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;nginx-shell&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;--executor&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;shell&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;--limit&lt;/span&gt; 1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Don’t forget place your toker. It stored in Admin Area ➔ Overview ➔ Runners:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;https://YOUR_GITLAB_URL/admin/runners&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://gainanovrus.github.io/blog/assets/images/gitlab-ci/runners-admin.png&quot; alt=&quot;runners-admin&quot; class=&quot;align-center&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And set the correct description and tags. I prefer to use a hostname as a description.
+I named it &lt;code class=&quot;highlighter-rouge&quot;&gt;nginx&lt;/code&gt; because I run it on Nginx server. And set up tags.
+I suggest use &lt;code class=&quot;highlighter-rouge&quot;&gt;host + executor&lt;/code&gt; as a tag.&lt;/p&gt;
+
+&lt;h3 id=&quot;start-runner&quot;&gt;Start Runner&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gitlab-runner start
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Check a status of a service:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# gitlab-runner status
+gitlab-runner: Service is running!
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Show configured runners on the host:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# gitlab-runner list
+Listing configured runners                          ConfigFile=/etc/gitlab-runner/config.toml
+host1                                                 Executor=shell Token=XXXXXXXXXXXXXXXXXXXXXXX URL=https://YOUR_GITLAB_URL/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After that I usually change a type of a Runner from a shared into a specific.&lt;/p&gt;
+
+&lt;h3 id=&quot;converting-runner-type&quot;&gt;Converting Runner type&lt;/h3&gt;
+
+&lt;p&gt;Set up the current Runner as a specific one to deny to use a Runner of all projects.
+Just choose our new Runner in Admin Area and determine some project or projects with it.&lt;/p&gt;
+
+&lt;p&gt;Once the Runner has been set up, you should see it on the Runners page of your
+project, following Settings ➔ CI/CD:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://gainanovrus.github.io/blog/assets/images/gitlab-ci/change-runner-type.png&quot; alt=&quot;change-runner-type&quot; class=&quot;align-center&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;After that you can configure your CI process in a .gitlab-ci.yml file with
+using tags to select specific Runners. For example:&lt;/p&gt;
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;example_job&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;tags&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;nginx-shell&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;script&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;execute_something_script&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Next &lt;a href=&quot;/devops/gitlab-ci-create-first-pipeline/&quot;&gt;post&lt;/a&gt; will help you to write a basic CI/CD configuration.&lt;/p&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="gitlab" /><category term="devops" /><category term="centos" /><summary type="html">GitLab uses Runners for a running scripts that defined in your CI pipeline. A Runner is a daemon that hosted in your servers. It waits commands from GitLab and activates when a job executed. It requires some manual actions to install and configure.</summary></entry><entry><title type="html">GitLab CI/CD. Main concepts and terms</title><link href="https://gainanovrus.github.io/blog/devops/gitlab-ci-main-concepts/" rel="alternate" type="text/html" title="GitLab CI/CD. Main concepts and terms" /><published>2018-08-11T00:00:00+03:00</published><updated>2018-08-11T00:00:00+03:00</updated><id>https://gainanovrus.github.io/blog/devops/gitlab-ci-main-concepts</id><content type="html" xml:base="https://gainanovrus.github.io/blog/devops/gitlab-ci-main-concepts/">&lt;p&gt;If you want to use Continuous Integration (CI) and Continuous Delivery (CD)
+services you need to know basic terms using in GitLab. I selected the foremost
+ones and set links to the description and additional information about them.&lt;/p&gt;
+
+&lt;h2 id=&quot;configuration-file&quot;&gt;Configuration file&lt;/h2&gt;
+&lt;p&gt;For using a CI/CD service you need to create a &lt;a href=&quot;https://docs.gitlab.com/ce/ci/yaml/README.html&quot;&gt;.gitlab-ci.yml&lt;/a&gt;
+file to the root directory of your repository. This file is used by GitLab
+Runner to manage your project’s jobs and stored in a
+&lt;a href=&quot;https://en.wikipedia.org/wiki/YAML&quot;&gt;YAML&lt;/a&gt; format.&lt;/p&gt;
+
+&lt;h2 id=&quot;runner&quot;&gt;Runner&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.gitlab.com/runner&quot;&gt;GitLab Runner&lt;/a&gt; is a daemon in a host machine that is used to running
+your jobs and send the results back to GitLab. It permanently holds a connect
+with Gitlab. When a user runs job by pipeline Runner executes commands from
+.gitlab-ci.yml on the host.&lt;/p&gt;
+
+&lt;h2 id=&quot;job&quot;&gt;Job&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.gitlab.com/ee/ci/pipelines.html#jobs&quot;&gt;Jobs&lt;/a&gt; are set of commands that stored in section &lt;code class=&quot;highlighter-rouge&quot;&gt;script&lt;/code&gt; in a config file.
+GitLab Runner runs jobs in a host machine. Each job is run independently of each
+other. The most popular jobs are a build_web_app1, build_web_app2, prepare, test,
+deploy, and etc.&lt;/p&gt;
+
+&lt;h2 id=&quot;stage&quot;&gt;Stage&lt;/h2&gt;
+&lt;p&gt;A &lt;a href=&quot;https://docs.gitlab.com/ee/ci/yaml/README.html#stages&quot;&gt;stage&lt;/a&gt; allows to group jobs, and jobs of the same stage are executed
+in parallel. Jobs of the next stage are run after the jobs from the previous
+stage complete successfully.&lt;/p&gt;
+
+&lt;h2 id=&quot;pipeline&quot;&gt;Pipeline&lt;/h2&gt;
+&lt;p&gt;A &lt;a href=&quot;https://docs.gitlab.com/ee/ci/pipelines.html#pipelines&quot;&gt;pipeline&lt;/a&gt; is a group of jobs that get executed in stages (batches). All of the
+jobs in a stage are executed in parallel and if they all succeed the pipeline
+moves on to the next stage. If one of the jobs fails the next stage is not
+(usually) executed. You can access the pipelines page in your project’s
+Pipelines tab.&lt;/p&gt;
+
+&lt;h2 id=&quot;artifact&quot;&gt;Artifact&lt;/h2&gt;
+&lt;p&gt;An &lt;a href=&quot;https://docs.gitlab.com/ce/user/project/pipelines/job_artifacts.html#defining-artifacts-in-gitlab-ci-yml&quot;&gt;artifact&lt;/a&gt; is a list of files and directories which are attached
+to a job after it completes successfully. The uploaded artifacts will be kept
+in GitLab during expiry period. You can download the artifacts archive or
+browse its contents in Job Info page.&lt;/p&gt;
+
+&lt;h2 id=&quot;environment&quot;&gt;Environment&lt;/h2&gt;
+&lt;p&gt;GitLab provides a full history of your deployments per every environment.
+&lt;a href=&quot;https://docs.gitlab.com/ee/ci/environments.html&quot;&gt;Environments&lt;/a&gt; are like tags for your CI jobs, describing where code gets deployed.
+GitLab keeps track of your deployments, so you always know what is currently
+being deployed on your servers. For example, you can create and use typical
+environments - production and staging.&lt;/p&gt;
+
+&lt;h2 id=&quot;dependency&quot;&gt;Dependency&lt;/h2&gt;
+&lt;p&gt;When defined jobs exist in a &lt;a href=&quot;https://docs.gitlab.com/ee/ci/yaml/README.html#dependencies&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;dependency&lt;/code&gt;&lt;/a&gt; block of your .gitlab-ci.yml the
+Runner should be download all artifacts before start the current job.
+It can be used to divide build and deploy jobs for example.
+The deploy job often uses generated artifacts on previous stages.&lt;/p&gt;
+
+&lt;p&gt;Next post will describe how to &lt;a href=&quot;/devops/gitlab-ci-runner-install/&quot;&gt;install and configure a GitLab Runner&lt;/a&gt; for using
+it in your first pipeline.&lt;/p&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="gitlab" /><category term="devops" /><summary type="html">Before we will create the first pipeline with GitLab CI we should understand what pipeline is it. I want to explain main terms in this post.</summary></entry><entry><title type="html">GitLab CI/CD</title><link href="https://gainanovrus.github.io/blog/devops/gitlab-ci-main/" rel="alternate" type="text/html" title="GitLab CI/CD" /><published>2018-08-10T00:00:00+03:00</published><updated>2018-08-10T00:00:00+03:00</updated><id>https://gainanovrus.github.io/blog/devops/gitlab-ci-main</id><content type="html" xml:base="https://gainanovrus.github.io/blog/devops/gitlab-ci-main/">&lt;p&gt;Today I want to start writing a cycle of articles about CI/CD process with GitLab.
+Many developers use GitLab to store code and work together on one project (write
+and review code, make issues, user management, etc.). But it has many other
+built-in tools includes automate test and deploy process.&lt;/p&gt;
+
+&lt;p&gt;With Gitlab you can easily build, test and deploy your code. In our company we
+are using Gitlab CI/CD for a long time. I will share my experience with you.&lt;/p&gt;
+
+&lt;p&gt;So these topics will be described in next articles:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;/devops/gitlab-ci-main-concepts/&quot;&gt;GitLab CI/CD. Main concepts and terms&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/devops/gitlab-ci-runner-install/&quot;&gt;GitLab CI/CD. Install and configure Runner&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/devops/gitlab-ci-create-first-pipeline/&quot;&gt;GitLab CI/CD. Create simple pipeline&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;GitLab CI/CD. Tips and tricks&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;&lt;strong&gt;Official documentation&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.gitlab.com/ce/ci/&quot;&gt;GitLab CI/CD Documentation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.gitlab.com/ce/ci/quick_start/README.html&quot;&gt;Getting started with GitLab CI/CD&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.gitlab.com/ce/ci/yaml/README.html&quot;&gt;Configuration of your jobs with .gitlab-ci.yml&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="gitlab" /><category term="devops" /><summary type="html">GitLab CI/CD takes many benefits for companies that want to automate software development workflow. I use it in my practice for a long time and want to documents my experience.</summary></entry><entry><title type="html">Tasks of Linux contest in IT-Planet</title><link href="https://gainanovrus.github.io/blog/linux/tasks-of-linux-contest-in-itplanet/" rel="alternate" type="text/html" title="Tasks of Linux contest in IT-Planet" /><published>2018-06-10T00:00:00+03:00</published><updated>2018-06-10T00:00:00+03:00</updated><id>https://gainanovrus.github.io/blog/linux/tasks-of-linux-contest-in-itplanet</id><content type="html" xml:base="https://gainanovrus.github.io/blog/linux/tasks-of-linux-contest-in-itplanet/">&lt;p class=&quot;notice--info&quot;&gt;&lt;strong&gt;IT-Planet&lt;/strong&gt; is an international olympiad for students and young specialists in IT. 
+I participated in the contest of Linux Administration and I became one of the winners. 
+The tasks that presented below have been in the final of the contest.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://world-it-planet.org/&quot;&gt;«IT-Планета»&lt;/a&gt; — одно из самых масштабных состязаний в области информационных технологий, учрежденных в России. 
+Учредителями конкурсов являются ведущие российские и международные ИТ-компании: 1С, Huawei, Cisco, Oracle, ГНУ/Линуксцентр и СКБ Контур. 
+Олимпиада проводится по нескольким направлениям.&lt;/p&gt;
+
+&lt;p&gt;Я участвовал в конкурсе по номинации “Администрирование Linux”, прошел несколько отборочных этапов и стали одним из победителей в финальных соревнованиях.
+И здесь решил выложить сами задания финала, которые показались мне достаточно интересными. Если найду время - выложу и решения.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;div class=&quot;notice--info&quot;&gt;
+&lt;p&gt;В нашем распоряжении была машина с OC Centos 7 минимальной конфигурации, подключенная физически к интернету. Необходимо было:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;авторизоваться в системе, взломав пароль пользователя root&lt;/li&gt;
+  &lt;li&gt;починить сломанные настройки сети&lt;/li&gt;
+  &lt;li&gt;найти веб-сервер в локальной сети, на котором лежат задания&lt;/li&gt;
+  &lt;li&gt;скачать текстовый файл с заданиями и начать их решать&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;hr /&gt;
+
+&lt;h3 id=&quot;Задания-финала-конкурса-Администрирование-linux&quot;&gt;Задания финала конкурса “Администрирование Linux”&lt;/h3&gt;
+
+&lt;div class=&quot;notice&quot;&gt;
+&lt;h4 id=&quot;Представиться-в-rootmotd&quot;&gt;Представиться в /root/motd&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Не забывайте, что ваша рабочая станция после перезапуска должна автоматически
+ подключиться к сети.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Нужно создать раздел на диске размером 1000MB, примонтировать в /data/
+    &lt;ul&gt;
+      &lt;li&gt;Диск должен монтироваться при старте системы&lt;/li&gt;
+      &lt;li&gt;Должны быть приняты меры на случай смены имени диска&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Завести пользователей orta, atmos, hexen, plyaski, ai
+    &lt;ul&gt;
+      &lt;li&gt;orta, atmos должны иметь доступ read в /data&lt;/li&gt;
+      &lt;li&gt;ai и plyaski rw доступ&lt;/li&gt;
+      &lt;li&gt;Чтобы избежать переполнения раздела, нужно выставить квоту на запись для
+юзеров ai и plyaski, soft 7000kb, hard 8000kb&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Настроить nfs-server
+    &lt;ul&gt;
+      &lt;li&gt;Каталог /var/nfs должен быть доступен для монтирования из локальной сети&lt;/li&gt;
+      &lt;li&gt;root доступ должен быть отключен&lt;/li&gt;
+      &lt;li&gt;пользовательская авторизация включена&lt;/li&gt;
+      &lt;li&gt;firewall должен работать&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Настроить кеширующий dns-сервер unbound на локальную сеть.
+    &lt;ul&gt;
+      &lt;li&gt;В качестве forward-zone использовать 8.8.8.8 / 8.8.4.4&lt;/li&gt;
+      &lt;li&gt;запросы должны приниматься только из подсети 192.168.171.0/24&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Юзеру hexen ограничить использование CPU до 10% а MEM до 128MB
+    &lt;ul&gt;
+      &lt;li&gt;проверка будет производиться приложением stress/stress-ng&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Запустить в контейнере (docker/lxc) socks5-прокси сервер с авторизацией по
+логин:пароль (it:planet), порт 1080
+    &lt;ul&gt;
+      &lt;li&gt;Проверить работоспособность прокси при помощи curl/wget/aria2/etc&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Установить и настроить prometheus для сбора метрик с рабочей станции
+сервис должен работать на стандартном порту (9090), отдавать базовую
+информацию о машине, быть доступным из локальной сети.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;На сервере с задачами находится файл &lt;a href=&quot;/blog/assets/files/itplanet-linux/answers.txt&quot;&gt;answers.txt&lt;/a&gt;
+Содержит он вопросы восстановления паролей у пользователей почтового
+сервиса. Для удобства обработки списка нужно написать скрипт, который
+    &lt;ul&gt;
+      &lt;li&gt;Забирает список с сервера&lt;/li&gt;
+      &lt;li&gt;На лету преобразовывает его в json 
+(реализация принимается на bash, python, готовый скрипт положить в /root/answer_to_json.py,{sh})&lt;/li&gt;
+      &lt;li&gt;json сохранить в /root/result.json&lt;/li&gt;
+      &lt;li&gt;Бонусный балл можно заработать отфильтровав наиболее редкие вопросы восстановления
+(результат положить в /root/answers_filtered.txt)&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;На сервере с заданиями можно обнаружить странный архив &lt;a href=&quot;/blog/assets/files/itplanet-linux/botnet.tar.gz&quot;&gt;botnet.tar.gz&lt;/a&gt; с бинарниками,
+происхождение и назначение которых вам неизвестны. После краткого
+расследования выяснилось, что злоумышленник проник в систему, потому что у
+одного из пользователей логин совпадал с паролем. Есть подозрение, что это
+часть какого-то ботнета. Задача собрать как можно больше информации о
+бинарном файле, о том что делает программа, при возможности деанонимизировать автора.
+Информацию о файле и свои мысли записать в /root/botnet.answer&lt;/p&gt;
+
+    &lt;p&gt;Все манипуляции с файлами из архива с ботнетом производить в контейнере. Выполнение на хост-системе ведет
+к дисквалификации.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="itplanet" /><category term="contest" /><category term="centos" /><category term="linux" /><summary type="html">IT-Planet is an international olympiad for students and young specialists in IT. I participated in the contest of Linux Administration and I became one of the winners. The tasks that presented below have been in the final of the contest.</summary></entry><entry><title type="html">Программа максимум или как объехать и увидеть Крым за 5 дней!</title><link href="https://gainanovrus.github.io/blog/travelling/journey-to-crimea/" rel="alternate" type="text/html" title="Программа максимум или как объехать и увидеть Крым за 5 дней!" /><published>2018-06-09T00:00:00+03:00</published><updated>2018-06-09T00:00:00+03:00</updated><id>https://gainanovrus.github.io/blog/travelling/journey-to-crimea</id><content type="html" xml:base="https://gainanovrus.github.io/blog/travelling/journey-to-crimea/">&lt;p&gt;Так вышло, что у меня было лишь 5 дней отпуска на изучение Крыма, и я понимал, что не смогу просто лежать на пляже всё это время.
+Тем более, что море еще недостаточно теплое (конец мая).&lt;/p&gt;
+
+&lt;p&gt;Необходимо было придумать себе цель путешествия. И я ее нашел. Что это за цель, я думаю, вы поймете к концу рассказа.&lt;/p&gt;
+
+&lt;p&gt;А ниже, в формате истории с некоторыми интересными фактами, она будет представлена.&lt;/p&gt;
+
+&lt;h2 id=&quot;Крымский-полуостров&quot;&gt;Крымский полуостров&lt;/h2&gt;
+
+&lt;p&gt;Крымский полуостров окружен морем с четырех сторон, и лишь Перекопский перешеек шириной в семь километров соединяет его с Большой землей.&lt;/p&gt;
+
+&lt;p&gt;Площадь Крыма около 27 000 км2. Он меньше Швейцарии, но больше Израиля или Кипра, а протяженность его побережья составляет 2500 км.&lt;/p&gt;
+
+&lt;p&gt;Природа Крыма разнообразна и уникальна. Здесь встречаются сразу три климатические зоны: умеренно-континентальный климат степей,
+горный пояс и субтропики южного побережья.
+Только на Крымском полуострове можно столкнуться с сочетанием плоских горных вершин с холодноватым и невероятно влажным воздухом, а
+всего через пару-тройку километров располагаются теплые черноморские берега с их галечными и песчаными пляжами.&lt;/p&gt;
+
+&lt;figure class=&quot;third &quot;&gt;
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/crimea-1.jpg&quot; title=&quot;Песочный городской пляж в пос. Черноморское&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/crimea-1-th.jpg&quot; alt=&quot;Песочный городской пляж в пос. Черноморское&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/crimea-2.jpg&quot; title=&quot;Бесконечное поле с цветущими маками&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/crimea-2-th.jpg&quot; alt=&quot;Бесконечное поле с цветущими маками&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/crimea-3.jpg&quot; title=&quot;Надвигающаяся скала на остановку у м. Сарыч&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/crimea-3-th.jpg&quot; alt=&quot;Надвигающаяся скала на остановку у м. Сарыч&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+  
+&lt;/figure&gt;
+
+&lt;h2 id=&quot;Западное-побережье&quot;&gt;Западное побережье&lt;/h2&gt;
+
+&lt;p&gt;Западное побережье – степное. Нет гор и лесов, только ветер и безводье.
+Растения в большинстве своем низкорослые, иссохшие, жесткие, колючие — акация, туя, скумпия, редко — тополь.
+В мае зацветают тюльпаны, затем маки. Степь в это время прекрасна.&lt;/p&gt;
+
+&lt;p&gt;Крайняя точка западного побережья - &lt;strong&gt;мыс Тарханкут&lt;/strong&gt;.
+В средние века его называли “Мыс Бурь”.
+Расположен неподалеку от села Оленевка, насчитывающего около 1500 жителей.
+В этой местности море очень чистое, потому что поблизости нет рек, впадающих в него.
+Вода меняет оттенки от глубокого синего до лазурно-голубого.
+Наблюдать за сменой цвета можно бесконечно.&lt;/p&gt;
+
+&lt;p&gt;Переменчивость погоды, частые шторма и скальный рельеф береговой линии делали эти места весьма опасными.
+В 1814 году в обеспечении безопасного мореплавания приняли решение соорудить маяк.
+Высота Тарханкутского маяка составила 35 метров.
+Маяк оборудовали 15 лампами, дающими свет от сгорания масла, и массивным колоколом, который в непогоду звонил в набат.
+В наши дни маяк полностью переоборудован и вокруг него осуществляется охрана.
+Рядом с ним видно затонувший в 2010 году сухогруз.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;И добраться до туда не так-то просто. До Оленевки ходят всего несколько рейсов из Евпатории и Черноморского с утра.
+  Доехав до Черноморского, я понял, что последний автобус ушёл 15 минут назад, следующий — только завтра.
+  Ехать на такси — не мой путь, и я решил взять велосипед напрокат, подумав, что 30 км не такая уж и большая дистанция. Я ж и больше проходил…
+  Совершенно проигнорировав особенности рельефа, сельскую дорогу и… штормовое предупреждение.
+  Благо всё обошлось, и за несколько часов я добрался до этого удивительного места.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;figure class=&quot;third &quot;&gt;
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/tarhankut-1.jpg&quot; title=&quot;Приближающаяся темнота туч по дороге до Оленевки&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/tarhankut-1-th.jpg&quot; alt=&quot;Приближающаяся темнота туч по дороге до Оленевки&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/tarhankut-2.jpg&quot; title=&quot;Голубые бухты в райное Большого Атлеша&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/tarhankut-2-th.jpg&quot; alt=&quot;Голубые бухты в райное Большого Атлеша&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/tarhankut-3.jpg&quot; title=&quot;Скала Малого Алтеша с ее сквозным гротом&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/tarhankut-3-th.jpg&quot; alt=&quot;Скала Малого Алтеша с ее сквозным гротом&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/tarhankut-4.jpg&quot; title=&quot;Тарханкутский маяк с затонувшим сухогрузом&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/tarhankut-4-th.jpg&quot; alt=&quot;Тарханкутский маяк с затонувшим сухогрузом&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/tarhankut-5.jpg&quot; title=&quot;Живописный закат на одном из причалов у мыса&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/tarhankut-5-th.jpg&quot; alt=&quot;Живописный закат на одном из причалов у мыса&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+  
+&lt;/figure&gt;
+
+&lt;h2 id=&quot;Южное-побережье&quot;&gt;Южное побережье&lt;/h2&gt;
+
+&lt;p&gt;Высокие горы, теплое море, мягкий климат – вот что такое Юг Крымского полуострова.&lt;/p&gt;
+
+&lt;p&gt;Здесь можно найти живописные скалы, высокие горы и уютные бухты с песочными пляжами.
+Гряда Крымских гор защищает полуостров от воздушных масс, идущих с континента,
+а потому на южном побережье сохраняется субтропический климат с теплым летом, жарким солнцем,
+обилием зелени и теплой морской водой.&lt;/p&gt;
+
+&lt;p&gt;Самой южной точкой Крыма является &lt;strong&gt;мыс Сарыч&lt;/strong&gt;.
+Большинство предполагают, что название Сарыч («золототканый») мыс получил благодаря цвету расположенных рядом холмов.
+Расстояние от мыса Сарыч до мыса Керемпе в Турции составляет около 260 км.
+Маяк на мысе построен по приказу императора Николая II в 1898 году.
+12-ти метровая башня сделана из чугуна. Маяк дожил до наших дней в неизменном виде.
+Совсем рядом находятся территории дач высших правительственных чиновников СССР, где находился М.С. Горбачев во время попытки государственного переворота 1991 г.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Отбиваясь от череды таксистов и немного передохнув в Ялте, отправился покорять самую южную точку Крыма.
+  Добраться до туда можно на проходящем автобусе до Севастополя.
+  Билетов на ближайшие рейсы не оказалось, но местные водители автобусов без проблем подбирают людей, стоит лишь немного отойти за территорию вокзала.
+  Зачастую это бывает дешевле, чем в кассе.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Дорога до мыса проходит вдоль живописного побережья на значительной высоте над морем. Море и горы. Красота… Сам мыс посетить, к сожалению, не удалось.
+  Территория вокруг него была вся застроена различными постройками. К маяку также не попасть - режимный объект.
+  Зато застал живописный закат на фоне гор. А вообще, темнеет, на удивление, быстро и рано.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;figure class=&quot;third &quot;&gt;
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/sarych-1.jpg&quot; title=&quot;Нависающая скала над остановкой у м. Сарыч&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/sarych-1-th.jpg&quot; alt=&quot;Нависающая скала над остановкой у м. Сарыч&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/sarych-2.jpg&quot; title=&quot;Застроенное побережье крайнего юга полуострова&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/sarych-2-th.jpg&quot; alt=&quot;Застроенное побережье крайнего юга полуострова&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/sarych-3.jpg&quot; title=&quot;Теплый закат на фоне холма сплошь покрытого зеленым лесом&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/sarych-3-th.jpg&quot; alt=&quot;Теплый закат на фоне холма сплошь покрытого зеленым лесом&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/sarych-4.jpg&quot; title=&quot;Панорама на мыс Сарыч&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/sarych-4-th.jpg&quot; alt=&quot;Панорама на мыс Сарыч&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+  
+&lt;/figure&gt;
+
+&lt;h2 id=&quot;Восточное-побережье&quot;&gt;Восточное побережье&lt;/h2&gt;
+
+&lt;p&gt;Восток Крыма представляет собой скопление небольших бухт и полуостровов, например, Керченского полуострова.
+Он характерен плавным переходом от Крымских гор к степи.
+Климат на восточном берегу Крыма близок к средиземноморскому – мягкий и без резких температурных колебаний.
+Воздух здесь чистый и сухой, а, благодаря морским бризам, летний зной переносится достаточно легко.
+Пляжи на восточном побережье Крыма встречаются разные - песчано-гравийный с мелким ракушечником от Алушты до Судака,
+с серым песком в самом Судаке, гравийно-галечный в Зеленой бухте Нового Света и мелкопесчаные в Феодосии.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Мыс Фонарь&lt;/strong&gt; является самой восточной точкой Крымского полуострова.
+У этого скалистого возвышения воды Керченского пролива переходят в воды Азовского моря.
+Название мыса — «Фонарь», переводится с греческого языка, как факел, светоч.
+Со времен греческой колонизации на мысе Фонарь был маяк, обеспечивающий морским судам безопасное прохождение Боспора Киммерийского.
+Сам мыс Фонарь представляет собой скалистое возвышение на границе Азовского моря и Керченского пролива.
+С его верхушки открываются потрясающие панорамы Азовского моря, Краснодарского края, косы Чушки и паромной переправы.
+Керченский пролив с этого места хорошо просматривается, а при хорошей погоде отлично видны постройки на той стороне.
+С 1820 года на самом высоком месте возвышается Еникальский маяк, указывающий путь морским судам.
+Но во время ожесточенных боев, в годы Великой Войны, маяк был разрушен.
+О тех событиях, и бесстрашных подвигах во имя жизни, времен войны, сегодня напоминают стелы и обелиски.
+Сейчас здесь оборудован современный навигационный комплекс со станцией GPS.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Приехав в Керчь, пересел на городской автобус из Керчи и доехал до популярной некогда паромной переправы.
+  Пообщавшись с работниками узнал, что из-за сильного ветра (порывами до 20 м/с) попасть на другой берег у меня не получится еще как минимум 40 часов и лучше это сделать по мосту.
+  Эх…&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Солнце двигалось к закату, ветер дул в спину, и хотелось успеть вернуться до наступления темноты. Пройти предстояло около 10 км. Земля, давно не видавшая дождя, была покрыта чередой глубоких трещин, прикрытых пожелтевшей сухой травой. Завораживающие холмистые пейзажи вокруг мыса и почти полное отсутствие людей создают здесь особую таинственную атмосферу. Удивительное место с неповторимой энергетикой.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;figure class=&quot;third &quot;&gt;
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/fonar-1.jpg&quot; title=&quot;Вид на мыс Фонарь с высоты птичьего полета&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/fonar-1-th.jpg&quot; alt=&quot;Вид на мыс Фонарь с высоты птичьего полета&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/fonar-2.jpg&quot; title=&quot;Каменистая бухта у мыса покрытая туманом&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/fonar-2-th.jpg&quot; alt=&quot;Каменистая бухта у мыса покрытая туманом&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/fonar-3.jpg&quot; title=&quot;С мыса виднеется участок Керченской переправы&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/fonar-3-th.jpg&quot; alt=&quot;С мыса виднеется участок Керченской переправы&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/fonar-4.jpg&quot; title=&quot;А также видны постройки с восточного берега Керченского пролива&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/fonar-4-th.jpg&quot; alt=&quot;А также видны постройки с восточного берега Керченского пролива&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/fonar-5.jpg&quot; title=&quot;А Еникальский маяк твердо стоит на посту на самой высокой части мыса&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/fonar-5-th.jpg&quot; alt=&quot;А Еникальский маяк твердо стоит на посту на самой высокой части мыса&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+  
+&lt;/figure&gt;
+
+&lt;p&gt;Отдельного упоминания стоит горный Крым.&lt;/p&gt;
+
+&lt;h2 id=&quot;Крымские-горы&quot;&gt;Крымские горы&lt;/h2&gt;
+
+&lt;p&gt;Уникальные явления природы — Крымские горы.
+Они являются одной из визитных карточек полуострова и излюбленным место туристов.
+Горы Крыма - это сложная структура горных хребтов, каждый элемент которых совершенно уникален и имеет собственное историческое значение.
+Горы Крыма нельзя назвать очень высокими, они ниже Кавказа, Алтая и Альп. Высота самой большой горы Роман-Кош всего лишь 1545 м.
+Самые пики Крымских гор принято называть яйла. Яйла — это цепь своеобразных столообразных плоских вершин, соединенных глубокими перевалами.
+Ландшафт их необычайно живописен и крайне разнообразен. Весной они представляют собой сплошной ковер из цветов.&lt;/p&gt;
+
+&lt;p&gt;Горные реки изобилуют многочисленными порогами, перекатами и водопадами (Учан-Су, Гэловкинский, Джур-Джур и др.).
+Горный Крым также называют Лесным — здесь сохранились крупные массивы реликтовых лесов, занимающие до 12% площади полуострова.&lt;/p&gt;
+
+&lt;p&gt;Одна из вершин Крымских гор, находящаяся в пределах большой Ялты – это &lt;strong&gt;Ставри-Кая&lt;/strong&gt;.
+Ее высота около семисот метров над уровнем моря.
+В переводе с греческого языка «ставрос» это — крест, а с татарского «кая»- скала, так что название говорит само за себя – «крестовая скала».
+Вершину скалы венчает православный крест. Со скалы хорошо просматривается южный берег и Ялта.
+К ее вершине ведет сразу несколько удобных троп-терренкуров (терренкур - “лечение местностью”: tеrrа - земля, сurе - лечить),
+считающихся лечебными, потому что проходят по целебным сосновым лесам.&lt;/p&gt;
+
+&lt;p&gt;Боткинскую тропу проложили члены Ялтинского отделения Крымско-Кавказского горного клуба,
+почитавшие знаменитого профессора, врача С. П. Боткина. Тропа названа именем великого деятеля медицины, т.к.
+он одним из первых оценил и рассказал о целебном влиянии земель Южного берега Крыма на здоровье человека.
+Неповторимые ароматы хвои здешних лесов, чистый горный воздух оказывают мощное лечебное воздействие на организм.
+Человек здесь исцеляется не только телом, но и душой. А это залог скорого излечения от множества недугов.
+С. П. Боткин стал одним из первых проповедовать лечение силой земли.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Мой путь был от Поляны сказок (так называется автобусная остановка), по Боткинской тропе до горы Ставри-Кая,
+  переход на Штангеевскую тропу до водопада Учан-Су и обратно через лесной массив к Поляне сказок.
+  Удобная хорошо протоптанная тропа, проходящая через хвойный лес, почти не дает возможности сбиться с пути.
+  Воздух здесь необычайно чистый, легкий. Хочется дышать полной грудью.
+  Идти не трудно, и любой более-менее подготовленный человек способен преодолеть этот маршрут.
+  По дороге кое-где оборудованы скамейки, и чтобы не сбиться с маршрута имеется много меток на деревьях.
+  Также путь проходит через каскад водопадов реки Яузлар, в котором туристы набирают воду для питья.
+  Вода чистая и вкусная. В целом, маршрут у меня занял 6.5 часов.
+  Рекомендую всем к посещению! И как гласит одна мудрая надпись, помните, что в лесу мусор не растет!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;figure class=&quot;third &quot;&gt;
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/stavri-1.jpg&quot; title=&quot;Вид на скалу Ставри-Кая уже после спуска с неё&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/stavri-1-th.jpg&quot; alt=&quot;Вид на скалу Ставри-Кая уже после спуска с неё&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/stavri-2.jpg&quot; title=&quot;Скала Ставри-Кая и окресости Ялтинского побережья внизу&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/stavri-2-th.jpg&quot; alt=&quot;Скала Ставри-Кая и окресости Ялтинского побережья внизу&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/stavri-3.jpg&quot; title=&quot;Удивительные виды на Ялту открываются со скалы Ставри-Кая&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/stavri-3-th.jpg&quot; alt=&quot;Удивительные виды на Ялту открываются со скалы Ставри-Кая&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/stavri-4.jpg&quot; title=&quot;Необычайно стойкое дерево цепляется за край скалы&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/stavri-4-th.jpg&quot; alt=&quot;Необычайно стойкое дерево цепляется за край скалы&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/stavri-5.jpg&quot; title=&quot;Особо опасные участки маршурта имеют ограждения. Иногда там случаются обвалы грунта&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/stavri-5-th.jpg&quot; alt=&quot;Особо опасные участки маршурта имеют ограждения. Иногда там случаются обвалы грунта&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/stavri-6.jpg&quot; title=&quot;В самом начале Боткинской тропы протекает несколько чистых горных рек. Сейчас они представляют собой небольшие ручейки&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/stavri-6-th.jpg&quot; alt=&quot;В самом начале Боткинской тропы протекает несколько чистых горных рек. Сейчас они представляют собой небольшие ручейки&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+  
+&lt;/figure&gt;
+
+&lt;h2 id=&quot;Вместо-заключения&quot;&gt;Вместо заключения&lt;/h2&gt;
+
+&lt;p&gt;Вроде бы зачем все это? Есть ведь много популярных достопримечательностей, среди которых Воронцовский дворец, Ласточкино гнездо, Генуэзские крепости, Херсонес,
+или просто отдых на пляже.
+Но кроме них Крым полон мест, менее известных, а от этого еще более привлекательных – уголков полуострова, окутанных своей тайной и невероятным очарованием.&lt;/p&gt;
+
+&lt;p&gt;И я уверен, что каждому по силам придумать свой уникальный маршрут путешествия в этом удивительном краю, и, надеюсь, что мой рассказ побудит вас открыться приключениям.&lt;/p&gt;
+
+&lt;figure class=&quot; &quot;&gt;
+  
+    
+      &lt;a href=&quot;/blog/assets/images/journey-to-crimea/crimea-conclusion.jpg&quot; title=&quot;Если хочешь, чтобы что-то запомнилось подольше - сочетай это с приемом пищи. Обед у обрыва скалы и на фоне гор&quot;&gt;
+        &lt;img src=&quot;/blog/assets/images/journey-to-crimea/crimea-conclusion.jpg&quot; alt=&quot;Если хочешь, чтобы что-то запомнилось подольше - сочетай это с приемом пищи. Обед у обрыва скалы и на фоне гор&quot; /&gt;
+      &lt;/a&gt;
+    
+  
+  
+&lt;/figure&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="russia" /><summary type="html">In this post I want to tell about my trip to a wonderful Russian place. This place is Crimea. I use my native language to describe it because only with it I can explain the beauty of this land. Maybe it will be translated later.</summary></entry><entry><title type="html">Create daily database backups with Borg</title><link href="https://gainanovrus.github.io/blog/linux/database-backup-with-borg/" rel="alternate" type="text/html" title="Create daily database backups with Borg" /><published>2018-04-15T00:00:00+03:00</published><updated>2018-04-15T00:00:00+03:00</updated><id>https://gainanovrus.github.io/blog/linux/database-backup-with-borg</id><content type="html" xml:base="https://gainanovrus.github.io/blog/linux/database-backup-with-borg/">&lt;p&gt;In this post, I want to describe a creating backup of PostgreSQL database and transferring it to a remote server. I will show you how to automate it to get regular daily backup and use a deduplication tool as &lt;a href=&quot;https://borgbackup.readthedocs.io/en/stable/index.html&quot;&gt;Borgbackup&lt;/a&gt; for effective using storage. Also, the tool has methods for encryption your data and I will show how to use it. 
+Backup database to borg repository is the efficient and secure way to store your critically important data.&lt;/p&gt;
+
+&lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
+
+&lt;p&gt;Before following this tutorial, you should understand conditions that I have:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Has two Linux servers:
+    &lt;ul&gt;
+      &lt;li&gt;one is a backup remote storage&lt;/li&gt;
+      &lt;li&gt;second is a database server&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I will use Centos 7 on the remote server, and Ubuntu 16.04 on another server with installed PostgreSQL 9.6. They both have connections to one network, an IP of Centos is 192.168.0.1 and Ubuntu has 192.168.0.2. Backup server has a special backup user with name &lt;code class=&quot;highlighter-rouge&quot;&gt;backup_user&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;instructions&quot;&gt;Instructions&lt;/h2&gt;
+
+&lt;h3 id=&quot;install-borg-on-both-servers&quot;&gt;Install borg on both servers&lt;/h3&gt;
+
+&lt;p&gt;Is a simple action just use apt or yum install:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;apt install borgbackup
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And checking your version after that &lt;code class=&quot;highlighter-rouge&quot;&gt;borg --version&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Centos: borg 1.1.4
+Ubuntu: borg 1.0.11
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ok, some differences can’t a problem with using it. If you want to use the last version follow &lt;a href=&quot;https://borgbackup.readthedocs.io/en/stable/installation.html&quot;&gt;this&lt;/a&gt; installing instruction. But didn’t use the version before 1.0.9 because that has a &lt;a href=&quot;https://borgbackup.readthedocs.io/en/stable/changes.html#pre-1-0-9-manifest-spoofing-vulnerability-cve-2016-10099&quot;&gt;vulnerability&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Official docs have a good description of basic usage a borg commands and options,  see them for best understanding next commands.&lt;/p&gt;
+
+&lt;h3 id=&quot;configure-access-to-the-backup-server&quot;&gt;Configure access to the backup server&lt;/h3&gt;
+
+&lt;p&gt;Generate ssh key to remote access to the backup server if you don’t get it.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ssh-keygen -b 2048 -t rsa -q -N '' -f ~/.ssh/id_rsa
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Create a config file if you don’t want to remember an IP of the remote server like me.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cat &amp;lt;&amp;lt; EOT &amp;gt;&amp;gt; ~/.ssh/config
+Host backup_server
+User backup_user
+HostName 192.168.0.1
+Port 22
+EOT
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And run command to copy generated public key to the remote server.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ssh-copy-id backup_server
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Test it.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# ssh backup_server
+Last login: Sun Apr 15 10:18:16 2018
+[backup_user@backup_server ~]$
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;All is OK.&lt;/p&gt;
+
+&lt;h3 id=&quot;create-a-backup-script&quot;&gt;Create a backup script&lt;/h3&gt;
+
+&lt;p&gt;Ok, let’s begin to automate the process of creating a backup of the database. I am using a &lt;a href=&quot;https://www.postgresql.org/docs/current/static/app-pg-dumpall.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;pg_dumpall&lt;/code&gt;&lt;/a&gt; to create a backup of a full database. A result of this command a SQL-file that can create all existing databases and users in a new place. This result before coping will been stored on local path &lt;code class=&quot;highlighter-rouge&quot;&gt;/root/db_dumps&lt;/code&gt;. Also I make backup of database configs.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;BACKUP_DIR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/root/db_dumps
+&lt;span class=&quot;nv&quot;&gt;BACKUP_DUMP_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;dump_&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'+%Y-%m-%d_%H%M%S'&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.sql&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;BACKUP_CONFIG_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;config_&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'+%Y-%m-%d_%H%M%S'&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.tar.gz&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;USERNAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;postgres
+&lt;span class=&quot;nv&quot;&gt;BORG_CMD&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;borgmatic&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;DB_CONF_PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/etc/postgresql/9.6/main&quot;&lt;/span&gt;
+
+error_exit&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$1&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; 1&amp;gt;&amp;amp;2
+  &lt;span class=&quot;nb&quot;&gt;exit &lt;/span&gt;1
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+debug_message&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$1&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; 1&amp;gt;&amp;amp;2
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+debug_message &lt;span class=&quot;s2&quot;&gt;&quot;[backup][START] Start creating backup&quot;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#remove previous backup&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[[&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_DIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;  &lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-rf&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_DIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[[&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_DIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_DIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;chmod &lt;/span&gt;700 &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_DIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#backup database data&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_DIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt; pg_dumpall &lt;span class=&quot;nt&quot;&gt;-U&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$USERNAME&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_DUMP_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then
+  &lt;/span&gt;error_exit &lt;span class=&quot;s2&quot;&gt;&quot;[backup][ERROR] Failed to produce data backup&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;else
+  &lt;/span&gt;debug_message &lt;span class=&quot;s2&quot;&gt;&quot;[backup][SUCCESS] Data backup success created&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fi&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#backup database configures&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;DB_CONF_PATH&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;tar&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-cvzf&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_CONFIG_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;.conf &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; /dev/null 2&amp;gt;&amp;amp;1&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then
+  &lt;/span&gt;error_exit &lt;span class=&quot;s2&quot;&gt;&quot;[backup][ERROR] Cannot create archive with PG conf files&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;[[&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_CONFIG_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt;  &lt;span class=&quot;nb&quot;&gt;mv&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_CONFIG_NAME&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BACKUP_DIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;
+  debug_message &lt;span class=&quot;s2&quot;&gt;&quot;[backup][SUCCESS] Config files success created&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fi&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;#copy to backup server&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;BORG_CMD&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then
+  &lt;/span&gt;error_exit &lt;span class=&quot;s2&quot;&gt;&quot;[backup][ERROR] Failed copy to backup server&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;else
+  &lt;/span&gt;debug_message &lt;span class=&quot;s2&quot;&gt;&quot;[backup][SUCCESS] Data backup success copied&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;fi&lt;/span&gt;
+
+
+&lt;span class=&quot;c&quot;&gt;#remove local backup files&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#none&lt;/span&gt;
+
+debug_message &lt;span class=&quot;s2&quot;&gt;&quot;[backup][COMPLETE] Backup success created&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I saved this script in the database server by path &lt;code class=&quot;highlighter-rouge&quot;&gt;/opt/postgres_backup.sh&lt;/code&gt;. And set execute rights to file (&lt;code class=&quot;highlighter-rouge&quot;&gt;chmod 700 /opt/postgres_backup.sh&lt;/code&gt;).&lt;/p&gt;
+
+&lt;h4 id=&quot;borgbackup-command&quot;&gt;BorgBackup command&lt;/h4&gt;
+
+&lt;p&gt;In my script has been a variable &lt;code class=&quot;highlighter-rouge&quot;&gt;BORG_CMD&lt;/code&gt; is a wrapper of Borgbackup - &lt;a href=&quot;https://torsion.org/borgmatic/&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;borgmatic&lt;/code&gt;&lt;/a&gt;. It initiates a backup, prunes any old backups according to a retention policy, and validates backups for consistency. The script supports specifying your settings in a declarative configuration file rather than having to put them all on the command-line and handles common errors.&lt;/p&gt;
+
+&lt;p&gt;To install &lt;code class=&quot;highlighter-rouge&quot;&gt;borgmatic&lt;/code&gt; use pip3:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pip3 install --upgrade borgmatic
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;borgmatic-settings&quot;&gt;Borgmatic settings&lt;/h4&gt;
+
+&lt;p&gt;The settings of borgmatic is stored on &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/borgmatic/config.yaml&lt;/code&gt;. And my ones to our task are described below.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;location:
+    source_directories:
+        - /root/db_dumps
+
+    repositories:
+        - backup_server:/backups/db
+
+storage:
+    encryption_passcommand: &quot;cat /root/.borg-passphrase&quot;
+
+retention:
+    keep_daily: 30
+    keep_weekly: 12
+    keep_monthly: 6
+
+consistency:
+    checks:
+        - repository
+        - archives
+    check_last: 7
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;create-a-passphrase-on-the-database-server&quot;&gt;Create a passphrase on the database server&lt;/h3&gt;
+
+&lt;p&gt;Next command creating a key file to use as a passphrase of an encrypted repository. Borg are using system environments to get some parameters. This one show borg how to get a passphrase to either new or existing repository.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;head -c 1024 /dev/urandom | base64 &amp;gt; /root/.borg-passphrase
+chmod 400 /root/.borg-passphrase
+export BORG_PASSCOMMAND=&quot;cat /root/.borg-passphrase&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;create-a-repository-on-the-backup-server&quot;&gt;Create a repository on the backup server&lt;/h3&gt;
+
+&lt;p&gt;Using a &lt;code class=&quot;highlighter-rouge&quot;&gt;repokey&lt;/code&gt; modes to “passphrase-only” security. The key will be stored inside the repository (in its “config” file). In above mentioned attack scenario, the attacker will have the key (but not the passphrase).&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# borg init --encryption=repokey backup_server:/backups/db
+
+By default repositories initialized with this version will produce security
+errors if written to with an older version (up to and including Borg 1.0.8).
+
+If you want to use these older versions, you can disable the check by running:
+borg upgrade --disable-tam db_test
+
+See https://borgbackup.readthedocs.io/en/stable/changes.html#pre-1-0-9-manifest-spoofing-vulnerability for details about the security implications.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The output has some warnings about a using old version.&lt;/p&gt;
+
+&lt;h3 id=&quot;create-a-deamon-to-automate-running-a-backup-script&quot;&gt;Create a deamon to automate running a backup script&lt;/h3&gt;
+
+&lt;p&gt;Ubuntu has a nice mechanism to auto-running scripts or applications in the background. His name - &lt;code class=&quot;highlighter-rouge&quot;&gt;SystemD&lt;/code&gt;. And if exists a necessity to run a script by a scheduler (i.e. every night) you should use timers that is part of systemd.&lt;/p&gt;
+
+&lt;p&gt;I write my own daemon  to run an above script. It has stored on &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/systemd/system/backup.service&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Unit]
+Description=Backup PostgreSQL database
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/postgres_backup.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And I has a timer unit that runs a backup.service every day at midnight&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Unit]
+Description=Run backup script every day at midnight
+
+[Timer]
+OnCalendar=daily
+
+[Install]
+WantedBy=timers.target
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After that you should reload daemon-service.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl daemon-reload
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;manual-run-script-and-view-logs&quot;&gt;Manual run script and view logs&lt;/h3&gt;
+
+&lt;p&gt;To run our systemd unit (or daemon) just run next command on a terminal:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl start backup
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And anfter this command completed view logs by &lt;code class=&quot;highlighter-rouge&quot;&gt;journalctl -u backup&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Apr 14 11:07:48 ubuntu systemd[1]: Starting Backup PostgreSQL database...
+Apr 14 11:07:48 ubuntu bash[234]: [backup][START] Start creating backup
+Apr 14 11:08:48 ubuntu bash[234]: [backup][SUCCESS] Data backup success created
+Apr 14 11:08:48 ubuntu bash[234]: [backup][SUCCESS] Config files success created
+Apr 14 11:10:27 ubuntu bash[234]: [backup][SUCCESS] Data backup success copied
+Apr 14 11:10:27 ubuntu bash[234]: [backup][COMPLETE] Backup success created
+Apr 14 11:10:27 ubuntu systemd[1]: Started Backup PostgreSQL database.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;finish-preparations-and-check-the-results&quot;&gt;Finish preparations and check the results&lt;/h3&gt;
+
+&lt;p&gt;Don’t forget setup &lt;code class=&quot;highlighter-rouge&quot;&gt;enable&lt;/code&gt; flag on the timer for working them after reboot system.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl enable backup.timer
+systemctl start backup.timer
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And check active system timers with &lt;code class=&quot;highlighter-rouge&quot;&gt;systemctl list-timers&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;NEXT                         LEFT     LAST                         PASSED       UNIT                         ACTIVATES
+Mon 2018-04-16 00:00:00 MSK  9h left  Sun 2018-04-15 00:00:52 MSK  14h ago      backup.timer                 backup.service
+...
+
+5 timers listed.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ok, I just run a backup script two times on my database and have got two backups.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# borg list backup_server:/backups/db
+ubuntu-2018-04-15T00:05:46.344337 Sun, 2018-04-15 00:05:28
+ubuntu-2018-04-15T00:08:46.344337 Sun, 2018-04-15 00:08:47
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Let’s see the information about second one.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# borg info backup_server:/backups/db::ubuntu-2018-04-15T00:08:46.344337
+Name: ubuntu-2018-04-15T00:08:46.344337
+Fingerprint: 19314fb992f83d9e746eda534d22fc8375a8d20c0cf8828a4353463574asdw
+Hostname: ubuntu
+Username: root
+Time (start): Sun, 2018-04-15 00:08:47
+Time (end):   Sun, 2018-04-15 00:08:47
+Number of files: 2
+
+                       Original size      Compressed size    Deduplicated size
+This archive:                8.50 GB              8.50 GB                624 B
+All archives:               17.00 GB             17.00 GB              6.64 GB
+
+                       Unique chunks         Total chunks
+Chunk index:                    2548                 6750
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;One dump file has a size of 8G, but repository using deduplication stores two ones with less disk usage space. All archives has reduce about 6,6G. Next command will agree this words&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;backup_server &amp;gt;# du -hd0 /backups/db
+6,2G    db
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And at the end, I want to show the command that extracts (“restore”) backup from an archive repository to a local path.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mkdir old_data
+cd old_data
+borg extract backup_server:/backups/db::ubuntu-2018-04-15T00:08:46.344337
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In conclucion I want to say that the Borg is a simple, reliable and secure tool to store your backup data. The data deduplication technique used makes Borg suitable for daily backups since only changes are stored. The authenticated encryption technique makes it suitable for backups to not fully trusted targets. And it has a simple interface to run with many parameters with borgmatic.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information:&lt;/h2&gt;
+
+&lt;p&gt;This links might useful to get any additional information:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://slides.com/thomaswaldmann/borg&quot;&gt;Borg by Thomas Waldmann&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.borgbackup.org/&quot;&gt;BorgBackup Offsite&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://torsion.org/borgmatic/&quot;&gt;borgmatic Offsite&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.reddit.com/r/linux/comments/69lm87/is_borg_backup_suitable_for_the_production/&quot;&gt;Is Borg backup suitable for the production?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="postgres" /><summary type="html">This article shows how to create backups of your data from PostgreSQL DB to a remote server with a secure and effective approach</summary></entry><entry><title type="html">Upgrade kernel of CentOS 7 to latest version</title><link href="https://gainanovrus.github.io/blog/linux/upgrade-centos-kernel/" rel="alternate" type="text/html" title="Upgrade kernel of CentOS 7 to latest version" /><published>2018-03-11T00:00:00+03:00</published><updated>2018-03-11T00:00:00+03:00</updated><id>https://gainanovrus.github.io/blog/linux/upgrade-centos-kernel</id><content type="html" xml:base="https://gainanovrus.github.io/blog/linux/upgrade-centos-kernel/">&lt;p&gt;Previously I was writing about &lt;a href=&quot;/linux/upgrade-centos/&quot;&gt;upgrading&lt;/a&gt; system now 
+I will show how to upgrade the CentOS7 kernel to the latest version.
+Using ELRepo repository we can get easy kernel updates. 
+ELRepo is focused on the packages related to hardware, 
+including filesystem drivers, graphic drivers, network drivers,
+sound card drivers, webcam, and others.&lt;/p&gt;
+
+&lt;h2 id=&quot;instructions&quot;&gt;Instructions&lt;/h2&gt;
+
+&lt;p&gt;Check the current kernel version.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# uname -sr
+Linux 4.11.3-1.el7.elrepo.x86_64
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If we now go to &lt;www.kernel.org&gt;, we will see that the latest kernel version is 4.15 at the time of this writing 
+(other versions are available from the same site).&lt;/www.kernel.org&gt;&lt;/p&gt;
+
+&lt;p&gt;To enable the ELRepo repository on CentOS 7, do&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, install the latest mainline stable kernel&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;yum --enablerepo=elrepo-kernel install kernel-ml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I had this output of that command&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# yum --enablerepo=elrepo-kernel install kernel-ml
+Loaded plugins: fastestmirror, langpacks
+elrepo-kernel                                                                                                                                                          | 2.9 kB  00:00:00
+elrepo-kernel/primary_db                                                                                                                                               | 1.7 MB  00:00:01
+Loading mirror speeds from cached hostfile
+ * base: mirror.reconn.ru
+ * elrepo: nl.mirror.babylon.network
+ * elrepo-kernel: nl.mirror.babylon.network
+ * epel: mirror.logol.ru
+ * extras: mirror.reconn.ru
+ * updates: mirror.reconn.ru
+Resolving Dependencies
+--&amp;gt; Running transaction check
+---&amp;gt; Package kernel-ml.x86_64 0:4.15.8-1.el7.elrepo will be installed
+--&amp;gt; Finished Dependency Resolution
+
+Dependencies Resolved
+
+==============================================================================================================================================================================================
+ Package                                    Arch                                    Version                                              Repository                                      Size
+==============================================================================================================================================================================================
+Installing:
+ kernel-ml                                  x86_64                                  4.15.8-1.el7.elrepo                                  elrepo-kernel                                   44 M
+
+Transaction Summary
+==============================================================================================================================================================================================
+Install  1 Package
+
+Total download size: 44 M
+Installed size: 198 M
+Is this ok [y/d/N]: y
+Downloading packages:
+kernel-ml-4.15.8-1.el7.elrepo.x86_64.rpm                                                                                                                               |  44 MB  00:00:05
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : kernel-ml-4.15.8-1.el7.elrepo.x86_64                                                                                                                                       1/1
+  Verifying  : kernel-ml-4.15.8-1.el7.elrepo.x86_64                                                                                                                                       1/1
+
+Installed:
+  kernel-ml.x86_64 0:4.15.8-1.el7.elrepo
+
+Complete!
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, reboot your machine to apply the latest kernel&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl reboot
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you just reboot the system and run command to check the version of your kernel&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# uname -sr
+Linux 4.11.3-1.el7.elrepo.x86_64
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You will see your current kernel. WTF? But I updated it.
+Your system will be updated but to run the system with new kernel need configure Grub loader.&lt;/p&gt;
+
+&lt;p&gt;Let’s check the current configuration&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# awk -F\' '$1==&quot;menuentry &quot; {print i++ &quot; : &quot; $2}' /etc/grub2.cfg
+0 : CentOS Linux (4.15.8-1.el7.elrepo.x86_64) 7 (Core)
+1 : CentOS Linux (4.11.3-1.el7.elrepo.x86_64) 7 (Core)
+2 : CentOS Linux (0-rescue-d39b765b9cf142baa7ed9ca6543375de) 7 (Core)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;As you can see the new kernel has the second option in the loading process.
+We want to use kernel 4.15 as our default, so you can use the following command to make this happen.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;grub2-set-default 0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;When you want to revert back to the old kernel, 
+you can change the value of the &lt;code class=&quot;highlighter-rouge&quot;&gt;grub2-set-default&lt;/code&gt; command to 1.&lt;/p&gt;
+
+&lt;p&gt;Finally, generate the grub2 config with &lt;code class=&quot;highlighter-rouge&quot;&gt;gurb2-mkconfig&lt;/code&gt; command, and then reboot the server.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;grub2-mkconfig -o /boot/grub2/grub.cfg
+systemctl reboot
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After system will load check again the kernel version&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# uname -sr
+Linux 4.15.8-1.el7.elrepo.x86_64
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Excellent! We have the latest kernel.&lt;/p&gt;
+
+&lt;p&gt;Of course, don’t do this procedure on a system with users.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.howtoforge.com/tutorial/how-to-upgrade-kernel-in-centos-7-server/&quot;&gt;How to Upgrade Kernel on CentOS 7&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.tecmint.com/install-upgrade-kernel-version-in-centos-7/&quot;&gt;How to Install or Upgrade to Kernel 4.15 in CentOS 7&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="centos" /><summary type="html">The Kernel is the brain for an operating system. It's like the core element of every OS. Some popular OSs that use the Linux kernel are Ubuntu, CentOS, and Debian. In this tutorial, I will show you how to upgrade CentOS 7 kernel to the latest version. And in this guide, we will install the latest stable version 4.15.8.</summary></entry><entry><title type="html">Upgrade CentOS 7.x to latest version</title><link href="https://gainanovrus.github.io/blog/linux/upgrade-centos/" rel="alternate" type="text/html" title="Upgrade CentOS 7.x to latest version" /><published>2018-03-11T00:00:00+03:00</published><updated>2018-03-11T00:00:00+03:00</updated><id>https://gainanovrus.github.io/blog/linux/upgrade-centos</id><content type="html" xml:base="https://gainanovrus.github.io/blog/linux/upgrade-centos/">&lt;p&gt;Usually, you want to use the last version of the operating system and if it is true
+you will update your OS early or later. In this article, you can found a simple and small instruction to update Centos 7 from 7.x to the latest version (now it is 7.4)
+See CentOS 7.4 &lt;a href=&quot;https://wiki.centos.org/Manuals/ReleaseNotes/CentOS7&quot;&gt;release note&lt;/a&gt; for more information about changes.&lt;/p&gt;
+
+&lt;h2 id=&quot;instructions&quot;&gt;Instructions&lt;/h2&gt;
+
+&lt;p&gt;Check the current version&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# cat /etc/redhat-release
+CentOS Linux release 7.3.1611 (Core)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Upgrading is the same as the update option with &lt;code class=&quot;highlighter-rouge&quot;&gt;-obsoletes&lt;/code&gt; flag.
+Before upgrading purge all old cache and download a new one.
+And next, you can upgrade OS.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;yum clean all
+yum makecache
+yum -y upgrade
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Below is described info that I got (I left only main info)&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# yum clean all
+...
+Cleaning up everything
+Cleaning up list of fastest mirrors
+
+# yum makecache
+...
+Metadata Cache Created
+
+# yum -y upgrade
+...
+Complete!
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After the upgrade process has completed seeing changes reboot a system&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl reboot
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And repeat to check the current version of the system&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# cat /etc/redhat-release
+CentOS Linux release 7.4.1708 (Core)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Of course, don’t do this procedure on a system with users.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://blog.dailystuff.nl/2017/10/upgrading-from-centos-7-3-to-7-4/&quot;&gt;Upgrading from CentOS 7.3 to 7.4&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.itzgeek.com/how-tos/linux/centos-how-tos/how-to-update-centos-7-07-17-2-to-centos-7-3.html&quot;&gt;How to Update CentOS 7.0/7.1/7.2/7.3 to CentOS 7.4&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="centos" /><summary type="html">The latest version of a system has latest bug fixes and new opportunities and in this article will be showed how to update CentOS 7</summary></entry><entry><title type="html">Add a free SSL certificate to NGINX server</title><link href="https://gainanovrus.github.io/blog/linux/free-ssl-certbot-nginx-setup/" rel="alternate" type="text/html" title="Add a free SSL certificate to NGINX server" /><published>2018-02-02T00:00:00+03:00</published><updated>2018-03-11T14:00:00+03:00</updated><id>https://gainanovrus.github.io/blog/linux/free-ssl-certbot-nginx-setup</id><content type="html" xml:base="https://gainanovrus.github.io/blog/linux/free-ssl-certbot-nginx-setup/">&lt;p&gt;&lt;a href=&quot;https://letsencrypt.org/&quot;&gt;Let’s Encrypt&lt;/a&gt; provides an easy way to obtain and install free TLS/SSL certificates, thereby enabling encrypted HTTPS on web servers. It simplifies the process by providing a software client, Certbot, that attempts to automate most (if not all) of the required steps.&lt;/p&gt;
+
+&lt;p&gt;In this article I will show you how to use the certbot Let’s Encrypt client to obtain a free SSL certificate and use it with Nginx on CentOS 7. I will also show you how to automatically renew your SSL certificate.&lt;/p&gt;
+
+&lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;Before following this tutorial, you’ll need a few things.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;CentOS 7 server.&lt;/li&gt;
+  &lt;li&gt;DNS A Record that points your domain to the public IP address of your server.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Once you have all of the prerequisites out of the way, let’s move on to installing the Let’s Encrypt client software.&lt;/p&gt;
+
+&lt;h2 id=&quot;instructions&quot;&gt;Instructions&lt;/h2&gt;
+
+&lt;h3 id=&quot;install-and-configure-nginx&quot;&gt;Install and configure nginx&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; yum -y install nginx
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Add server name to nginx config file. Next a minimal configures that you need to get certificates  stored in file &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/nginx/nginx.conf&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;http {
+    server {
+        listen       80 default_server;
+        server_name  example.com;
+
+        location ~ ^/(.well-known/acme-challenge/.*)$ {
+	        root     /usr/share/nginx/html;
+	    }
+	    location / {
+	       ...
+	    }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h3 id=&quot;install-and-configure-certbot&quot;&gt;Install and configure Certbot&lt;/h3&gt;
+
+&lt;p&gt;The official Let’s Encrypt client is called Certbot, and it is included in the EPEL repository. Install Certbot with yum:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;yum -y install certbot certbot-nginx
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;obtaining-a-certificate&quot;&gt;Obtaining a Certificate&lt;/h3&gt;
+
+&lt;p&gt;Certbot provides a variety of ways to obtain SSL certificates, through various plugins.
+This runs certbot with the &lt;code class=&quot;highlighter-rouge&quot;&gt;--nginx&lt;/code&gt; plugin, using &lt;code class=&quot;highlighter-rouge&quot;&gt;-d&lt;/code&gt; to specify the names we’d like the certificate to be valid for. If this is your first time running certbot, you will be prompted to enter an email address and agree to the terms of service. After doing so, certbot will communicate with the Let’s Encrypt server, then run a challenge to verify that you control the domain you’re requesting a certificate for.&lt;/p&gt;
+
+&lt;p&gt;I suggest you a simple command that will obtain a certifiacte without any questions and outputs:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;certbot certonly --webroot           \
+-d example.com                       \
+--webroot-path /usr/share/nginx/html \
+--email your_email@example.com       \
+--post-hook &quot;systemctl reload nginx&quot; \
+--agree-tos                          \
+--quiet
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;But you can yet view logs placed on path &lt;code class=&quot;highlighter-rouge&quot;&gt;/var/log/letsencrypt/letsencrypt.log&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;To show information about obtained certificates use command &lt;code class=&quot;highlighter-rouge&quot;&gt;certbot certificates&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# certbot certificates
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+-------------------------------------------------------------------------------
+Found the following certs:
+  Certificate Name: example.com
+    Domains: example.com
+    Expiry Date: 2018-05-03 04:20:43+00:00 (VALID: 89 days)
+    Certificate Path: /etc/letsencrypt/live/example.com/fullchain.pem
+    Private Key Path: /etc/letsencrypt/live/example.com/privkey.pem
+-------------------------------------------------------------------------------
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The certificate is storing on the disk by path &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/letsencrypt/live/example.com&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# ll /etc/letsencrypt/live/example.com
+total 4
+lrwxrwxrwx. 1 root root  37 Feb  2 08:45 cert.pem -&amp;gt; ../../archive/example.com/cert1.pem
+lrwxrwxrwx. 1 root root  38 Feb  2 08:45 chain.pem -&amp;gt; ../../archive/example.com/chain1.pem
+lrwxrwxrwx. 1 root root  42 Feb  2 08:45 fullchain.pem -&amp;gt; ../../archive/example.com/fullchain1.pem
+lrwxrwxrwx. 1 root root  40 Feb  2 08:45 privkey.pem -&amp;gt; ../../archive/example.com/privkey1.pem
+-rw-r--r--. 1 root root 543 Feb  2 08:45 README
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In file &lt;code class=&quot;highlighter-rouge&quot;&gt;README&lt;/code&gt; consists next description:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;This directory contains your keys and certificates.
+
+`privkey.pem`  : the private key for your certificate.
+`fullchain.pem`: the certificate file used in most server software.
+`chain.pem`    : used for OCSP stapling in Nginx &amp;gt;=1.3.7.
+`cert.pem`     : will break many server configurations, and should not be used
+                 without reading further documentation (see link below).
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Additional information are available on the &lt;a href=&quot;https://certbot.eff.org/docs/using.html#where-are-my-certificates&quot;&gt;certbot site&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;revoke-a-certificate&quot;&gt;Revoke a Certificate&lt;/h3&gt;
+
+&lt;p&gt;If you didn’t want use generated certificates any more just revoke it:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;certbot revoke                                              \
+--cert-path /etc/letsencrypt/live/example.com/fullchain.pem \
+--delete-after-revoke                                       \
+--quiet
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;I use a &lt;code class=&quot;highlighter-rouge&quot;&gt;--quiet&lt;/code&gt; parameter if you want see a result of &lt;code class=&quot;highlighter-rouge&quot;&gt;certbot revoke&lt;/code&gt; just run it without this option:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# certbot revoke --cert-path /etc/letsencrypt/live/example.com/fullchain.pem
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Starting new HTTPS connection (1): acme-v01.api.letsencrypt.org
+&lt;span class=&quot;gd&quot;&gt;-------------------------------------------------------------------------------
+&lt;/span&gt;Would you like to delete the cert(s) you just revoked?
+&lt;span class=&quot;gd&quot;&gt;-------------------------------------------------------------------------------
+&lt;/span&gt;(Y)es (recommended)/(N)o: y
+&lt;span class=&quot;gd&quot;&gt;-------------------------------------------------------------------------------
+&lt;/span&gt;Deleted all files relating to certificate ems.insyte.ru.
+&lt;span class=&quot;gd&quot;&gt;-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+&lt;/span&gt;Congratulations! You have successfully revoked the certificate that was located
+at /etc/letsencrypt/live/example.com/fullchain.pem
+&lt;span class=&quot;gd&quot;&gt;-------------------------------------------------------------------------------
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;renew-a-certificate&quot;&gt;Renew a Certificate&lt;/h3&gt;
+
+&lt;p&gt;Let’s Encrypt’s certificates are only valid for ninety days. This is to encourage users to automate their certificate renewal process. We’ll need to set up a regularly run command to check for expiring certificates and renew them automatically.&lt;/p&gt;
+
+&lt;p&gt;To run the renewal check daily, we will use cron, a standard system service for running periodic jobs.&lt;/p&gt;
+
+&lt;p&gt;We tell cron what to do by opening and editing a file called a crontab &lt;code class=&quot;highlighter-rouge&quot;&gt;crontab -e&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;15 3 * * * /usr/bin/certbot renew --post-hook &quot;systemctl reload nginx&quot; --quiet
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The line runs the following command at 3:15 am, every day.&lt;/p&gt;
+
+&lt;p&gt;The renew command for Certbot will check all certificates installed on the system and update any that are set to expire in less than thirty days. After a renew process has completed a nginx server will been reload.&lt;/p&gt;
+
+&lt;p&gt;All installed certificates will be automatically renewed and reloaded when they have thirty days or less before they expire.&lt;/p&gt;
+
+&lt;p&gt;Read &lt;a href=&quot;https://certbot.eff.org/docs/using.html#certbot-command-line-options&quot;&gt;docs&lt;/a&gt; to get information about command line options.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-centos-7&quot;&gt;How To Secure Nginx with Let’s Encrypt on CentOS 7 - DigitalOcean&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://certbot.eff.org/docs/using.html&quot;&gt;User Guide — Certbot documentation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://certbot.eff.org/#centosrhel7-nginx&quot;&gt;Nginx on CentOS/RHEL 7 — Certbot&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="ssl" /><category term="nginx" /><category term="centos" /><summary type="html">In this article I will show you how to use the certbot Let's Encrypt client to obtain a free SSL certificate and use it with Nginx on CentOS 7. I will also show you how to automatically renew your SSL certificate.</summary></entry></feed>
