@@ -1,5 +1,5 @@
 ---
-title: "Visualization of the JINR cloud resources utilization"
+title: "Visualization of cloud resources utilization"
 excerpt: "A system that gathering data from a cloud infrastructure based on OpenNebula and showing it with Grafana."
 header:
   image: assets/images/visualisation-jinr-cloud/visualisation-jinr-cloud-scheme.png
@@ -23,14 +23,14 @@ gallery:
     alt: "Resource usage statistics"
 ---
 
-To visualize statistics on a distribution of resources of the [JINR](http://jinr.ru) cloud the [Grafana](http://grafana.com) system was chosen. 
-It provides a user-friendly interface through a web browser displaying various kinds of statistical metrics in real-time, 
+To visualize statistics on a distribution of resources of the [JINR](http://jinr.ru) cloud the [Grafana](http://grafana.com) system was chosen.
+It provides a user-friendly interface through a web browser displaying various kinds of statistical metrics in real-time,
 gives flexible and functional ways to customize the layout of charts and graphs.
 
-As data-storage to store gathering information from OpenNebula was chosen [InfluxDB](http://influxdata.com). 
-It is an open source database specifically to handle time series data with high availability and high performance requirements. 
-InfluxDB is meant to be used as a backend storage for many use cases involving large amounts of timestamped data, 
-including DevOps monitoring, application metrics and real-time analytics. 
-It has a simple, high performing write and query HTTP(S) APIs. 
+As data-storage to store gathering information from OpenNebula was chosen [InfluxDB](http://influxdata.com).
+It is an open source database specifically to handle time series data with high availability and high performance requirements.
+InfluxDB is meant to be used as a backend storage for many use cases involving large amounts of timestamped data,
+including DevOps monitoring, application metrics and real-time analytics.
+It has a simple, high performing write and query HTTP(S) APIs.
 
 {% include gallery caption="Developed dashboards" %}
