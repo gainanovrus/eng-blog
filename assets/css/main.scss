@@ -7,5 +7,6 @@
 $link-color: #52adc8 !default;
 
 @import "logo-portfolio.css";
+
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
