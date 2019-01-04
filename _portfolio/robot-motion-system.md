@@ -1,5 +1,6 @@
 ---
 title: "Computer-aided system to control a moving of a robotic system in an environment with obstacles"
+author_profile: false
 excerpt: "The work was been made for the University in masters thesis by me"
 header:
   image: assets/images/robot-motion/robot-motion-main-min.png

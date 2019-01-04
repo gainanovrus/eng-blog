@@ -1,5 +1,6 @@
 ---
 title: "Monitoring system for Docker SLURM cluster"
+author_profile: false
 excerpt: "Design and deploy a system for collect, store and visualize data from SLURM cluster realized on Docker environment."
 header:
   image: assets/images/influxdb-slurm-monitoring/influxdb-slurm-monitoring-banner.png

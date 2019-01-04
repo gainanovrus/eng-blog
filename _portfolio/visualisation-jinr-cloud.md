@@ -1,5 +1,6 @@
 ---
 title: "Visualization of cloud resources utilization"
+author_profile: false
 excerpt: "A system that gathering data from a cloud infrastructure based on OpenNebula and showing it with Grafana."
 header:
   image: assets/images/visualisation-jinr-cloud/visualisation-jinr-cloud-scheme.png
