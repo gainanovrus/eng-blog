@@ -5,12 +5,14 @@ header:
   image: assets/images/influxdb-slurm-monitoring/influxdb-slurm-monitoring-banner.png
   teaser: assets/images/influxdb-slurm-monitoring/influxdb-slurm-monitoring-teaser.png
 sidebar:
-  - title: "Role"
+  - title: "Place"
     image: assets/images/influxdb-slurm-monitoring/icmm_logo-min.png
     image_alt: "logo"
+    text: "Institute of Continuous Media Mechanics UB RAS (ICMM UB RAS), Perm "
+  - title: "Role"
     text: "DevOps engineer"
-  - title: "Responsibilities"
-    text: "Design a system for monitoring tasks queue, node loads and system statics of SLURM cluster in Institute of Continuous Media Mechanics (ICMM UB RAS)"
+  - title: "Achievements"
+    text: "Design a system for monitoring tasks queue, node loads and system statics of SLURM cluster"
 gallery:
   - url: assets/images/influxdb-slurm-monitoring/influxdb-slurm-monitoring-scheme.png
     image_path: assets/images/influxdb-slurm-monitoring/influxdb-slurm-monitoring-scheme.png

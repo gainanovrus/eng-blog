@@ -5,12 +5,14 @@ header:
   image: assets/images/robot-motion/robot-motion-main-min.png
   teaser: assets/images/robot-motion/robot-motion-main-min.png
 sidebar:
-  - title: "Role"
+  - title: "Place"
     image: assets/images/robot-motion/pnrpu-logo-min.png
     image_alt: "logo"
+    text: "Perm National Research Polytechnic University (PNRPU), Perm"
+  - title: "Role"
     text: "Student"
-  - title: "Responsibilities"
-    text: "Studying and doing scientific work"
+  - title: "Achievements"
+    text: "Made a scientific work include robot motion models for a department in University"
 gallery:
   - url: assets/images/robot-motion/robot-motion-1-min.png
     image_path: assets/images/robot-motion/robot-motion-1-min.png
