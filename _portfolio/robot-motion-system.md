@@ -27,7 +27,7 @@ gallery:
 
 In my last course of the University, I've decided to help my department to create a model that will simulate the real system for scanning details in many angles.
 The main purpose of the work is to find an algorithm to move robots by path without collision to each other and the environment.
-I use [V-REP][v-rep] system to design models and to solve inverse and forward kinematics tasks of together motion two robots.
+I use [V-REP][vrep] system to design models and to solve inverse and forward kinematics tasks of together motion two robots.
 In the picture gallery is present models are consisting of two main robots is a manipulator (in the picture it is a "1") and a frame robot ("2").
 Also has a table robot ("3") that rotates a detail ("4").
 
@@ -40,3 +40,5 @@ Also you can view the video of a scanning process of a detail.
 <iframe width="640" height="360" src="https://www.youtube-nocookie.com/embed/yxw9i_CwjF0" frameborder="0" allowfullscreen></iframe>
 
 {% include gallery %}
+
+[vrep]: http://www.v-rep.eu/
