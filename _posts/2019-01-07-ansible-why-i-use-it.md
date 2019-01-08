@@ -78,7 +78,7 @@ Executing a command that creating a replication slot on a remote host with psql 
 ## 4. Rich documentation
 
 I enjoy reading the documentation of Ansible.
-With many examples, all functions are understanding quickly and better.
+All functions are understanding quickly and better with many examples in the docs.
 And if I have a question [StackOverflow][stackoverflow] have an answer on it often.
 
 
