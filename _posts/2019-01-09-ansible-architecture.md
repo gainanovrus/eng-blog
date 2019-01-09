@@ -8,8 +8,8 @@ categories: devops
 tags: ansible devops
 toc: true
 header:
-  teaser: /assets/images/ansible-why-i-use-it.png
-  og_image: /assets/images/ansible-why-i-use-it.png
+  teaser: /assets/images/ansible-architecture.png
+  og_image: /assets/images/ansible-architecture.png
 ---
 
 Ansible is an automation engine that automates cloud provisioning, configuration management, application deployment, intra-service orchestration, and many other IT needs.
