@@ -199,7 +199,7 @@ And for getting a value of the field2 used next reference `foo.field2`.
 
 Once you have defined variables, you can use them in your playbooks using the Jinja2 templating system. Here is a simple Jinja2 template:
 ```
-My amp goes to {{ max_amp_value }}
+My amp goes to {% raw %}{{ max_amp_value }}{% endraw %}
 ```
 The same syntax is using in playbooks. More examples you can find in the [docs][vars-intro].
 

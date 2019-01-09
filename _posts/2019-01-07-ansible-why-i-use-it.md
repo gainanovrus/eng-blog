@@ -72,7 +72,7 @@ Executing a command that creating a replication slot on a remote host with psql 
 ```yaml
 - name: create replication slot
   shell: |
-    psql -U postgres -c "SELECT * FROM pg_create_physical_replication_slot('{{ replica_host }}');"
+    psql -U postgres -c "SELECT * FROM pg_create_physical_replication_slot('{% raw %}{{ replica_host }}{% endraw %}');"
 ```
 
 ## 4. Rich documentation
