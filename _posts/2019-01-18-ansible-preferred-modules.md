@@ -139,7 +139,7 @@ Also, set attributes of files, symlinks or directories.
 ## synchronize
 
 The `copy` and `fetch` modules copies only the defined files not full directory.
-I use the [synchronize][synchronize-module] module for copy directory recursive with files from control to remote machine.
+I use the [`synchronize`][synchronize-module] module for copy directory recursive with files from control to remote machine.
 It is a wrapper around `rsync` command. `rsync` must be installed on both the local and remote host.
 
 ```yaml
@@ -165,7 +165,7 @@ It is a wrapper around `rsync` command. `rsync` must be installed on both the lo
 ## command
 
 The [`command`][command-module] module takes the command name followed by a list of space-delimited arguments.
-It will not be processed through the shell, so variables like $HOME and operations like "<", ">", "|", ";" and "&" will not work (use the `shell` module if you need these features).
+It will not be processed through the shell, so variables like `$HOME` and operations like "<", ">", "|", ";" and "&" will not work (use the `shell` module if you need these features).
 
 ```yaml
 - name: Return somefile to registered var - somefile_content
