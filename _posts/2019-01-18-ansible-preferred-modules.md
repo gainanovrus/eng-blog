@@ -23,7 +23,7 @@ I want to write it for storing information in one page.
 It expected you know how to write and custom Ansible playbook.
 
 For start see the next simple task that used module `reboot` for [rebooting a server][reboot-module]:
-```
+```yaml
 - name: Reboot a slow machine that might have lots of updates to apply
   reboot:
     reboot_timeout: 3600
@@ -40,7 +40,7 @@ Ok, now I list the my list of 'must have' modules.
 
 The [`copy`][copy-module] module copies a file from the local or remote machine to a location on the remote machine.
 
-```
+```yaml
 - name: Copying file with owner and permissions
   copy:
     src: /srv/myfiles/foo.conf
@@ -65,7 +65,7 @@ The [`fetch`][fetch-module] module works like `copy`, but in reverse.
 It is used for fetching files from remote machines and storing them locally in a file tree, organized by hostname.
 It works with only ONE file (not directory).
 
-```
+```yaml
 - name: Copy file into local storage in /tmp/fetched/host.example.com/tmp/somefile
 - fetch:
     src: /tmp/somefile
@@ -79,7 +79,7 @@ It works with only ONE file (not directory).
 - name: Copy postgresql config file to local machine
   fetch:
     src: /usr/local/pgsql/data/postgresql.conf
-    dest: backup/pgconf/{{ inventory_hostname }}/
+    dest: "backup/pgconf/{% raw %}{{ inventory_hostname }}{% endraw %}/"
     flat: yes
 ```
 
@@ -88,10 +88,10 @@ It works with only ONE file (not directory).
 Templates are processed by the [Jinja2](http://jinja.pocoo.org/docs/) templating language.
 [This module][template-module] like `copy` module - copies files to remote hosts.
 But it has provide autocomplete special files - templates, that include variables in them.
-For instance the template has contents `This is a test file on {{ ansible_hostname }}`.
+For instance the template has contents `This is a test file on {% raw %}{{ ansible_hostname }}{% endraw %}`.
 After run playbook with `template` task, the file will be copied and included `This is a test file on some_hostname`.
 
-```
+```yaml
 - name: Copy a template /mytemplates/foo.j2 to master machine
   template:
     src: /mytemplates/foo.j2
@@ -106,7 +106,7 @@ After run playbook with `template` task, the file will be copied and included `T
 The [`file`][file-module] module creates or removes files, symlinks or directories.
 Also, set attributes of files, symlinks or directories.
 
-```
+```yaml
 - name: Change file ownership, group and permissions
   file:
     path: /etc/foo.conf
@@ -142,7 +142,7 @@ The `copy` and `fetch` modules copies only the defined files not full directory.
 I use the [synchronize][synchronize-module] module for copy directory recursive with files from control to remote machine.
 It is a wrapper around `rsync` command. `rsync` must be installed on both the local and remote host.
 
-```
+```yaml
 - name: Synchronization of src on the control machine to dest on the remote hosts
   synchronize:
     src: some/relative/path
@@ -153,7 +153,7 @@ It is a wrapper around `rsync` command. `rsync` must be installed on both the lo
   synchronize:
     src: /first/absolute/path/
     dest: /second/absolute/path/
-  delegate_to: "{{ inventory_hostname }}"
+  delegate_to: "{% raw %}{{ inventory_hostname }}{% endraw %}"
 
 - name: Synchronization of two paths both on the control machine
   synchronize:
@@ -167,7 +167,7 @@ It is a wrapper around `rsync` command. `rsync` must be installed on both the lo
 The [`command`][command-module] module takes the command name followed by a list of space-delimited arguments.
 It will not be processed through the shell, so variables like $HOME and operations like "<", ">", "|", ";" and "&" will not work (use the `shell` module if you need these features).
 
-```
+```yaml
 - name: Return somefile to registered var - somefile_content
   command: cat somefile
   args:
@@ -191,14 +191,14 @@ The [`shell`][shell-module] module takes the command name followed by a list of 
 It is almost exactly like the command module but runs the command through a shell (`/bin/sh`) on the remote node.
 It also has the `creates` and `removes` parameters.
 
-```
+```yaml
 - name: Run liquibase
   shell: |
     docker-compose up -d db       &&
     docker-compose run liquibase  &&
     docker-compose down
   args:
-    chdir: "{{ project_dir }}"
+    chdir: "{% raw %}{{ project_dir }}{% endraw %}"
 
 - name: Show replication slots
   shell: |
@@ -206,7 +206,7 @@ It also has the `creates` and `removes` parameters.
   register: out
 
 - name: Run a command using a templated variable (always use quote filter to avoid injection)
-  shell: cat {{ myfile|quote }}
+  shell: "cat {% raw %}{{ myfile|quote }}{% endraw %}"
 ```
 
 ## raw
@@ -214,7 +214,7 @@ It also has the `creates` and `removes` parameters.
 The [`raw`][raw-module] module allows execute command on the remote hosts that haven't got installed Python.
 It is works when any other modules doesn't.
 
-```
+```yaml
 - name: Install python2 for Ansible on Debian host
    raw: bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qqy python-minimal python-simplejson)"
    register: output
@@ -225,7 +225,7 @@ It is works when any other modules doesn't.
 
 The [`service`][service-module] module controls services on remote hosts.
 
-```
+```yaml
 - name: Start and enable service httpd, if not started
   service:
     name: httpd
@@ -248,7 +248,7 @@ The [`service`][service-module] module controls services on remote hosts.
 The [`yum`][yum-module] module installs, upgrades, downgrades, removes, and lists packages and groups with the `yum` package manager (such as for RedHat/CentOS).
 This module only works on Python 2. If you require Python 3 support see the `dnf` module.
 
-```
+```yaml
 - name: Install the latest version of Apache
   yum:
     name: httpd
@@ -268,7 +268,7 @@ This module only works on Python 2. If you require Python 3 support see the `dnf
   vars:
     ansible_python_interpreter: /usr/bin/python
   yum:
-    name: "{{ item }}"
+    name: "{% raw %}{{ item }}{% endraw %}"
     state: present
   with_items:
     - qemu-kvm
@@ -283,7 +283,7 @@ This module only works on Python 2. If you require Python 3 support see the `dnf
 
 The [`apt`][apt-module] module manages `apt` packages (such as for Debian/Ubuntu).
 
-```
+```yaml
 - name: Update repositories cache and install Apache package
   apt:
     name: apache2
@@ -306,7 +306,7 @@ The [`apt`][apt-module] module manages `apt` packages (such as for Debian/Ubuntu
 
 - name: Install KVM packages
   apt:
-    name: "{{ item }}"
+    name: "{% raw %}{{ item }}{% endraw %}"
   with_items:
     - qemu-kvm
     - bridge-utils
@@ -320,7 +320,7 @@ The [`apt`][apt-module] module manages `apt` packages (such as for Debian/Ubuntu
 
 The [`pkgng`][pkgng-module] module manages binary packages for FreeBSD after 9.0.
 
-```
+```yaml
 - name: Install package telegraf | FreeBSD
   pkgng:
     name: telegraf
@@ -343,7 +343,7 @@ The [`apt_repository`][apt-repository-module] module another useful module for w
 It adds or removes an APT repositories in Ubuntu and Debian.
 It often is used with [`apt_key`][apt-key-module] module.
 
-```
+```yaml
 - name: Download apt key
   apt_key:
     url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
@@ -362,7 +362,7 @@ It often is used with [`apt_key`][apt-key-module] module.
 
 The [`yum_repository`][yum-repository-module] module like `apt_repository` adds or removes repositories in RPM-based Linux distributions.
 
-```
+```yaml
 - name: Add EPEL repository
   yum_repository:
     name: epel
@@ -388,7 +388,7 @@ The [`yum_repository`][yum-repository-module] module like `apt_repository` adds 
 
 The [`user`][user-module] module manages user accounts and user attributes.
 
-```
+```yaml
 - name: Create a backup user
   user:
     name: backup
@@ -407,23 +407,22 @@ The [`user`][user-module] module manages user accounts and user attributes.
     ssh_key_bits: 2048
 ```
 
-## authorized-key-module
+## authorized_key
 
 The [`authorized_key`][authorized-key-module] module adds or removes SSH authorized keys for particular user accounts.
 
-```
+```yaml
 - name: Set authorized key taken from file on control machine
   authorized_key:
     user: backup
     state: present
-    key: "{{ lookup('file', 'backup/id_rsa.pub') }}"
-
+    key: "{% raw %}{{ lookup('file', 'backup/id_rsa.pub') }}{% endraw %}"
 
 - name: Set multiple authorized key taken from selected files
   authorized_key:
     user: root
     state: present
-    key: "{{ lookup('file', item + '_id_rsa.pub') }}"
+    key: "{% raw %}{{ lookup('file', item + '_id_rsa.pub') }}{% endraw %}"
   loop:
     - jsmith
     - sjobs
@@ -435,7 +434,7 @@ The [`authorized_key`][authorized-key-module] module adds or removes SSH authori
 The [`lineinfile`][lineinfile-module] module ensures a particular line is in a file, or replace an existing line using a back-referenced regular expression.
 This is primarily useful when you want to change a single line in a file only.
 
-```
+```yaml
 - name: Disable SElinux (config) | RedHat
   lineinfile:
     path: /etc/selinux/config
@@ -449,8 +448,8 @@ This is primarily useful when you want to change a single line in a file only.
 - name: Add node IP to /etc/hosts
   lineinfile:
     path: /etc/hosts
-    regexp: '{{ item.name }}$'
-    line: '{{ item.ip }} {{ item.name }}'
+    regexp: '{% raw %}{{ item.name }}{% endraw %}$'
+    line: '{% raw %}{{ item.ip }}{% endraw %} {% raw %}{{ item.name }}{% endraw %}'
   with_items:
     - ip: 10.0.0.1
       name: srv1
@@ -462,16 +461,16 @@ This is primarily useful when you want to change a single line in a file only.
 
 The [`blockinfile`][blockinfile-module] module will insert/update/remove a block of multi-line text surrounded by customizable marker lines.
 
-```
+```yaml
 - name: Add parameters for connection to host into ssh-config
   blockinfile:
     path: ~/.ssh/config
-    marker_begin: "BEGIN {{ item.name }}"
-    marker_end: "END {{ item.name }}"
+    marker_begin: "BEGIN {% raw %}{{ item.name }}{% endraw %}"
+    marker_end: "END {% raw %}{{ item.name }}{% endraw %}"
     marker: "# {mark}"
     block: |
-      Host {{ item.name }}
-      HostName {{ item.name }}
+      Host {% raw %}{{ item.name }}{% endraw %}
+      HostName {% raw %}{{ item.name }}{% endraw %}
       User oneadmin
     with_items:
       - ip: 10.0.0.1
@@ -486,9 +485,9 @@ The [`debug`][debug-module] module prints statements during execution.
 It can be useful for debugging variables or expressions.
 Useful for debugging together with the ‘when:’ directive.
 
-```
+```yaml
 - debug:
-    msg: "System {{ inventory_hostname }} has gateway {{ ansible_default_ipv4.gateway }}"
+    msg: "System {% raw %}{{ inventory_hostname }}{% endraw %} has gateway {% raw %}{{ ansible_default_ipv4.gateway }}{% endraw %}"
   when: ansible_default_ipv4.gateway is defined
 
 - shell: /usr/bin/uptime
@@ -505,7 +504,7 @@ The [`pause`][pause-module] module pauses playbook execution for a set amount of
 Use `ctrl+c` to advance a pause earlier than it is set to expire or if you need to abort a playbook run entirely.
 To continue early press `ctrl+c` and then `c`. To abort a playbook press `ctrl+c` and then `a`.
 
-```
+```yaml
 - name: Pause for 5 minutes
   pause:
     minutes: 5
@@ -520,12 +519,12 @@ To continue early press `ctrl+c` and then `c`. To abort a playbook press `ctrl+c
 The [`fail`][fail-module] module fails the progress with a custom message.
 It can be useful with flag `ingnore_error` in previous task. It's often used with some condition.
 
-```
+```yaml
 - name: build app
   docker_container:
     image: maven
     volumes:
-     - "{{ project_dir }}:/pd"
+     - "{% raw %}{{ project_dir }}{% endraw %}:/pd"
     working_dir: /pd
     command: mvn clean install
   register: app_build
