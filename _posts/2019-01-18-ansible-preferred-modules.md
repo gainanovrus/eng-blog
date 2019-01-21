@@ -573,7 +573,7 @@ Also, these notes will help me to remember forgotten things.
 [apt-module]: https://docs.ansible.com/ansible/latest/modules/apt_module.html
 [pkgng-module]: https://docs.ansible.com/ansible/latest/modules/pkgng_module.html
 [apt-repository-module]: https://docs.ansible.com/ansible/latest/modules/apt_repository_module.html
-[apt-key-modules]: https://docs.ansible.com/ansible/latest/modules/apt_key_module.html
+[apt-key-module]: https://docs.ansible.com/ansible/latest/modules/apt_key_module.html
 [yum-repository-module]: https://docs.ansible.com/ansible/latest/modules/yum_repository_module.html
 [user-module]: https://docs.ansible.com/ansible/latest/modules/user_module.html
 [authorized-key-module]: https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html
