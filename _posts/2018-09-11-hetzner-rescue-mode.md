@@ -14,7 +14,7 @@ header:
   og_image: /assets/images/hetzner-rescue/hetzner-rescue-teaser.jpg
 ---
 
-The Hetzner Rescue System is Linux live environment that give administrative
+The Hetzner Rescue System is a Linux live environment that gives administrative
 access to you for your server. It helps to repair an installed system,
 to check file systems or to install a new operating system.
 
@@ -34,21 +34,22 @@ Permission denied (publickey,password).
 ```
 
 The string `xxx.xxx.xxx.xxx` is a public IP of the remote server.
+Let's see what I do in this situation.
 
 ## Instructions
 
-1. Activating a rescue mode for selected server in Hetzner [web panel][web-panel].
+#### Activating a rescue mode for selected server in Hetzner [web panel][web-panel].
 Choose your ssh key for connecting to the rescue server without password.
 
 ![activate-rescue]({{ site.url }}{{ site.baseurl }}/assets/images/hetzner-rescue/activate-rescue.png){: .align-center}
 
-2. Reset the server: select first or second option
+#### Reset the server: select first or second option
 
 ![send-reboot]({{ site.url }}{{ site.baseurl }}/assets/images/hetzner-rescue/send-reboot.png){: .align-center}
 The rescue system will be loaded after the server reboot.
 And we can connects to it with our ssh key (the key that we inserted on step 1)
 
-3. Connect to the server by ssh.
+#### Connect to the server by ssh.
 
 Where is `xxx.xxx.xxx.xxx` public IP of the server
 (you can find it in the web panel)
@@ -88,7 +89,7 @@ Network data:
          RealTek RTL-8169 Gigabit Ethernet driver
 ```
 
-4. Because I use LVM in the host system, I run commands to scan disk for
+#### Because I use LVM in the host system, I run commands to scan disk for
  Volume Groups and Physical Volumes.
 
 ```
@@ -101,8 +102,7 @@ root@rescue ~ # pvscan
   Total: 1 [476,31 GiB] / in use: 1 [476,31 GiB] / in no VG: 0 [0   ]
 ```
 
-5. Fine. Was founded a group named `vg0`. It is a group that I want to mount.
-Activate it.
+#### Fine. Was founded a group named `vg0`. It is a group that I want to mount. Activate it.
 
 ```
 root@rescue ~ # lvm vgchange -a y
@@ -119,7 +119,7 @@ ACTIVE            '/dev/vg0/home' [20,00 GiB] inherit
 
 We see the a familiar file structure, don't it?
 
-6. Now display the devices that you can mount.
+#### Now display the devices that you can mount.
 
 ```
 root@rescue ~ # ls -l /dev/mapper/vg*
@@ -128,7 +128,8 @@ lrwxrwxrwx 1 root root 7 Sep 11 07:26 /dev/mapper/vg0-root -> ../dm-0
 lrwxrwxrwx 1 root root 7 Sep 11 07:26 /dev/mapper/vg0-tmp -> ../dm-1
 ```
 
-7. Then, mount the desired MD device of the host server.
+#### Then, mount the desired MD device of the host server.
+
 I will mount `/` in the host server as `/mnt` in the rescue server (current session)
 
 ```
@@ -163,7 +164,7 @@ drwxr-xr-x 13 root root 4,0K May 14 08:39 usr
 drwxr-xr-x 19 root root 4,0K May 14 08:39 var
 ```
 
-8. Make some actions with host files.
+#### Make some actions with host files.
 
 As I said I've lost a control to the server.
 Now I want to add the ssh-key for access without password to the host.
@@ -182,7 +183,7 @@ root@rescue ~ # ls -l /mnt/root/.ssh/authorized_keys
 -rw------- 1 root root 747 Sep 11 07:28 /mnt/root/.ssh/authorized_keys
 ```
 
-9. In the finish of work with the host files unmount the root device.
+#### In the finish of work with the host files unmount the root device.
 
 ```
 root@rescue ~ # umount /dev/mapper/vg0-root
@@ -194,7 +195,7 @@ root@rescue ~ # lvm vgchange -a n vg0
   0 logical volume(s) in volume group "vg0" now active
 ```
 
-10. Now you can exit from rescue mode. Just run a reboot command.
+#### Now you can exit from rescue mode. Just run a reboot command.
 
 ```
 root@rescue ~ # reboot
@@ -204,7 +205,7 @@ Broadcast message from root@rescue on pts/0 (Tue 2018-09-11 08:58:23 CEST):
 The system is going down for reboot NOW!
 ```
 
-11. That's all. The server will reboot and the host system will start.
+#### That's all. The server will reboot and the host system will start.
 
 Try to connect.
 ```
