@@ -1,34 +1,27 @@
 ---
-published: false
+published: true
 layout: single
 title: Work with host system in Hetzner Rescue Mode
 excerpt: >-
-  Hetzner Rescue Mode allow repair host system when you cannot access in usually
-  way. In this post I will show how to mount LVM volume and change some file.
+  Hetzner Rescue Mode allow to repair host system when you cannot access in usually
+  way. In this post I will show how to mount LVM volume and to change a some file.
   As example add new ssh-key to authorized_keys file.
 categories: linux
 tags: centos linux hetzner
 toc: true
 header:
-  teaser: /assets/images/gitlab-ci/gitlab-ci-simple-pipeline.png
-  og_image: /assets/images/gitlab-ci/gitlab-ci-simple-pipeline.png
-
-change-runner-type:
-  - url: /assets/images/gitlab-ci/change-runner-type.png
-    image_path: /assets/images/gitlab-ci/change-runner-type.png
-    title: "Determine the landing project with a current Runner (nginx)"
+  teaser: /assets/images/hetzner-rescue/hetzner-rescue-teaser.jpg
+  og_image: /assets/images/hetzner-rescue/hetzner-rescue-teaser.jpg
 ---
 
-The Hetzner Rescue System is a Linux live environment that allows you to have
-administrative access to your server. This makes it possible to carry out
-repairs to the installed system, to check file systems or to install a new
-operating system.
+The Hetzner Rescue System is Linux live environment that give administrative
+access to you for your server. It helps to repair an installed system,
+to check file systems or to install a new operating system.
 
 ## Problem
 
-In my example in the host was been installed CentOS 7 with SWRAID 1 and LVM.
-And I want to get an access to this host by ssh public key (was forgotten a root
-password).
+I show you an example. There is a host with installed CentOS 7 with SWRAID 1 and LVM.
+I can't get a remote access by ssh (because I've forgotten the `root` password):
 
 ```
 $ ssh root@xxx.xxx.xxx.xxx
@@ -39,7 +32,8 @@ Permission denied, please try again.
 root@xxx.xxx.xxx.xxx's password:
 Permission denied (publickey,password).
 ```
-Where is `xxx.xxx.xxx.xxx` public IP of the server
+
+The string `xxx.xxx.xxx.xxx` is a public IP of the remote server.
 
 ## Instructions
 
@@ -48,12 +42,16 @@ Choose your ssh key for connecting to the rescue server without password.
 
 ![activate-rescue]({{ site.url }}{{ site.baseurl }}/assets/images/hetzner-rescue/activate-rescue.png){: .align-center}
 
-2. Reset the server. Select first or second option
+2. Reset the server: select first or second option
 
 ![send-reboot]({{ site.url }}{{ site.baseurl }}/assets/images/hetzner-rescue/send-reboot.png){: .align-center}
+The rescue system will be loaded after the server reboot.
+And we can connects to it with our ssh key (the key that we inserted on step 1)
 
 3. Connect to the server by ssh.
-Where is `xxx.xxx.xxx.xxx` public IP of the server (it showed in the web panel)
+
+Where is `xxx.xxx.xxx.xxx` public IP of the server
+(you can find it in the web panel)
 ```
 $ ssh root@xxx.xxx.xxx.xxx
 ```
@@ -86,12 +84,13 @@ Network data:
    eth0  LINK: yes
          MAC:  00:00:00:00:00:00
          IP:   xxx.xxx.xxx.xxx
-         IPv6: 2001:00f8:0011:2412::2/64
+         IPv6: 1001:1001:1001:1001::2/64
          RealTek RTL-8169 Gigabit Ethernet driver
 ```
 
-4. Because I use LVM in the host system I run commands for scanning disk for
+4. Because I use LVM in the host system, I run commands to scan disk for
  Volume Groups and Physical Volumes.
+
 ```
 root@rescue ~ # vgscan
   Reading all physical volumes.  This may take a while...
@@ -102,8 +101,9 @@ root@rescue ~ # pvscan
   Total: 1 [476,31 GiB] / in use: 1 [476,31 GiB] / in no VG: 0 [0   ]
 ```
 
-5. Fine. Was founded a group named `vg0`. It is group that I want to mount.
+5. Fine. Was founded a group named `vg0`. It is a group that I want to mount.
 Activate it.
+
 ```
 root@rescue ~ # lvm vgchange -a y
 4 logical volume(s) in volume group "vg0" now active
@@ -119,17 +119,18 @@ ACTIVE            '/dev/vg0/home' [20,00 GiB] inherit
 
 We see the a familiar file structure, don't it?
 
-6. Now display the devices that you can mount
+6. Now display the devices that you can mount.
+
 ```
 root@rescue ~ # ls -l /dev/mapper/vg*
 lrwxrwxrwx 1 root root 7 Sep 11 07:26 /dev/mapper/vg0-home -> ../dm-2
-lrwxrwxrwx 1 root root 7 Sep 11 07:26 /dev/mapper/vg0-one -> ../dm-3
 lrwxrwxrwx 1 root root 7 Sep 11 07:26 /dev/mapper/vg0-root -> ../dm-0
 lrwxrwxrwx 1 root root 7 Sep 11 07:26 /dev/mapper/vg0-tmp -> ../dm-1
 ```
 
-7. Then mount the desired MD device of the host server.
+7. Then, mount the desired MD device of the host server.
 I will mount `/` in the host server as `/mnt` in the rescue server (current session)
+
 ```
 root@rescue ~ # mount /dev/mapper/vg0-root /mnt
 ```
@@ -163,8 +164,12 @@ drwxr-xr-x 19 root root 4,0K May 14 08:39 var
 ```
 
 8. Make some actions with host files.
-As I said I want to add my ssh key into the host for get access to it without
-password. For then edit an `.ssh/authorized_keys` file
+
+As I said I've lost a control to the server.
+Now I want to add the ssh-key for access without password to the host.
+
+Edit a file `.ssh/authorized_keys`, and add our public key in it.
+
 ```
 root@rescue ~ # vi /mnt/root/.ssh/authorized_keys
 
@@ -178,6 +183,7 @@ root@rescue ~ # ls -l /mnt/root/.ssh/authorized_keys
 ```
 
 9. In the finish of work with the host files unmount the root device.
+
 ```
 root@rescue ~ # umount /dev/mapper/vg0-root
 ```
@@ -189,6 +195,7 @@ root@rescue ~ # lvm vgchange -a n vg0
 ```
 
 10. Now you can exit from rescue mode. Just run a reboot command.
+
 ```
 root@rescue ~ # reboot
 
@@ -198,21 +205,25 @@ The system is going down for reboot NOW!
 ```
 
 11. That's all. The server will reboot and the host system will start.
+
 Try to connect.
 ```
 $ ssh root@xxx.xxx.xxx.xxx
 Last failed login: Mon Sep 10 16:10:44 CEST 2018 from yyy.yyy.yyy.yyy on ssh:notty
 There was 1 failed login attempt since the last successful login.
+
 [root@CentOS-75-64-minimal ~]# hostname
 CentOS-75-64-minimal
 ```
 
 ## Conclusion
+
 In my practice I often repair system in rescue mode. With rescue I monitor the
 logs when system didn't start. It's very useful tool for fix mistakes with
 network and firewall settings.
 
 ## Additional information
+
 [lvm(8) - Linux man page][lvm]
 [Hetzner Rescue System - Official Information](https://www.hetzner.com/unternehmen/rescue-system)
 [Hetzner Rescue System/en - Official Manual][rescue-doc]
