@@ -13,21 +13,22 @@ minimal_mistakes_skin    : "contrast" # "air", "aqua", "contrast", "dark", "dirt
 
 # Site Settings
 locale                   : "en-US"
-title                    : "GAINANOV.PRO - BLOG"
+title                    : "GAINANOV.PRO"
 title_separator          : "-"
+subtitle                 : "BLOG: About IT, Dev & SysAd"
 name                     : "Ruslan Gainanov"
 description              : "Hi! I'm Ruslan. I'm interested in the development of software and administration of systems. This is another personal blog about IT, servers and software. I've made the site for writing my notes about everything I have ever done. I hope it is helpful to someone."
 url                      : "https://gainanov.pro" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 #url                      : # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "/eng-blog" # the subpath of your site, e.g. "/blog"
-repository               : "gainanovrus/en" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
+repository               : "gainanovrus/eng-blog" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : #"/assets/images/500x300.jpg" # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 # breadcrumbs            : false # true, false (default)
 words_per_minute         : 200
 comments:
-  provider               : "disqus" # false (default), "disqus", "discourse", "facebook", "google-plus", "staticman", "staticman_v2" "custom"
+  provider               : #"disqus" # false (default), "disqus", "discourse", "facebook", "google-plus", "staticman", "staticman_v2" "custom"
   disqus:
-    shortname            : "blog-w2w2-top" # https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
+    shortname            : #"blog-w2w2-top" # https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
   discourse:
     server               : # https://meta.discourse.org/t/embedding-discourse-comments-via-javascript/31963 , e.g.: meta.discourse.org
   facebook:
@@ -160,7 +161,7 @@ author:
       # url: "https://instagram.com/"
     - label: "LinkedIn"
       icon: "fab fa-fw fa-linkedin"
-      url: "https://linkedin.com/in/gainanovrus"
+      url: "linkedin.com/in/gainanovrus"
 
 
 

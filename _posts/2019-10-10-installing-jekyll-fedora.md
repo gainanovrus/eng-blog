@@ -46,7 +46,7 @@ I install next packages manually. It will pretty enough to install Jekyll.
 sudo dnf install ruby ruby-devel rubygems-devel \
                  autoconf automake bison gcc-c++ libffi-devel libtool \
                  libyaml-devel readline-devel sqlite-devel zlib-devel \
-                 openssl-devel redhat-rpm-config
+                 openssl-devel redhat-rpm-config rubygem-nokogiri
 ```
 So I am not sure that all of them are needed.
 
@@ -75,7 +75,6 @@ sudo gem install jekyll bundler
 
 Done! You may install new Jekyll site and test it locally :)
 
-
 ## Some notes
 
 Inside Jekyll project directory, run `bundler install` and `bundler update --bundler`
@@ -92,7 +91,7 @@ to install and update the gems needed, then use `bundle exec jekyll serve -d pub
 * [Jekyll on Fedora][https://developer.fedoraproject.org/start/sw/web-app/jekyll.html] -
     Jekyll instruction from Fedora developers.
 * [minimal-mistakes](https://github.com/mmistakes/minimal-mistakes) -
-    The best theme for Jekyll that I've try. It is used in this blog. 
+    The best theme for Jekyll that I've try. It is used in this blog.
 
 [jekyll]: https://jekyllrb.com/
 [haproxy-package]: https://docs.netgate.com/pfsense/en/latest/packages/haproxy-package.html
