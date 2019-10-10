@@ -102,8 +102,8 @@ It is open TCP-ports `80` and `443` through WAN interface  for opening our HAPro
 
 ### test everything
 
-You should now be able to hit http://nginx.example.com and have it redirect to
-https://nginx.example.com and also correctly go to the right backend server.
+You should now be able to hit `http://nginx.example.com` and have it redirect to
+`https://nginx.example.com` and also correctly go to the right backend server.
 
 The site should have a "green" status because is used a secured connection.
 
@@ -127,15 +127,15 @@ The solution was founded in the [forum](https://forum.netgate.com/topic/111505/h
 
 ## Additional information
 
-* [A walkthrough on how to proxy https traffic to multiple sites][https://blog.devita.co/pfsense-to-proxy-traffic-for-websites-using-pfsense/#step1installthehaproxypackage] -
+* [A walkthrough on how to proxy https traffic to multiple sites](https://blog.devita.co/pfsense-to-proxy-traffic-for-websites-using-pfsense/#step1installthehaproxypackage) -
     A blog post with screenshots with similar idea.
-* [pfsense-haproxy-package-doc][https://github.com/PiBa-NL/pfsense-haproxy-package-doc/wiki#https-for-multiple-domains-using-sni-from-1-frontend] -
+* [pfsense-haproxy-package-doc](https://github.com/PiBa-NL/pfsense-haproxy-package-doc/wiki#https-for-multiple-domains-using-sni-from-1-frontend) -
     HAProxy pfSense package, howto.
-* [HAProxy package - pfSense][https://docs.netgate.com/pfsense/en/latest/packages/haproxy-package.html] -
+* [HAProxy package - pfSense](https://docs.netgate.com/pfsense/en/latest/packages/haproxy-package.html) -
     Official documentation of HAProxy on pfSense site.
-* [Another instruction for using HAProxy with pfSense][https://github.com/PiBa-NL/pfsense-haproxy-package-doc/wiki/Single-frontend-serving-multiple-different-domains-using-http] -
+* [Another instruction for using HAProxy with pfSense](https://github.com/PiBa-NL/pfsense-haproxy-package-doc/wiki/Single-frontend-serving-multiple-different-domains-using-http) -
     Single frontend serving multiple different domains using http.
 
-[pfsense-ssl]: {{ "" | relative_url }}{% post_url 2019-10-07-installing-lets-encrypt-pfsense %}
+[pfsense-ssl]: {% post_url 2019-10-07-installing-lets-encrypt-pfsense %}
 [haproxy-docs]: http://www.haproxy.org/#docs
 [haproxy-package]: https://docs.netgate.com/pfsense/en/latest/packages/haproxy-package.html

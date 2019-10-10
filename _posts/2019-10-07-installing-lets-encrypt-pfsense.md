@@ -20,7 +20,7 @@ last_modified_at: 2019-10-08
 
 ## Introduction
 
-LetsEncrypt certs are 90 days, and must be renewed.
+[LetsEncrypt][letsencrypt] certs are 90 days, and must be renewed.
 Secondly, you have to be able to prove you control the name that the certificate is for.
 This makes things more complicated.
 
@@ -135,14 +135,15 @@ If you have any issues or questions, you can reach out to me and I'd be happy to
 
 ## Additional information
 
-* [Wildcard Certificates on pfSense][https://www.danielcolomb.com/2019/08/29/creating-wildcard-certificates-on-pfsense-with-lets-encrypt/] -
+* [Wildcard Certificates on pfSense](https://www.danielcolomb.com/2019/08/29/creating-wildcard-certificates-on-pfsense-with-lets-encrypt/) -
     Creating Wildcard Certificates on pfSense with Let’s Encrypt.
-* [LetsEncrypt SSL Certificate with pfSense][https://blog.barclayhowe.com/letsencrypt-ssl-certificate-pfsense-internal-linux-server/] -
+* [LetsEncrypt SSL Certificate with pfSense](https://blog.barclayhowe.com/letsencrypt-ssl-certificate-pfsense-internal-linux-server/) -
     LetsEncrypt SSL Certificate with pfSense on Internal Linux Server.
-* [ACME package - pfSense][https://docs.netgate.com/pfsense/en/latest/certificates/acme-package.html] -
+* [ACME package - pfSense](https://docs.netgate.com/pfsense/en/latest/certificates/acme-package.html) -
     Official documentation of ACME on pfSense site.
-* [Acme plugin on pfSense][https://laskowski-tech.com/2017/12/04/acme-plugin-on-pfsense-add-lets-encrypt-cert-to-your-firewall/] -
-    Acme plugin on pfSense, add Let’s Encrypt Cert to your firewall!.
+* [Acme plugin on pfSense](https://laskowski-tech.com/2017/12/04/acme-plugin-on-pfsense-add-lets-encrypt-cert-to-your-firewall/) -
+    Acme plugin on pfSense, add Let’s Encrypt Cert to your firewall.
 
+[letsencrypt]: https://letsencrypt.org/
 [standalone]: https://docs.netgate.com/pfsense/en/latest/certificates/acme-validation.html#standalone
-[haproxy-https]: {{ "" | relative_url }}{% post_url 2019-10-09-installing-haproxy-pfsense %}
+[haproxy-https]: {% post_url 2019-10-09-installing-haproxy-pfsense %}

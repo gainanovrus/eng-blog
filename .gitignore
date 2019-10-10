@@ -17,3 +17,4 @@ Thumbs.db
 Gemfile.lock
 yarn.lock
 node_modules/
+public/
