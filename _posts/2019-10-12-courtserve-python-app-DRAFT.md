@@ -1,5 +1,5 @@
 ---
-published: true
+published: false
 layout: single
 title: Installing Jekyll on Fedora 30
 excerpt: >-
@@ -88,10 +88,10 @@ to install and update the gems needed, then use `bundle exec jekyll serve -d pub
     Let's begin design your static site with Jekyll.
 * [Jekyll, rvm, bundler and Fedora](https://robbinespu.gitlab.io/blog/2019/05/08/ruby-fedora-jekyll/)-
     The article that I inspired by.
-* [Jekyll on Fedora](https://developer.fedoraproject.org/start/sw/web-app/jekyll.html) -
+* [Jekyll on Fedora][https://developer.fedoraproject.org/start/sw/web-app/jekyll.html] -
     Jekyll instruction from Fedora developers.
 * [minimal-mistakes](https://github.com/mmistakes/minimal-mistakes) -
     The best theme for Jekyll that I've try. It is used in this blog.
 
 [jekyll]: https://jekyllrb.com/
-[ruby]: https://www.ruby-lang.org/
+[haproxy-package]: https://docs.netgate.com/pfsense/en/latest/packages/haproxy-package.html
