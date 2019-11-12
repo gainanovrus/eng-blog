@@ -19,7 +19,7 @@ last_modified_at: 2019-10-24
 
 [ESXi](https://www.vmware.com/products/esxi-and-esx.html) is a type-1 hypervisor, meaning it runs directly on system hardware without the need for an operating system (OS). Type-1 hypervisors are also referred to as bare-metal hypervisors because they run directly on hardware.
 
-Also VMware vSphere Hypervisor is a free product and require a free license for full usage without any restrictions.
+Also VMware vSphere Hypervisor is a free product and require a free license for the usage.
 
 [pfSense](https://www.pfsense.org/) is a free and open source firewall and router that also features unified threat management, load balancing, multi WAN, and more.
 
@@ -305,3 +305,9 @@ After I install **Open VM Tools** ESXi will show a warning message:
 
 To avoid this just change the **Guest OS Version** to `FreeBSD 11 (64-bit)` and will be happy.
 ![082_change_guest_os_to_freebsd11]({{ site.url }}{{ site.baseurl }}/assets/images/installing-pfsense-on-esxi/082_change_guest_os_to_freebsd11.png){: .align-center}
+
+
+## Additional information
+
+* [VMware Virtual Networking Concepts](https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/techpaper/virtual_networking_concepts.pdf) -
+    The information guide to VMware Networks.
