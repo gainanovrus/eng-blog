@@ -3,7 +3,7 @@ title:  "Add a free SSL certificate to NGINX server"
 excerpt: "In this article I will show you how to use the certbot Let's Encrypt client to obtain a free SSL certificate and use it with Nginx on CentOS 7. I will also show you how to automatically renew your SSL certificate."
 toc: true
 categories: linux
-tags: ssl nginx centos
+tags: ssl nginx centos letsencrypt
 last_modified_at: 2018-03-11T16:00:00+05:00
 header:
   teaser: /assets/images/free-ssl-certbot-nginx-setup-teaser.png
