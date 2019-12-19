@@ -1,14 +1,14 @@
 ---
 layout: single
-title: "Example post with many types of content"
+title: "Jekyll. Example post with many types of content"
 date:   2018-02-01 07:23:43 -0500
 search: false
 share: false
 comments: false
 related: false
 toc: true
-toc_label: "On page"
-categories: jekyll
+# toc_label: "On page"
+categories: dev
 ---
 
 A variety of common markup showing how the theme styles them.
@@ -73,8 +73,8 @@ Do It Live
 
 ## Unordered Lists (Nested)
 
-  * List item one 
-      * List item one 
+  * List item one
+      * List item one
           * List item one
           * List item two
           * List item three
@@ -88,8 +88,8 @@ Do It Live
 
 ## Ordered List (Nested)
 
-  1. List item one 
-      1. List item one 
+  1. List item one
+      1. List item one
           1. List item one
           2. List item two
           3. List item three

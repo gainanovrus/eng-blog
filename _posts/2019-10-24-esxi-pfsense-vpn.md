@@ -1,7 +1,7 @@
 ---
 published: true
 layout: single
-title: VMWare ESXi. The best way to build VPN tunnel
+title: ESXi. The best way to build VPN tunnel
 excerpt: >-
   ESXi is good and reliable tool to run VMs on bare metal. It configuring by webGUI.
   But the host with ESXi can be accessed only through NAT without any public IP or ports.

@@ -1,14 +1,12 @@
 ---
-published: false
+published: true
 layout: single
 title: Setup VLAN interface on CentOS
 excerpt: >-
-  Sometimes you don’t have access to ESXi by WebGUI.
-  You might need to restart a server remotely via SSH or direct console.
-  In these cases it’s great to be able to turn virtual machines on and off via the command line.
+  There is a short instruction to configure VLAN interface in CentOS sytem with `ip` command.
 categories: sysad
-tags: esxi shell vm
-toc: true
+tags: linux centos vlan
+toc: false
 # header:
 #  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png
 #  og_image: /assets/images/custom-oauth2-provider-to-nextcloud.png

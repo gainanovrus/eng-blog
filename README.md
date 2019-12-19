@@ -13,11 +13,22 @@ sudo dnf install ruby ruby-devel rubygems-devel \
 
 sudo gem install jekyll bundler
 ```
+On MacOS
+```
+brew update
+brew install ruby
+
+  echo 'export PATH="/usr/local/opt/ruby/bin:$PATH"' >> ~/.zshrc
+
+gem update --system
+gem install jekyll bundler
+```
 
 ### View and test result
 
 Deploy a site on localhost
 ```
+cd ./eng-blog/
 bundler install
 bundler update --bundler
 bundle exec jekyll serve -d public --incremental --verbose --watch
@@ -27,21 +38,6 @@ Open deployment in browser ([localhost:4000/eng-blog](http:/localhost:4000/eng-b
 
 ## Deploy to GitHub
 
-<!-- ### Prepare environment -->
-
-<!-- Install npm
-```
-curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
-sudo yum install -y nodejs
-``` -->
-
-<!--
-Install yarm
-```
-curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
-sudo yum install -y yarn
-``` -->
-
 ### Setup needed components
 
 ```
@@ -50,7 +46,8 @@ sudo yum install -y yarn
 
 ### Deploy to gh-pages
 
-Build project and deploy html-pages to `gh-pages` branch
+Build project and deploy html-pages to `gh-pages` branch.
+It will deploy to [gainanov.pro/eng-blog](https://gainanov.pro/eng-blog)
 ```
 ./bin/deploy
 ```
