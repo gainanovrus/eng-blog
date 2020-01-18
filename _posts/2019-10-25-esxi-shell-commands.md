@@ -1,7 +1,7 @@
 ---
-published: false
+published: true
 layout: single
-title: VMWare ESXi. The command line and shell magic
+title: ESXi. The command line and shell magic
 excerpt: >-
   Sometimes you don’t have access to ESXi by WebGUI.
   You might need to restart a server remotely via SSH or direct console.
@@ -164,9 +164,7 @@ Now check the VMs startup settings:
 vim-cmd hostsvc/autostartmanager/get_autostartseq
 ```
 
-Make sure that the **startAction** value of the VM has changed to `powerOn`
-
-https://theitbros.com/config-virtual-machine-auto-startup-vmware-esxi/
+Make sure that the **startAction** value of the VM has changed to `powerOn`.
 
 ### Uplink of vSwitch
 
@@ -261,6 +259,15 @@ vim-cmd hostsvc/firmware/restore_config /tmp/configBundle.tgz
 
 After running this command an ESXi host will be rebooted automatically.
 
+### Login to console by SSH rsa key
+
+You should have a SSH key on the host that you would like to connect to ESXi.
+So I think you already know how to generate ssh-keys, I just write command to add keys to the ESXi host - `esxi.machine.com`.
+
+```
+cat ~/.ssh/id_rsa.pub | ssh root@esxi.machine.com 'cat >> /etc/ssh/keys-root/authorized_keys'
+```
+
 ### Conclusion
 
 Today’s blog post has covered a series of ESXi shell commands. Using the command line
@@ -280,6 +287,5 @@ Use the ESXi shell commands list provided in this blog post for fine ESXi tuning
   Another manual instruction to this. This one from graspingtech.
 * [Резервное копирование настроек VMWare ESXI](https://linux-admins.ru/article.php?id_article=17) -
   On Russian language.
-
-[jekyll]: https://jekyllrb.com/
-[ruby]: https://www.ruby-lang.org/
+* [Configure Autostart of VM on VMware ESXi](https://theitbros.com/config-virtual-machine-auto-startup-vmware-esxi/) -
+  Some information about starting VM process, and how to do it with cmd

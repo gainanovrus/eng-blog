@@ -1,7 +1,7 @@
 ---
-published: false
+published: true
 layout: single
-title: Git: Squash Multiple Commits in to One Commit
+title: Git. Squash Multiple Commits in to One Commit
 excerpt: >-
   This note shows how to merge an ugly feature branch with multiple dirty WIP
   commits back into the master as one pretty commit.
@@ -141,7 +141,7 @@ members or before pushing the changes to a remote repository.
 It's much easier to read through a source tree and understand what bugs have been
 fixed when a single commit fixes a single bug, for example.
 
-## Additional information
+## additional information
 
 * [git-rebase - Reapply commits on top of another base tip](https://git-scm.com/docs/git-rebase) -
   Full information about git-rebase command.

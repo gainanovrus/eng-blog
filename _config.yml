@@ -15,7 +15,7 @@ minimal_mistakes_skin    : "contrast" # "air", "aqua", "contrast", "dark", "dirt
 locale                   : "en-US"
 title                    : "GAINANOV.PRO"
 title_separator          : "-"
-subtitle                 : "BLOG: About IT, Dev & SysAd"
+subtitle                 : "BLOG: About IT, Dev & Ops"
 name                     : "Ruslan Gainanov"
 description              : "Hi! I'm Ruslan. I'm interested in the development of software and administration of systems. This is another personal blog about IT, servers and software. I've made the site for writing my notes about everything I have ever done. I hope it is helpful to someone."
 url                      : "https://gainanov.pro" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"

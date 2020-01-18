@@ -7,8 +7,7 @@ last_modified_at: 2019-01-03T00:00:00-00:00
 published: true
 ---
 
-Hi, I'm Ruslan Gainanov. And I blogging about everything that happens to me and that I do in a job.
-But often this is associated with IT, Sysadmin and Software.
+![photo]({{ site.url }}{{ site.baseurl }}/assets/images/photo-150x200.jpg){: .align-left} Hi, I'm Ruslan Gainanov. And I blogging about everything that happens to me and that I do in a job. But often this is associated with IT, Sysadmin and Software.
 
 And sorry for my language mistakes. With this blog, I hope I will know English better.
 
