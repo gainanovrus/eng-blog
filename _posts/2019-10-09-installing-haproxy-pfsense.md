@@ -8,7 +8,7 @@ excerpt: >-
   web servers traffic. HAProxy with SSL provides secure and performance access to
   many web sites hosted on multiple hosts connected with pfSense LAN.
 categories: linux
-tags: pfSense linux ssl haproxy
+tags: pfsense linux ssl haproxy
 toc: true
 # header:
 #  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png

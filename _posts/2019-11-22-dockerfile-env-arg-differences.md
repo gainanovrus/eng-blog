@@ -1,11 +1,12 @@
 ---
-published: false
+published: true
 layout: single
-title: Dockerfile: ARG and ENV statement differences
+title: Dockerfile. ARG and ENV statement differences
 excerpt: >-
-  The both words use for define variables in to Dockerfile. It may be difficult to understand the difference, but it will be explained here.
+  The both words use for define variables in to Dockerfile.
+  It may be difficult to understand the difference, but it will be explained here.
 categories: devops
-tags: dockerfile devops
+tags: docker dockerfile devops
 toc: true
 # header:
 #  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png
@@ -16,10 +17,12 @@ last_modified_at: 2019-11-22
 The ARG and ENV statements use for define variables in to Dockerfile.
 It may be difficult to understand the difference. The difference is when variables will be utilized.
 
-If you need **build-time** customization, **ARG** is best choice. From docker [reference][arg]:
+If you need **build-time** customization, **ARG** is best choice.
+From docker [reference][arg]:
 > The `ARG` instruction defines a variable that users can pass at build-time to the builder with the docker build command using the --build-arg <varname>=<value> flag.
 
-If you need **run-time** customization (to run the same image with different settings), **ENV** is well-suited. What you should know from [docs][env]:
+If you need **run-time** customization (to run the same image with different settings), **ENV** is well-suited.
+What you should know from [docs][env]:
 > The `ENV` instruction sets the environment variable <key> to the value <value>.
 The environment variables set using ENV will persist when a container is run from the resulting image.
 
@@ -49,7 +52,8 @@ docker-compose up --build
 
 ## conclusion
 
-I hope this explanation has helped you to learn a bit more about using dockerfile statements, and will save you time to understand the basis of Docker.
+I hope this explanation has helped you to learn a bit more about using dockerfile statements,
+and will save you time to understand the basis of Docker.
 
 [dcfile]: https://docs.docker.com/compose/compose-file/
 [arg]: https://docs.docker.com/engine/reference/builder/#arg

@@ -5,12 +5,11 @@ title: ESXi. NTP Configuration
 excerpt: >-
   How to configure date and time using NTP on a Vmware ESXi server.
 categories: sysad
-tags: esxi
+tags: esxi ntp
 toc: true
 # header:
 #  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png
 #  og_image: /assets/images/custom-oauth2-provider-to-nextcloud.png
-last_modified_at: 2019-10-24
 ---
 
 Would you like to learn how to set date and time using the Vmware ESXi NTP feature?
