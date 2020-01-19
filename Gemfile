@@ -5,6 +5,8 @@ source "https://rubygems.org"
 
 gem "jekyll"
 
+gem "jemoji"
+
 gem "minimal-mistakes-jekyll"
 
 group :jekyll_plugins do

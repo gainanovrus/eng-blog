@@ -75,8 +75,6 @@ Installing CentOS using kickstart is a 3 step process
 Ultimately you can modify the ISO file and the `isolinux/isolinux.cfg` and make it autostart and everything,
 but for this post it just wasn’t the right approach. Also you can run PXE server to automate full installation.
 
-![destination-window-with-raid-controller]({{ site.url }}{{ site.baseurl }}/assets/images/dell-centos/destination-with-raid.png){: .align-center}
-
 That’s all! Automatic Kickstart installations offer a great deal of benefits for system administrators in environments that they have to perform system installations on multiple machines the same time, in a short period of time, without the need to manually interfere with the installation process.
 
 ## Additional information
