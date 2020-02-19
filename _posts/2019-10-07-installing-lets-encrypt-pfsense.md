@@ -89,14 +89,14 @@ Under **Firewall / NAT / Port Forward** create a new rule that forwards port
 
 This allows the ACME server to communicate with your device to verify ownership.
 
-[![create_nat_rule]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/cert_success_issued.png)]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/create_right_nat_rule.png){: .align-center}
+[![create_nat_rule]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/create_right_nat_rule.png)]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/create_right_nat_rule.png){: .align-center}
 
 In this picture `8080` port is bound with **Standalone HTTP server** in the ACME certificates page.
 The IP `192.168.100.1` is my pfSense local IP. Don't forget to set **Add associated filter rule** in the option **Filter rule association**.
 
 Open the **Firewall / Rules / WAN** page and check that the rule was automatically created.
 
-[![firewall_rule]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/cert_success_issued.png)]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/firewall_rule.png){: .align-center}
+[![firewall_rule]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/firewall_rule.png)]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/firewall_rule.png){: .align-center}
 
 ### issue certificate
 
@@ -113,6 +113,7 @@ The successful message will include this text in the end:
 ```
 [Wed Feb 19 10:36:34 MSK 2020] Cert success.
 -----BEGIN CERTIFICATE-----
+< ... >
 -----END CERTIFICATE-----
 [Wed Feb 19 10:36:34 MSK 2020] Your cert is in  /tmp/acme/staging//nginx.example.com/nginx.example.com.cer
 [Wed Feb 19 10:36:34 MSK 2020] Your cert key is in  /tmp/acme/staging//nginx.example.com/nginx.example.com.key
