@@ -11,8 +11,8 @@ categories: devops
 tags: python selenium testing selenoid docker QA
 toc: true
 header:
-  teaser: /assets/images/selenium/selenium_python_logo.png
-  og_image: /assets/images/selenium/selenium_python_logo.png
+  teaser: /assets/images/selenium/selenoid_logo.png
+  og_image: /assets/images/selenium/selenoid_logo.png
 ---
 
 My [previous post][selenium-post] will include a introduction into writing tests with Selenium.
@@ -32,13 +32,13 @@ Suitable for personal usage and in big clusters.
 - Ability to send browser logs to centralized log storage
 - Fully isolated and reproducible environment
 
-[![selenoid-flow](/assets/images/selenium/test-selenoid-docker-selenium-flow.png)](/assets/images/selenium/test-selenoid-docker-selenium-flow.png){: .align-center}
+![selenoid-flow]({{ site.url }}{{ site.baseurl }}/assets/images/selenium/selenoid-animation.gif){: .align-center}
 
 ## Selenoid Grid composition
 
 Selenoid should be used with two components:
-* Selenoid - Selenium Hub successor running browsers within containers.
-* Selenoid-ui - Graphical user interface for Selenoid project and check run time browsers and logs.
+* [Selenoid](https://github.com/aerokube/selenoid) - Selenium Hub successor running browsers within containers.
+* [Selenoid-ui](https://github.com/aerokube/selenoid-ui) - Graphical user interface for Selenoid project and check run time browsers and logs.
 
 Now let’s create a simple Grid by using Selenoid Images with Docker on the local machine and you can run Test cases.
 

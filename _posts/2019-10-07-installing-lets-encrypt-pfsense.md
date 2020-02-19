@@ -75,7 +75,7 @@ Each domain should be written in a separate row in the table.
 
 The *method* will be how the Let’s Encrypt server will validate that you control the domain before issuing the cert.
 
-I selected [`Standalone HTTP server`][standalone] and in the options set the listen port to `8082`.
+I selected [`Standalone HTTP server`][standalone] and in the options set the listen port to `8080`.
 
 ![create_certificates]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/create_certificates.png){: .align-center}
 
@@ -85,15 +85,18 @@ This is important because the ACME server needs to be able to access this standa
 ### forward rule
 
 Under **Firewall / NAT / Port Forward** create a new rule that forwards port
-`80` HTTP to port `8082` in your pfSense IP address which is `192.168.1.1` by default.
+`80` HTTP to port `8080` in your pfSense IP address which is `192.168.100.1` by default.
 
 This allows the ACME server to communicate with your device to verify ownership.
 
-![create_nat_rule]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/create_nat_rule.png){: .align-center}
+[![create_nat_rule]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/cert_success_issued.png)]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/create_right_nat_rule.png){: .align-center}
 
-Also open port `80` from WAN interface (**Firewall / Rules / WAN**) if it closed.
+In this picture `8080` port is bound with **Standalone HTTP server** in the ACME certificates page.
+The IP `192.168.100.1` is my pfSense local IP. Don't forget to set **Add associated filter rule** in the option **Filter rule association**.
 
-![open_port]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/open_port.png ){: .align-center}
+Open the **Firewall / Rules / WAN** page and check that the rule was automatically created.
+
+[![firewall_rule]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/cert_success_issued.png)]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/firewall_rule.png){: .align-center}
 
 ### issue certificate
 
@@ -103,6 +106,23 @@ under **Services / Acme / Certificates** on required certificate.
 ![issue_certificate]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/issue_certificate.png){: .align-center}
 
 The gear will turn, and after a bit you’ll see a lot of green text. If there is block that looks like:
+
+[![issue_certificate]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/cert_success_issued.png)]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/cert_success_issued.png){: .align-center}
+
+The successful message will include this text in the end:
+```
+[Wed Feb 19 10:36:34 MSK 2020] Cert success.
+-----BEGIN CERTIFICATE-----
+-----END CERTIFICATE-----
+[Wed Feb 19 10:36:34 MSK 2020] Your cert is in  /tmp/acme/staging//nginx.example.com/nginx.example.com.cer
+[Wed Feb 19 10:36:34 MSK 2020] Your cert key is in  /tmp/acme/staging//nginx.example.com/nginx.example.com.key
+[Wed Feb 19 10:36:34 MSK 2020] The intermediate CA cert is in  /tmp/acme/staging//nginx.example.com/ca.cer
+[Wed Feb 19 10:36:34 MSK 2020] And the full chain certs is there:  /tmp/acme/staging//nginx.example.com/fullchain.cer
+[Wed Feb 19 10:36:34 MSK 2020] Run reload cmd: /tmp/acme/staging/reloadcmd.sh
+
+IMPORT CERT cobrain-staging, ... update cert!
+[Wed Feb 19 10:36:35 MSK 2020] Reload success
+```
 
 Be sure to read it carefully! Even though it’s green and the top may say success,
 there could be errors listed that you’ll want to resolve.
