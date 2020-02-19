@@ -200,7 +200,7 @@ Happy testing!
 
 ## Additional information
 
-* [Aerokube | Efficient Selenium Testing Infrastructure](https://aerokube.com/) - the start page to explore automation testing
+* [Aerokube. Efficient Selenium Testing Infrastructure](https://aerokube.com/) - the start page to explore automation testing
 * [Selenium with Python](https://selenium-python.readthedocs.io/) - Selenium library for Python
 
 [selenoid-ui]: https://aerokube.com/selenoid-ui/latest/

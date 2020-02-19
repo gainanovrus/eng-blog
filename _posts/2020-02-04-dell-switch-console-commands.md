@@ -7,6 +7,9 @@ excerpt: >-
 categories: sysad
 tags: dell cisco networks
 toc: true
+# header:
+#  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png
+#  og_image: /assets/images/custom-oauth2-provider-to-nextcloud.png
 ---
 
 I recently have experience in configuring a DELL PowerSwitch [S4048-ON][s4048-specs].

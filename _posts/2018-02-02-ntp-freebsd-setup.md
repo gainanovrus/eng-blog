@@ -1,7 +1,7 @@
 ---
 layout: single
-title:  "Install and configure NTP on FreeBSD 11"
-categories: freebsd
+title:  Install and configure NTP on FreeBSD 11
+categories: sysad
 tags: ntp freebsd
 header:
   teaser: /assets/images/ntp-freebsd-setup.png
@@ -9,7 +9,7 @@ header:
 ---
 
 In this article will be described what use NTP to synchronize system time on FreeBSD.
-I use FreeBSD 11 that ran as VPS in [Hetzner][hetzner] cloud. 
+I use FreeBSD 11 that ran as VPS in [Hetzner][hetzner] cloud.
 
 Previously you should check what version is installed on your machine. Use for this command `ntpd --version`. Result:
 ```

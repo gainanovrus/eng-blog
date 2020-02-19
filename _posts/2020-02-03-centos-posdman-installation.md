@@ -7,6 +7,9 @@ excerpt: >-
 categories: linux
 tags: centos linux podman
 toc: true
+header:
+  teaser: /assets/images/podman-logo.png
+  og_image: /assets/images/podman-logo.png
 ---
 
 [Podman][podman] is a free and open-source daemonless container platform that was built to develop, manage and deploy containers and pods on a Linux environment.

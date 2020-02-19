@@ -14,7 +14,7 @@ toc: true
 # header:
 #  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png
 #  og_image: /assets/images/custom-oauth2-provider-to-nextcloud.png
-last_modified_at: 2019-10-08
+last_modified_at: 2020-02-19
 ---
 
 
