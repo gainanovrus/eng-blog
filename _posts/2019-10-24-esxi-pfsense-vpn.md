@@ -1,9 +1,9 @@
 ---
 published: true
 layout: single
-title: ESXi. The best way to build VPN tunnel
+title: ESXi. The best way to build VPN tunnel with pfSense
 excerpt: >-
-  ESXi is good and reliable tool to run VMs on bare metal. It configuring by webGUI.
+  ESXi is good and reliable tool to run VMs on bare metal. It is configuring by webGUI.
   But the host with ESXi can be accessed only through NAT without any public IP or ports.
   This post shows how to create VPN tunnel with pfSense as VM on ESXi.
 categories: sysad
@@ -12,7 +12,7 @@ toc: true
 # header:
 #  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png
 #  og_image: /assets/images/custom-oauth2-provider-to-nextcloud.png
-last_modified_at: 2019-10-24
+last_modified_at: 2020-02-21
 ---
 
 ## Introduction

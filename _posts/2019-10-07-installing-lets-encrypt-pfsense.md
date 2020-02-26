@@ -9,7 +9,7 @@ excerpt: >-
   an invalid certificate. This article will show process of installation
   certificates with pfSense.
 categories: linux
-tags: pfSense linux ssl letsencrypt
+tags: pfsense linux ssl letsencrypt
 toc: true
 # header:
 #  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png
