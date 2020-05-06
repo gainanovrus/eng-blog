@@ -268,6 +268,23 @@ So I think you already know how to generate ssh-keys, I just write command to ad
 cat ~/.ssh/id_rsa.pub | ssh root@esxi.machine.com 'cat >> /etc/ssh/keys-root/authorized_keys'
 ```
 
+### Configuring Login Behavior
+
+ESXi has a good security feature to add a root account lockout for safety. After a number of failed login attempts, the server will trigger a lockout. By default, a maximum of five failed attempts is allowed before the account is locked. The account is unlocked after 15 minutes by default.
+
+You can configure the login behavior for your ESXi host with the following advanced options:
+* `Security.AccountLockFailures` - Maximum number of failed login attempts before a user's account is locked. Zero disables account locking.
+* `Security.AccountUnlockTime` - Number of seconds that a user is locked out.
+
+
+> Remote access for ESXi local user account 'root' has been locked for 120 seconds after xxx failed login attempts.
+
+Are you seeing this message? Do not worry, you are in the right place.  Now, let’s look at what to do if your ESXi root account is locked. The command line to clear the lockout status and reset the count to zero for an account is shown here with the root account as an example:
+
+```
+pam_tally2 --user root --reset
+```
+
 ### Conclusion
 
 Today’s blog post has covered a series of ESXi shell commands. Using the command line
