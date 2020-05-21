@@ -1,7 +1,7 @@
 ---
 published: true
 layout: single
-title: ESXi. Create Management Network (vmk0) VMkernel interface using ESXi Command line
+title: ESXi. Create and configure Management Network using ESXi Command line
 excerpt: >-
   This quick post about ESX CLI networking basics. Here is should be useful to recover the Management Network functionality on your ESXi host.
 categories: sysad
