@@ -12,7 +12,7 @@ toc: true
 # header:
 #  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png
 #  og_image: /assets/images/custom-oauth2-provider-to-nextcloud.png
-last_modified_at: 2019-10-24
+last_modified_at: 2020-05-21
 ---
 
 ## Introduction
@@ -86,6 +86,14 @@ esxcli hardware memory get
 View the detailed information about installed processors:
 ```
 esxcli hardware cpu list
+```
+
+### Change a hostname
+
+Run these commands to change the hostname:
+```
+esxcli system hostname set --host=hostname
+esxcli system hostname set --fqdn=fqdn
 ```
 
 ### Power control ESXi host
@@ -275,7 +283,6 @@ ESXi has a good security feature to add a root account lockout for safety. After
 You can configure the login behavior for your ESXi host with the following advanced options:
 * `Security.AccountLockFailures` - Maximum number of failed login attempts before a user's account is locked. Zero disables account locking.
 * `Security.AccountUnlockTime` - Number of seconds that a user is locked out.
-
 
 > Remote access for ESXi local user account 'root' has been locked for 120 seconds after xxx failed login attempts.
 

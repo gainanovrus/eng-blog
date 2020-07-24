@@ -162,6 +162,12 @@ SWP_UP_10G(conf)#exit
 SWP_UP_10G#
 ```
 
+The `do` command allows the execution of most EXEC-level commands from all CONFIGURATION levels without returning to the EXEC level.
+```
+SWP_UP_10G(conf)#do show clock       
+23:13:55.661 UTC Sat Jul 18 2020
+```
+
 ## command history
 
 Display a buffered log of all commands all users enter along with a time stamp
