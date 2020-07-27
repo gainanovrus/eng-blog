@@ -17,7 +17,7 @@ Follow to my guide I tested on my Dell PowerSwitch [S4048-ON][s4048-specs].
 
 ## Prerequisites
 
-I already configure management interface and ssh server. Read my previous posts if you didn't make it.
+I already configure management interface and ssh server. Read my [previous][ssh-server] post if you didn't make it.
 
 ## Download the latest firmware
 
@@ -45,6 +45,7 @@ The commands below will show a useful information about your device:
 I recommend to run them before upgrade the firmware. It could help to prevent any errors if it will be.
 
 For example my output of the command `show version`:
+
 ```
 DellEMC# show version
 
@@ -75,6 +76,7 @@ So my current version of system - `9.13(0.1)`. And I will upgrade to `9.14(2.7)`
 Dell EMC Networking recommends that you back up your startup configuration and any important files and directories to an external media prior to upgrading the system.
 
 Run the copy command to save running-config to some network host by SSH:
+
 ```
 copy running-config scp:
 ```
@@ -83,7 +85,8 @@ copy running-config scp:
 
 Follow these steps carefully to upgrade your S4048-ON systems.
 
-1. Copy Firmware from my Mac to flash memory on device
+* Copy Firmware from my Mac to flash memory on device
+
 ```
 DellEMC# copy scp://admin:some_strong_password@192.168.101.3 flash://FTOS-SK-9.14.2.7.bin
 
@@ -92,22 +95,25 @@ Source file name []: /Users/admin/Documents/dell/firmware/FTOS-SK-9.14.2.7.bin
 72581613 bytes successfully copied
 ```
 
-2. Verify a hash sum (it should be the same as presented in Download page)
+* Verify a hash sum (it should be the same as presented in Download page)
+
 ```
 DellEMC# verify md5 FTOS-SK-9.14.2.7.bin
 MD5 hash for FTOS-SK-9.14.2.7.bin : ae09a0042db441291b119708b890bb8c
 ```
 
-3. Upgrade the Dell EMC Networking OS in flash partition A: or B:
+* Upgrade the Dell EMC Networking OS in flash partition `A:` or `B:`
+
 ```
 DellEMC# upgrade system flash://FTOS-SK-9.14.2.7.bin A:
 
-!................................................................................................................................................................................................................................................................................................!
+!................................................!
 72581613 bytes successfully copied
 System image upgrade completed successfully.
 ```
 
-4. Verify that the Dell EMC Networking OS has been upgraded correctly in the upgraded flash partition
+* Verify that the Dell EMC Networking OS has been upgraded correctly in the upgraded flash partition
+
 ```
 DellEMC# show boot system stack-unit all
 
@@ -127,12 +133,14 @@ stack-unit 6 is not present.
 > NOTE: If your boot flash partition is different then `A:`
 > You should change the Primary Boot Parameter - `DellEMC(conf)# boot system stack-unit 1 primary system: A:`
 
-5. Save the configuration so that the configuration will be retained after a reload using write memory command.
+* Save the configuration so that the configuration will be retained after a reload using write memory command.
+
 ```
 DellEMC# write memory
 ```
 
-6. Reload the unit
+* Reload the unit
+
 ```
 DellEMC# reload
 
@@ -142,6 +150,7 @@ Proceed with reload [confirm yes/no]: yes
 ## Verification
 
 Verify the switch has been upgraded to the Dell EMC Networking OS version 9.14(2.7)
+
 ```
 DellEMC# show version
 
@@ -179,3 +188,4 @@ I'm hope this article could save a time you. Have a nice flashing.
 
 
 [s4048-specs]: https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/Dell-EMC-Networking-S4048-ON-Spec-Sheet.pdf
+[ssh-server]: {% post_url 2020-07-19-dell-ssh-server-configure %}

