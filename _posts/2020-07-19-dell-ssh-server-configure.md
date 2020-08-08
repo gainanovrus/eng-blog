@@ -7,6 +7,8 @@ excerpt: >-
 categories: sysad
 tags: dell networks security
 toc: true
+last_modified_at: 2020-08-08T00:00:00-00:00
+
 # header:
 #  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png
 #  og_image: /assets/images/custom-oauth2-provider-to-nextcloud.png
@@ -61,7 +63,7 @@ It use static or dynamic IP address.
 
 Let's add an IP `10.0.0.1/24` to the first management interface. Then enable it and exit.
 ```
-Dell(config)# interface managementethernet 0/0
+Dell(config)# interface managementethernet 1/1
 Dell(conf-if-ma-0/0)# ip add 10.0.0.1/24
 Dell(conf-if-ma-0/0)# no shutdown
 Dell(conf-if-ma-0/0)# exit

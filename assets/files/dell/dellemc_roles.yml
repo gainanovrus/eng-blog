@@ -1,0 +1,78 @@
+---
+# Ansible galaxy roles (DellEMC)
+# URL: https://galaxy.ansible.com/Dell-Networking/
+#
+# for install them:
+# ansible-galaxy install -r ansible-roles/dellemc_roles.yml
+
+# The dellos-aaa role facilitates the configuration of Authentication Authorization Acccounting (AAA)
+# attributes
+# - src: Dell-Networking.dellos-aaa
+
+# The dellos-acl role facilitates the configuration of an access control list (ACL).
+# It supports the configuration of different types of ACLs (standard and extended)
+# for both IPv4 and IPv6, and assigns the access-class to the line terminals.
+- src: Dell-Networking.dellos-acl
+
+# The dellos-bgp role facilitates the configuration of Border Gateway Protocol (BGP) attributes.
+# It supports the configuration of router ID, networks, neighbors, maximum path and other BGP attributes.
+# - src: Dell-Networking.dellos-bgp
+
+# This role shall be used to push the backup running configuration into the device.
+# This role shall merge the configuration in the template file with the running configuration of the device
+# - src: Dell-Networking.dellos-copy-config
+
+# The dellos-dcb role facilitates the configuration of Data Center Bridging (DCB).
+# It supports the configuration of DCB map and DCB buffer and assigns them to interfaces.
+# - src: Dell-Networking.dellos-dcb
+
+# The dellos-interface role facilitates the configuration of interface attributes.
+# It supports the configuration of administrative state, description, MTU, IP address,
+# IP helper, port mode and other interface attributes.
+- src: Dell-Networking.dellos-interface
+
+# The dellos-lag role facilitates the configuration of Link Aggregation Group (LAG) attributes.
+# It supports the creation and deletion of a LAG and its member ports.
+# It also supports the configuration of type (static/dynamic), hash scheme, minimum required link and other lag attributes.
+# - src: Dell-Networking.dellos-lag
+
+# The dellos-lldp role facilitates the configuration of Link Layer Discovery Protocol(LLDP) attributes
+# - src: Dell-Networking.dellos-lldp
+
+# The dellos-logging role facilitates the configuration of logging attributes
+# - src: Dell-Networking.dellos-logging
+
+# The dellos-ntp role facilitates the configuration of NTP attributes
+- src: Dell-Networking.dellos-ntp
+
+# The dellos-snmp role facilitates the configuration of snmp attributes
+- src: Dell-Networking.dellos-snmp
+
+# The dellos-system role facilitates the configuration of global system attributes.
+# It supports the configuration of hostname, SNMP server, NTP server, logging servers, management route and CLI users.
+- src: Dell-Networking.dellos-system
+
+# The dellos-users role facilitates the configuration of user attributes
+- src: Dell-Networking.dellos-users
+
+# The dellos-vlan role facilitates configuration of virtual LAN (VLAN) attributes.
+# It supports the creation and deletion of a VLAN and its member ports.
+- src: Dell-Networking.dellos-vlan
+
+# The dellos-vlt role facilitates the configuration of Virtual Link Trunking (VLT) attributes.
+# It supports the creation and deletion of VLT links LAG and VLTi link. Currently, this role is only supported for OS9.
+# - src: Dell-Networking.dellos-vlt
+
+# The dellos-vrf role facilitates configuration of virtual routing and forwarding (VRF)
+# that helps in the partition of physical routers to multiple virtual routers. Currently, this role is only supported for OS9.
+# - src: Dell-Networking.dellos-vrf
+
+# The dellos-vrrp role facilitates the configuration of Virtual Router Redundancy Protocol (VRRP) attributes
+# - src: Dell-Networking.dellos-vrrp
+
+# The dellos-xstp role facilitates the configuration of xSTP attributes.
+# It supports multiple versions of Spanning Tree Protocol (STP): Rapid Spanning Tree (RSTP),
+# Rapid Per-VLAN Spanning Tree (Rapid PVST+), Multiple Spanning Tree (MST) and Per-VLAN Spanning Tree (PVST).
+# It supports the configuration of bridge priority, enabling and disabling spanning tree,
+# creating and deleting instances and mapping virtual LANs (VLANs) to instances.
+# - src: Dell-Networking.dellos-xstp

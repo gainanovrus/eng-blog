@@ -7,6 +7,7 @@ excerpt: >-
 categories: sysad
 tags: dell cisco networks
 toc: true
+last_modified_at: 2020-08-08T00:00:00-00:00
 # header:
 #  teaser: /assets/images/custom-oauth2-provider-to-nextcloud.png
 #  og_image: /assets/images/custom-oauth2-provider-to-nextcloud.png
@@ -290,6 +291,7 @@ SWP_UP_10G#monitor interface te 1/1
 The command provides useful information about the configuration and status of the IP protocol and its services, on all interfaces, including their IP address, Layer 2 status, and Layer 3 status.
 ```
 SWP_UP_10G#show ip interface
+
 TenGigabitEthernet 1/1 is up, line protocol is up
 Description:
 Internet address is not set
@@ -303,6 +305,17 @@ ICMP unreachables are not sent
 IP unicast RPF check is not supported
 
 --More--
+```
+
+Or with defined name of interface
+```
+SWP_UP_10G#show ip interface managementethernet 1/1
+
+ManagementEthernet 1/1 is up, line protocol is up
+Internet address is 192.168.1.1/24
+Virtual-IP address is not set
+Broadcast address is 192.168.1.255
+Address determined by user input
 ```
 
 ## configure interface
