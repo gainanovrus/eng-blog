@@ -154,7 +154,7 @@ ok: [switch10g_new] => {
 ```yaml
 - name: Save an active config from the device to localhost
   vars:
-    running_config: dellos9_facts['ansible_facts']['ansible_net_config']
+    running_config: "{% raw %}{{ dellos9_facts['ansible_facts']['ansible_net_config'] }}{% endraw %}"
   local_action:
     module: copy
     content: "{% raw %}{{ running_config }}{% endraw %}"
