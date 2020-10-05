@@ -1,0 +1,707 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Install and configure NTP on FreeBSD 11 - GAINANOV.PRO</title>
+<meta name="description" content="In this article will be described what use NTP to synchronize system time on FreeBSD. I use FreeBSD 11 that ran as VPS in Hetzner cloud.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="Install and configure NTP on FreeBSD 11">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/sysad/ntp-freebsd-setup/">
+
+
+  <meta property="og:description" content="In this article will be described what use NTP to synchronize system time on FreeBSD. I use FreeBSD 11 that ran as VPS in Hetzner cloud.">
+
+
+
+  <meta property="og:image" content="https://gainanov.pro/eng-blog/assets/images/ntp-freebsd-setup.png">
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="Install and configure NTP on FreeBSD 11">
+  <meta name="twitter:description" content="In this article will be described what use NTP to synchronize system time on FreeBSD. I use FreeBSD 11 that ran as VPS in Hetzner cloud.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/sysad/ntp-freebsd-setup/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://gainanov.pro/eng-blog/assets/images/ntp-freebsd-setup.png">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2018-02-02T00:00:00+03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/sysad/ntp-freebsd-setup/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Install and configure NTP on FreeBSD 11">
+    <meta itemprop="description" content="In this article will be described what use NTP to synchronize system time on FreeBSD.I use FreeBSD 11 that ran as VPS in Hetzner cloud.">
+    <meta itemprop="datePublished" content="2018-02-02T00:00:00+03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Install and configure NTP on FreeBSD 11
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>In this article will be described what use NTP to synchronize system time on FreeBSD.
+I use FreeBSD 11 that ran as VPS in <a href="https://www.hetzner.de/">Hetzner</a> cloud.</p>
+
+<p>Previously you should check what version is installed on your machine. Use for this command <code class="language-plaintext highlighter-rouge">ntpd --version</code>. Result:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ntpd 4.2.8p10-a (1)
+</code></pre></div></div>
+
+<p>If you have NTP server that version is less 4.2.7 you should update it because you might be <a href="https://www.us-cert.gov/ncas/alerts/TA14-013A">attacked</a>.</p>
+
+<p>Using a <a href="https://www.freebsd.org/doc/en/books/handbook/ports-using.html">portsnap</a> to update your local ports:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>portsnap fetch extract
+portsnap fetch update
+</code></pre></div></div>
+
+<p>After that instal <code class="language-plaintext highlighter-rouge">zoneinfo</code> package and copy selected local zone to change your timezone (my zone is <code class="language-plaintext highlighter-rouge">Europe/Moscow</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd /usr/ports/misc/zoneinfo &amp;&amp; make install clean
+cp /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+</code></pre></div></div>
+
+<p>Editing your NTP configuration file <code class="language-plaintext highlighter-rouge">/etc/ntp.conf</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>restrict default kod nomodify notrap nopeer noquery
+restrict -6 default kod nomodify notrap nopeer noquery
+
+restrict 127.0.0.1
+restrict -6 ::1
+
+server ntp1.hetzner.de iburst
+server ntp2.hetzner.de iburst
+server ntp3.hetzner.de iburst
+</code></pre></div></div>
+
+<p>Don’t forget setup your servers in these parameters:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">server ntp#.hetzner.de iburst</code> – use this server to synchronize time; <code class="language-plaintext highlighter-rouge">iburst</code> keyword allows to speed up first connection</li>
+</ul>
+
+<p>And now only need to add a command that will allow running NTP on startup (<a href="https://www.freebsd.org/cgi/man.cgi?rc.conf(5)">rc.conf</a>):</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo ntpd_enable=\"YES\" &gt;&gt; /etc/rc.conf
+echo ntpd_sync_on_start=\"YES\" &gt;&gt; /etc/rc.conf
+</code></pre></div></div>
+
+<p>Parameter <code class="language-plaintext highlighter-rouge">ntpd_sync_on_start</code> is setting <code class="language-plaintext highlighter-rouge">YES</code> to syncs the system’s clock	on startup and to remove a restriction a lot time offset.</p>
+
+<p>Finally lets start a local NTP server:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/etc/rc.d/ntpd start
+</code></pre></div></div>
+
+<p>Some moments ago your local system time will update and you can check a status on this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># ntpq -p
+remote refid st t when poll reach delay offset jitter
+==============================================================================
++ntp1.hetzner.de 192.53.103.108 2 u 1 64 1 2.864 -0.889 0.153
++ntp2.hetzner.de 192.53.103.108 2 u 4 64 1 0.328 0.219 0.114
+*ntp3.hetzner.de 192.53.103.108 2 u 2 64 1 0.306 0.832 0.092
+
+# ntpdate -q localhost
+server 127.0.0.1, stratum 3, offset -0.000008, delay 0.02568
+server ::1, stratum 3, offset 0.000005, delay 0.02571
+ntpdate[52224]: adjust time server 127.0.0.1 offset -0.000008 sec
+</code></pre></div></div>
+
+<p>If you want to sync onetime use this command:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># ntpdate -v -b ntp1.hetzner.de
+ntpdate[11356]: ntpdate 4.2.8p10-a (1)
+ntpdate[11356]: step time server 213.239.239.164 offset 0.004194 sec
+</code></pre></div></div>
+
+<h2 id="additional-information">Additional information:</h2>
+<p>This links might useful to get any additional information:</p>
+<ul>
+  <li><a href="https://wiki.hetzner.de/index.php/Uhrzeit_synchronisieren_mit_NTP/en">Hetzner - Install the NTP daemon</a></li>
+  <li><a href="https://www.freebsd.org/cgi/man.cgi?query=ntpd&amp;sektion=8&amp;apropos=0&amp;manpath=FreeBSD+11.1-RELEASE+and+Ports">ntpd – NTP daemon	program</a></li>
+  <li><a href="https://www.freebsd.org/cgi/man.cgi?query=ntp.conf&amp;sektion=5&amp;apropos=0&amp;manpath=FreeBSD+11.0-RELEASE+and+Ports"> ntp.conf – Network Time Protocol (NTP) daemon configuration file format</a></li>
+  <li><a href="https://www.freebsd.org/doc/ru/books/handbook/network-ntp.html">Синхронизация часов через NTP</a></li>
+  <li><a href="https://sysadmin-note.ru/nastrojka-ntpdatentpd-na-freebsd-10/">Настройка ntpdate/ntpd на FreeBSD 10</a></li>
+  <li><a href="https://habrahabr.ru/post/209438/">Атака с помощью вашего сервера времени: NTP amplification attack (CVE-2013-5211)</a></li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/freebsd" class="page__taxonomy-item" rel="tag">freebsd</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/ntp" class="page__taxonomy-item" rel="tag">ntp</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/sysad" class="page__taxonomy-item" rel="tag">sysad</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-02-02T00:00:00+03:00">February 2, 2018</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Install+and+configure+NTP+on+FreeBSD+11%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fntp-freebsd-setup%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fntp-freebsd-setup%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fntp-freebsd-setup%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/linux/mysql-replication/" class="pagination--pager" title="MySQL Master-Slave replication with a Docker
+">Previous</a>
+    
+    
+      <a href="/eng-blog/linux/upgrade-centos-kernel/" class="pagination--pager" title="Upgrade kernel of CentOS 7 to latest version
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

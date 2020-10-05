@@ -1,0 +1,759 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>GitLab CE in Docker. Deploying - GAINANOV.PRO</title>
+<meta name="description" content="A good team of software development doesn’t exists without a code repository manager system. GitLab is the most popular and reach functionality system. This post will explain how to fast deploy GitLab as container in Docker.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="GitLab CE in Docker. Deploying">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/devops/deploy-gitlab-in-docker/">
+
+
+  <meta property="og:description" content="A good team of software development doesn’t exists without a code repository manager system. GitLab is the most popular and reach functionality system. This post will explain how to fast deploy GitLab as container in Docker.">
+
+
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="GitLab CE in Docker. Deploying">
+  <meta name="twitter:description" content="A good team of software development doesn’t exists without a code repository manager system. GitLab is the most popular and reach functionality system. This post will explain how to fast deploy GitLab as container in Docker.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/devops/deploy-gitlab-in-docker/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2019-10-02T00:00:00+03:00">
+
+
+
+  <meta property="article:modified_time" content="2019-10-02T00:00:00+03:00">
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/devops/deploy-gitlab-in-docker/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="GitLab CE in Docker. Deploying">
+    <meta itemprop="description" content="A good team of software development doesn’t exists without a code repository manager system. GitLab is the most popular and reach functionality system. This post will explain how to fast deploy GitLab as container in Docker.">
+    <meta itemprop="datePublished" content="2019-10-02T00:00:00+03:00">
+    <meta itemprop="dateModified" content="2019-10-02T00:00:00+03:00">
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">GitLab CE in Docker. Deploying
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  2 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#about-gitlab-ce">About GitLab CE</a></li>
+  <li><a href="#requirements">Requirements</a></li>
+  <li><a href="#installation">Installation</a></li>
+  <li><a href="#some-notes">Some notes</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <h2 id="about-gitlab-ce">About GitLab CE</h2>
+
+<p>GitLab CE is an open source, cloud-based Git repository and version control
+system used by thousands of organizations worldwide. GitLab CE includes a host
+of features that enable software development teams to consolidate
+source code, track and manage releases, increase code quality, deploy code
+changes, and track the evolution of software over time.</p>
+
+<p>Also included in the GitLab CE is a fully functional Continuous Integration
+and Delivery (CI/CD) system that can build, test, and deploy software updates
+as your team produces new code. Supporting the CI/CD functionality of GitLab
+is a private registry for Docker containers, enabling teams to streamline
+updates for production deployments that are running on a microservices
+architecture.</p>
+
+<p>You can install and self-manage GitLab under and MIT license or use GitLab’s
+commercial software built on top of the open source edition with additional
+features.</p>
+
+<p>Next will showed how to deploy GitLab CE quickly. The Docker will help us with it.
+With official Docker images based on the Omnibus GitLab package it will easy.</p>
+
+<p><a href="omnibus">Omnibus GitLab</a> is a way to package different services and tools required to
+run GitLab, so that most users can install it without laborious configuration.</p>
+
+<h2 id="requirements">Requirements</h2>
+
+<p>The GitLab has a minimum <a href="system-req">system requirements</a>:
+1 Cores, 4 GB RAM, 10 GB Storage. For a big workload read the docs.</p>
+
+<p>The docker installation require installed <a href="docker-install">Docker</a> software.</p>
+
+<h2 id="installation">Installation</h2>
+
+<p>Full docs are available <a href="https://docs.gitlab.com/omnibus/docker/">here</a>.
+I will show only main parts of it to run it quickly and easy.</p>
+
+<ol>
+  <li>There is <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> file has included the basic configuration
+to start deploy GitLab as Docker container:</li>
+</ol>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">web</span><span class="pi">:</span>
+  <span class="na">image</span><span class="pi">:</span> <span class="s1">'</span><span class="s">gitlab/gitlab-ce:latest'</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">gitlab</span>
+  <span class="na">restart</span><span class="pi">:</span> <span class="s">always</span>
+  <span class="na">hostname</span><span class="pi">:</span> <span class="s1">'</span><span class="s">gitlab.example.com'</span>
+  <span class="na">environment</span><span class="pi">:</span>
+    <span class="na">GITLAB_OMNIBUS_CONFIG</span><span class="pi">:</span> <span class="pi">|</span>
+      <span class="s">external_url 'https://gitlab.example.com'</span>
+  <span class="na">ports</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s1">'</span><span class="s">80:80'</span>
+    <span class="pi">-</span> <span class="s1">'</span><span class="s">443:443'</span>
+    <span class="pi">-</span> <span class="s1">'</span><span class="s">22:22'</span>
+  <span class="na">volumes</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s1">'</span><span class="s">/srv/gitlab/config:/etc/gitlab'</span>
+    <span class="pi">-</span> <span class="s1">'</span><span class="s">/srv/gitlab/logs:/var/log/gitlab'</span>
+    <span class="pi">-</span> <span class="s1">'</span><span class="s">/srv/gitlab/data:/var/opt/gitlab'</span>
+</code></pre></div></div>
+<p>Don’t forget to change the <code class="language-plaintext highlighter-rouge">gitlab.example.com</code> to desired hostname.
+GitLab has allow to set variables with <code class="language-plaintext highlighter-rouge">GITLAB_OMNIBUS_CONFIG</code> for configuration
+GitLab.</p>
+
+<blockquote>
+  <p>Note: The settings contained in <code class="language-plaintext highlighter-rouge">GITLAB_OMNIBUS_CONFIG</code> will not be written to
+the <code class="language-plaintext highlighter-rouge">gitlab.rb</code> configuration file, they’re evaluated on load.</p>
+</blockquote>
+
+<p>It’s reason then I preferable to write any customization in <code class="language-plaintext highlighter-rouge">gitlab.rb</code>.
+I show my config in <a href="next-topic">next</a> topic.</p>
+
+<ol>
+  <li>To start the installation run the command:
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up -d
+</code></pre></div>    </div>
+  </li>
+  <li>To view logs after starting use next:
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker logs gitlab -f
+</code></pre></div>    </div>
+  </li>
+  <li>After success starting open browser (<a href="https://gitlab.example.com">https://gitlab.example.com</a>)
+ and setup new admin password.</li>
+</ol>
+
+<h2 id="some-notes">Some notes</h2>
+
+<p>I can’t start GitLab with mounted volumes in NFS Storage. The error will be:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Multiple failures occurred:
+* RuntimeError occurred in chef run: ruby_block[verify_chown_persisted_on_redis] (/opt/gitlab/embedded/cookbooks/cache/cookbooks/runit/libraries/provider_runit_service.rb line 148) had an error: RuntimeError: Unable to persist filesystem ownership changes of /var/log/gitlab/redis/config. See https://docs.gitlab.com/ee/administration/high_availability/nfs.html#recommended-options for guidance.
+* RuntimeError occurred in delayed notification: ruby_block[restart_log_service] (/opt/gitlab/embedded/cookbooks/cache/cookbooks/runit/libraries/provider_runit_service.rb line 69) had an error: RuntimeError: ruby_block[verify_chown_persisted_on_redis] (/opt/gitlab/embedded/cookbooks/cache/cookbooks/runit/libraries/provider_runit_service.rb line 148) had an error: RuntimeError: Unable to persist filesystem ownership changes of /var/log/gitlab/redis/config. See https://docs.gitlab.com/ee/administration/high_availability/nfs.html#recommended-options for guidance.
+</code></pre></div></div>
+
+<p>I found the simple solution and delete a row <code class="language-plaintext highlighter-rouge">'/srv/gitlab/logs:/var/log/gitlab'</code> from yuml-file.</p>
+
+<p>Without it gitlab logs will not save in host machine but you still view
+logs with <code class="language-plaintext highlighter-rouge">docker logs</code> command.</p>
+
+<p>Also you can use the next advice from docs - <a href="fix-nfs">GitLab - Disable storage directories management</a>.</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://gitlab.com/gitlab-org/omnibus-gitlab/tree/master/docker">Dockerfile of official GitLab image</a> -
+  To view what actions was doing after you start an container.</li>
+  <li><a href="https://docs.gitlab.com/omnibus/docker/">Omnibus GitLab Docs - GitLab Docker images</a> -
+  The full information about installation GitLab in Docker.</li>
+  <li><a href="https://about.gitlab.com/install/">Download and install GitLab</a> -
+  The start page of installation process for everywhere.</li>
+  <li><a href="https://about.gitlab.com/pricing/self-managed/feature-comparison/">GitLab Feature Comparison</a> -
+  Find the difference between version of self-hosted GitLab.</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/devops" class="page__taxonomy-item" rel="tag">devops</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/docker" class="page__taxonomy-item" rel="tag">docker</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/gitlab" class="page__taxonomy-item" rel="tag">gitlab</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/devops" class="page__taxonomy-item" rel="tag">devops</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-10-02">October 2, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=GitLab+CE+in+Docker.+Deploying%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fdeploy-gitlab-in-docker%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fdeploy-gitlab-in-docker%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fdeploy-gitlab-in-docker%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/devops/ansible-preferred-modules/" class="pagination--pager" title="Ansible. My preferred modules
+">Previous</a>
+    
+    
+      <a href="/eng-blog/devops/gitlab-disable-https/" class="pagination--pager" title="GitLab CE in Docker. Disable HTTPS
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

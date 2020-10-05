@@ -1,0 +1,943 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>ESXi. The command line and shell magic - GAINANOV.PRO</title>
+<meta name="description" content="Sometimes you don’t have access to ESXi by WebGUI. You might need to restart a server remotely via SSH or direct console. In these cases it’s great to be able to turn virtual machines on and off via the command line.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="ESXi. The command line and shell magic">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/sysad/esxi-shell-commands/">
+
+
+  <meta property="og:description" content="Sometimes you don’t have access to ESXi by WebGUI. You might need to restart a server remotely via SSH or direct console. In these cases it’s great to be able to turn virtual machines on and off via the command line.">
+
+
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="ESXi. The command line and shell magic">
+  <meta name="twitter:description" content="Sometimes you don’t have access to ESXi by WebGUI. You might need to restart a server remotely via SSH or direct console. In these cases it’s great to be able to turn virtual machines on and off via the command line.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/sysad/esxi-shell-commands/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2019-10-25T00:00:00+03:00">
+
+
+
+  <meta property="article:modified_time" content="2020-05-21T00:00:00+03:00">
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/sysad/esxi-shell-commands/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="ESXi. The command line and shell magic">
+    <meta itemprop="description" content="Sometimes you don’t have access to ESXi by WebGUI. You might need to restart a server remotely via SSH or direct console. In these cases it’s great to be able to turn virtual machines on and off via the command line.">
+    <meta itemprop="datePublished" content="2019-10-25T00:00:00+03:00">
+    <meta itemprop="dateModified" content="2020-05-21T00:00:00+03:00">
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">ESXi. The command line and shell magic
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#introduction">Introduction</a></li>
+  <li><a href="#environment">Environment</a></li>
+  <li><a href="#usage">Usage</a>
+    <ul>
+      <li><a href="#how-to-open-the-cli-in-esxi">How to open the CLI in ESXi?</a></li>
+      <li><a href="#command-list">Command list</a></li>
+      <li><a href="#checking-hardware">Checking hardware</a></li>
+      <li><a href="#change-a-hostname">Change a hostname</a></li>
+      <li><a href="#power-control-esxi-host">Power control ESXi host</a></li>
+      <li><a href="#start-and-stop-vm">Start and stop VM</a></li>
+      <li><a href="#stop-vm-via-esxcli">Stop VM via esxcli</a></li>
+      <li><a href="#autostart-of-vm">Autostart of VM</a></li>
+      <li><a href="#uplink-of-vswitch">Uplink of vSwitch</a></li>
+      <li><a href="#enter-to-maintenance-mode">Enter to maintenance mode</a></li>
+      <li><a href="#backup-configuration">Backup configuration</a></li>
+      <li><a href="#restore-configuration">Restore configuration</a></li>
+      <li><a href="#login-to-console-by-ssh-rsa-key">Login to console by SSH rsa key</a></li>
+      <li><a href="#configuring-login-behavior">Configuring Login Behavior</a></li>
+      <li><a href="#conclusion">Conclusion</a></li>
+    </ul>
+  </li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <h2 id="introduction">Introduction</h2>
+
+<p><a href="https://www.vmware.com/products/esxi-and-esx.html">ESXi</a> is a type-1 hypervisor, meaning it runs directly on system hardware without the need for an operating system (OS). Type-1 hypervisors are also referred to as bare-metal hypervisors because they run directly on hardware.</p>
+
+<p>VMware provides a powerful and convenient graphical interface for managing ESXi servers.</p>
+
+<p>In this case, using the command line interface (CLI) is what you need –
+it is possible to configure all settings, including the hidden ones
+in the command line which is also referred to as the console.
+In addition to traditional commands that are the same in Linux and ESXi,
+ESXi has its own ESXCLI commands.</p>
+
+<p>ESXCLI is a part of the ESXi shell, this is a CLI framework intended to manage a virtual infrastructure
+(ESXi components such as hardware, network, storage, etc.) and control ESXi itself on the low level.
+All ESXCLI commands must be run in the ESXi shell (console).
+Generally, ESXCLI is the command that has a wide list of subcommands called namespaces and their options.
+The ESXCLI command is present right after ESXi installation along with other ESXi shell commands.
+Notice that ESXCLI commands are case-sensitive, similarly to other console commands used in ESXi.</p>
+
+<p>The ESXCLI log file is located in <code class="language-plaintext highlighter-rouge">/var/log/esxcli.log</code>.</p>
+
+<p>The data is written to this file if an ESXCLI command has not been executed successfully.
+If an ESXCLI command is run successfully, nothing is written to this log file.</p>
+
+<p>The most useful ESXCLI commands are explained in today’s blog post.</p>
+
+<h2 id="environment">Environment</h2>
+
+<p>In this article I have VMware ESXi Hypervisor 6.7 U3 (Free version)</p>
+
+<h2 id="usage">Usage</h2>
+
+<h3 id="how-to-open-the-cli-in-esxi">How to open the CLI in ESXi?</h3>
+
+<p>By default, ESXi shell is disabled for local and remote access;
+hence, you are not able to run ESXi shell commands until you enable the ESXi shell.
+VMware has made this restriction for security reasons.</p>
+
+<p>You can enable this with local command line direct connected to ESXi host (named DCUI) or with WebGUI (throw web-browser).</p>
+
+<p>Using the ESXi default interface. In the ESXi Direct Console User Interface (DCUI), go to <code class="language-plaintext highlighter-rouge">Troubleshooting Options</code>,
+navigate to <strong>Enable ESXi Shell</strong> and <strong>Enable SSH</strong> strings and press Enter to enable each option.</p>
+
+<p>After enabling the ESXi shell, press <strong>Alt+F1</strong> to open the console on the machine running ESXi.
+You should enter your login and password after that (credentials of the root user can be used).
+If you need to go back to the ESXi DCUI, press <strong>Alt+F2</strong>.</p>
+
+<p>The Enable SSH option allows you to open the ESXi console remotely by using an SSH client.</p>
+
+<h3 id="command-list">Command list</h3>
+
+<p>The entire list of all available ESXCLI namespaces and commands is displayed after running the command:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli esxcli command list
+</code></pre></div></div>
+
+<h3 id="checking-hardware">Checking hardware</h3>
+
+<p>To view installed PCI devices, run the following ESXCLI command:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli hardware pci list | more
+</code></pre></div></div>
+
+<p>Check the amount of memory installed on the ESXi server:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli hardware memory get
+</code></pre></div></div>
+
+<p>View the detailed information about installed processors:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli hardware cpu list
+</code></pre></div></div>
+
+<h3 id="change-a-hostname">Change a hostname</h3>
+
+<p>Run these commands to change the hostname:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli system hostname set --host=hostname
+esxcli system hostname set --fqdn=fqdn
+</code></pre></div></div>
+
+<h3 id="power-control-esxi-host">Power control ESXi host</h3>
+
+<p>Power off an ESXi host:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli system shutdown poweroff
+</code></pre></div></div>
+
+<p>The command for rebooting the host is similar. To write a reason of rebooting use <code class="language-plaintext highlighter-rouge">-r</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli system shutdown reboot -r "applying new update"
+</code></pre></div></div>
+
+<h3 id="start-and-stop-vm">Start and stop VM</h3>
+
+<p>The basic command to control the virtual machines is</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd vmsvc
+</code></pre></div></div>
+
+<p>To list all virtual machines run:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd vmsvc/getallvms
+</code></pre></div></div>
+
+<p>To work with individual VMs you need the <code class="language-plaintext highlighter-rouge">&lt;ID&gt;</code> provided by the previous command.</p>
+
+<p>To get a summary of the machine run (where <code class="language-plaintext highlighter-rouge">&lt;ID&gt;</code> is a number):</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd vmsvc/get.summary &lt;ID&gt;
+</code></pre></div></div>
+
+<p>To power on/power off/suspend a VM run:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd vmsvc/power.on &lt;ID&gt;
+vim-cmd vmsvc/power.off &lt;ID&gt;
+vim-cmd vmsvc/power.suspend &lt;ID&gt;
+</code></pre></div></div>
+
+<h3 id="stop-vm-via-esxcli">Stop VM via esxcli</h3>
+
+<p>Use this to forcibly stop a virtual machine.</p>
+
+<p>List all running virtual machines on the system to see the <strong>World ID</strong> of the virtual machine that you want to stop.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli vm process list
+</code></pre></div></div>
+
+<p>Stop the virtual machine by running the following command.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli vm process kill --type &lt;kill_type&gt; --world-id &lt;ID&gt;
+</code></pre></div></div>
+
+<p>The command supports three <code class="language-plaintext highlighter-rouge">--type</code> options. The following types are supported through the <code class="language-plaintext highlighter-rouge">--type</code> option:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">soft</code>. Gives the VMX process a chance to shut down cleanly (like kill or kill -SIGTERM)</li>
+  <li><code class="language-plaintext highlighter-rouge">hard</code>. Stops the VMX process immediately (like kill -9 or kill -SIGKILL)</li>
+  <li><code class="language-plaintext highlighter-rouge">force</code>. Stops the VMX process when other options do not work.</li>
+</ul>
+
+<p>https://pubs.vmware.com/vsphere-51/index.jsp?topic=%2Fcom.vmware.vcli.examples.doc%2Fcli_manage_vms.10.9.html</p>
+
+<h3 id="autostart-of-vm">Autostart of VM</h3>
+
+<p>Get a list of virtual machine IDs:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd vmsvc/getallvms
+</code></pre></div></div>
+
+<p>Enable force autostart feature:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd hostsvc/autostartmanager/enable_autostart true
+</code></pre></div></div>
+
+<p>Now check the VMs startup settings:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd hostsvc/autostartmanager/get_autostartseq
+</code></pre></div></div>
+
+<p>Make sure that the <strong>startAction</strong> value of the VM has changed to <code class="language-plaintext highlighter-rouge">powerOn</code>.</p>
+
+<h3 id="uplink-of-vswitch">Uplink of vSwitch</h3>
+
+<p>For example you have one <strong>physical nic</strong> on your ESX then that called <code class="language-plaintext highlighter-rouge">vmnic0</code>.
+If you have one <strong>vSwitch</strong> it will be called <code class="language-plaintext highlighter-rouge">vSwitch0</code>.</p>
+
+<p>To list your vSwitch run:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcfg-vswitch -l
+</code></pre></div></div>
+
+<p>If you have no vmnic or are missing the one that you want to use for the management
+network then you need to <strong>add</strong> it by using the following command:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcfg-vswitch -L vmnic0 vSwitch0
+</code></pre></div></div>
+
+<p>Replace <code class="language-plaintext highlighter-rouge">vmnic0</code> with your vmnic and same for the switch.</p>
+
+<p>So if I wanted to <strong>remove</strong> <code class="language-plaintext highlighter-rouge">vmnic0</code> from <code class="language-plaintext highlighter-rouge">vSwitch0</code> I would use the following command:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcfg-vswitch -U vmnic0 vSwitch0
+</code></pre></div></div>
+
+<h3 id="enter-to-maintenance-mode">Enter to maintenance mode</h3>
+
+<p>Enter the host to the maintenance mode.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli system maintenanceMode set --enable yes
+</code></pre></div></div>
+
+<p>or</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd hostsvc/maintenance_mode_enter
+</code></pre></div></div>
+
+<p>Get currently status of the host</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli system maintenanceMode get
+</code></pre></div></div>
+
+<h3 id="backup-configuration">Backup configuration</h3>
+
+<p>Using the ESXi Command Line to Back up ESXi Host.
+You don’t need to install any additional software to use the ESXi command line.
+You have to enable ESXi shell and remote SSH access to an ESXi host.
+Once you have connected to your ESXi host via SSH, you can run the commands.</p>
+
+<p>ESXi configuration is saved every hour automatically to the <code class="language-plaintext highlighter-rouge">/bootblank/state.tgz</code> file.
+For this reason, you should ensure that the current ESXi configuration is written to ESXi configuration files right now to confirm that all changes made to ESXi configuration since the last autosave are saved:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd hostsvc/firmware/sync_config
+</code></pre></div></div>
+
+<p>Back up ESXi configuration:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd hostsvc/firmware/backup_config
+</code></pre></div></div>
+<p>The result:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Bundle can be downloaded at : http://*/downloads/52f857f5-1bed-7e86-7c8b-c8c389f4d7b6/configBundle-localhost.localdomain.tgz
+</code></pre></div></div>
+
+<p>As a result, you’ll receive a link to download the <code class="language-plaintext highlighter-rouge">configBundle.tgz</code> archive from the ESXi host.
+You should replace the asterisk with the IP address of your ESXi host.
+The archive file that contains the ESXi configuration backup is saved to the <code class="language-plaintext highlighter-rouge">/scratch/downloads</code> directory.
+The scratch partition was mentioned in the blog post about installing ESXi on a USB Flash drive.</p>
+
+<h3 id="restore-configuration">Restore configuration</h3>
+
+<p>You should have ESXi of the same version and build number installed on the machine
+where you want to restore the ESXi configuration. The UUID must be the same on both the ESXi server that was backed up and the ESXi server on which the configuration must be restored (can be obtained using the command <code class="language-plaintext highlighter-rouge">esxcfg-info -u</code>).</p>
+
+<blockquote>
+  <p>Use numeric 1 as force option to override the UUID mismatch. For example, <code class="language-plaintext highlighter-rouge">vim-cmd hostsvc/firmware/restore_config 1 /tmp/configBundle.tgz</code>. The UUID value of the backed up ESXi host is mentioned in the <code class="language-plaintext highlighter-rouge">Manifest.txt</code> file inside the <code class="language-plaintext highlighter-rouge">configBundle.tgz</code> backup archive.</p>
+</blockquote>
+
+<p>Once you have prepared your freshly installed ESXi host to restore ESXi configuration from a backup, connect to the ESXi host via SSH and enter the host to the maintenance mode.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>esxcli system maintenanceMode set --enable yes
+</code></pre></div></div>
+
+<p>Copy the archive that contains the ESXi configuration backup <code class="language-plaintext highlighter-rouge">configBundle-xxxx.tgz</code> archive from a local machine to the <code class="language-plaintext highlighter-rouge">/tmp/</code> directory on the destination ESXi server.</p>
+
+<p>Rename the <code class="language-plaintext highlighter-rouge">configBundle-xxxx.tgz</code> file to <code class="language-plaintext highlighter-rouge">configBundle.tgz</code> before you enter a command to restore ESXi configuration. Otherwise you will get an error message: <em>File /tmp/configBundle.tgz was not found</em>.</p>
+
+<p>Restore the ESXi configuration:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim-cmd hostsvc/firmware/restore_config /tmp/configBundle.tgz
+</code></pre></div></div>
+
+<p>After running this command an ESXi host will be rebooted automatically.</p>
+
+<h3 id="login-to-console-by-ssh-rsa-key">Login to console by SSH rsa key</h3>
+
+<p>You should have a SSH key on the host that you would like to connect to ESXi.
+So I think you already know how to generate ssh-keys, I just write command to add keys to the ESXi host - <code class="language-plaintext highlighter-rouge">esxi.machine.com</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat ~/.ssh/id_rsa.pub | ssh root@esxi.machine.com 'cat &gt;&gt; /etc/ssh/keys-root/authorized_keys'
+</code></pre></div></div>
+
+<h3 id="configuring-login-behavior">Configuring Login Behavior</h3>
+
+<p>ESXi has a good security feature to add a root account lockout for safety. After a number of failed login attempts, the server will trigger a lockout. By default, a maximum of five failed attempts is allowed before the account is locked. The account is unlocked after 15 minutes by default.</p>
+
+<p>You can configure the login behavior for your ESXi host with the following advanced options:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Security.AccountLockFailures</code> - Maximum number of failed login attempts before a user’s account is locked. Zero disables account locking.</li>
+  <li><code class="language-plaintext highlighter-rouge">Security.AccountUnlockTime</code> - Number of seconds that a user is locked out.</li>
+</ul>
+
+<blockquote>
+  <p>Remote access for ESXi local user account ‘root’ has been locked for 120 seconds after xxx failed login attempts.</p>
+</blockquote>
+
+<p>Are you seeing this message? Do not worry, you are in the right place.  Now, let’s look at what to do if your ESXi root account is locked. The command line to clear the lockout status and reset the count to zero for an account is shown here with the root account as an example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pam_tally2 --user root --reset
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>Today’s blog post has covered a series of ESXi shell commands. Using the command line
+interface gives you more power in addition to WebGUI. You can use ESXi shell commands
+for viewing and configuring settings that are hidden or not available in the GUI.
+Use the ESXi shell commands list provided in this blog post for fine ESXi tuning.</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://www.nakivo.com/blog/back-up-and-restore-vmware-esxi-host-configuration-guide/">How to Back Up and Restore VMware ESXi Host Configuration</a> -
+Backup and restore instructions from Nakivo.</li>
+  <li><a href="https://www.nakivo.com/blog/most-useful-esxcli-esxi-shell-commands-vmware-environment/">Best ESXCLi and ESXi Shell Commands for your VMware Environment</a> -
+A one of explanation of the most often used ESXi shell commands from Nakivo.</li>
+  <li><a href="https://kb.vmware.com/s/article/2042141">How to back up ESXi host configuration (2042141)</a>-
+How to back up and restore the ESXi host from VMWare.</li>
+  <li><a href="https://graspingtech.com/backup-vmware-esxi-6-5-configuration/">How to Backup and Restore the VMware ESXi 6.5 Configuration</a> -
+Another manual instruction to this. This one from graspingtech.</li>
+  <li><a href="https://linux-admins.ru/article.php?id_article=17">Резервное копирование настроек VMWare ESXI</a> -
+On Russian language.</li>
+  <li><a href="https://theitbros.com/config-virtual-machine-auto-startup-vmware-esxi/">Configure Autostart of VM on VMware ESXi</a> -
+Some information about starting VM process, and how to do it with cmd</li>
+</ul>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/esxi" class="page__taxonomy-item" rel="tag">esxi</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/shell" class="page__taxonomy-item" rel="tag">shell</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/vm" class="page__taxonomy-item" rel="tag">vm</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/sysad" class="page__taxonomy-item" rel="tag">sysad</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-05-21">May 21, 2020</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=ESXi.+The+command+line+and+shell+magic%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fesxi-shell-commands%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fesxi-shell-commands%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fesxi-shell-commands%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/sysad/esxi-pfsense-vpn/" class="pagination--pager" title="ESXi. The best way to build VPN tunnel with pfSense
+">Previous</a>
+    
+    
+      <a href="/eng-blog/sysad/supermicro-ipmi-default-password/" class="pagination--pager" title="Supermicro IPMI default password
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

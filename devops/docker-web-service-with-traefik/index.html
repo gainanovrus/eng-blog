@@ -1,0 +1,947 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Docker. Create secure web service using Let’s Encrypt with Traefik - GAINANOV.PRO</title>
+<meta name="description" content="Deploying web services to public network usually requires to set up secure connections using SSL certificates. With Docker you can easily make it using another container as reverse proxy. This service named Traefik. It has big capabilities about I will explain in the post.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="Docker. Create secure web service using Let’s Encrypt with Traefik">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/devops/docker-web-service-with-traefik/">
+
+
+  <meta property="og:description" content="Deploying web services to public network usually requires to set up secure connections using SSL certificates. With Docker you can easily make it using another container as reverse proxy. This service named Traefik. It has big capabilities about I will explain in the post.">
+
+
+
+  <meta property="og:image" content="https://gainanov.pro/eng-blog/assets/images/traefik/traefik_docker_ssl_logo.png">
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="Docker. Create secure web service using Let’s Encrypt with Traefik">
+  <meta name="twitter:description" content="Deploying web services to public network usually requires to set up secure connections using SSL certificates. With Docker you can easily make it using another container as reverse proxy. This service named Traefik. It has big capabilities about I will explain in the post.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/devops/docker-web-service-with-traefik/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://gainanov.pro/eng-blog/assets/images/traefik/traefik_docker_ssl_logo.png">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2020-02-22T00:00:00+03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/devops/docker-web-service-with-traefik/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Docker. Create secure web service using Let’s Encrypt with Traefik">
+    <meta itemprop="description" content="Deploying web services to public network usually requires to set up secure connections using SSL certificates. With Docker you can easily make it using another container as reverse proxy. This service named Traefik. It has big capabilities about I will explain in the post.">
+    <meta itemprop="datePublished" content="2020-02-22T00:00:00+03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Docker. Create secure web service using Let’s Encrypt with Traefik
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  6 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#what-well-do">What We’ll Do</a></li>
+  <li><a href="#prerequisite">Prerequisite</a></li>
+  <li><a href="#repository">Repository</a></li>
+  <li><a href="#1-use-traefik-as-proxy">1. Use traefik as proxy</a></li>
+  <li><a href="#2-https-with-lets-encrypt">2. HTTPS with Let’s Encrypt</a></li>
+  <li><a href="#3-add-basicauth-to-dashboard">3. Add BasicAuth to Dashboard</a></li>
+  <li><a href="#4-https-redirection">4. HTTPS Redirection</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p>In my <a href="/eng-blog/devops/docker-traefik-concept-terms-explanation/">previous</a> post I speak about <a href="https://docs.traefik.io/">Traefik</a> concepts and designs. I explain the main words used in Traefik as Endpoint, Router, Rule and etc. So in here I will concentrate only on practice.</p>
+
+<p><a href="https://gainanov.pro/eng-blog/assets/images/traefik/treafik_docker.png" class="align-center"><img src="https://gainanov.pro/eng-blog/assets/images/traefik/treafik_docker.png" alt="traefik-docker-scheme" /></a></p>
+
+<h2 id="what-well-do">What We’ll Do</h2>
+<ul>
+  <li>We’ll use a pre-made container — <a href="https://github.com/containous/whoami"><code class="language-plaintext highlighter-rouge">containous/whoami</code></a> — capable of telling you where it is hosted and what it receives when you call it.</li>
+  <li>We’ll deploy that container through traefik proxy using docker-compose.</li>
+  <li>We’ll define a dashboard that shows us all deployed services.</li>
+  <li>We’ll setup letsencrypt configures that will automatically get and update free SSL certificates.</li>
+  <li>We’ll configure proxy to redirect all insecure requests to https scheme.</li>
+</ul>
+
+<h2 id="prerequisite">Prerequisite</h2>
+<p>You have installed a Docker and docker-compose. We will use Traefik 2.1</p>
+
+<h2 id="repository">Repository</h2>
+<p>All presented compose files has stored in <a href="https://github.com/GRomR1/docker-traefik">this</a> Github Repository.</p>
+
+<h2 id="1-use-traefik-as-proxy">1. Use traefik as proxy</h2>
+
+<p>This basic configuration will be a start point to run traefik with docker.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3'</span>
+
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">traefik</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">traefik:v2.1</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">traefik</span>
+    <span class="na">command</span><span class="pi">:</span>
+      <span class="c1"># Enable dashboard</span>
+      <span class="pi">-</span> <span class="s">--api.dashboard=true</span>
+      <span class="c1"># Allow use API and dashboard though insecure</span>
+      <span class="pi">-</span> <span class="s">--api.insecure=true</span>
+      <span class="c1"># Use docker as provider</span>
+      <span class="pi">-</span> <span class="s">--providers.docker=true</span>
+      <span class="c1"># Enable log income requsts</span>
+      <span class="pi">-</span> <span class="s">--accesslog=true</span>
+      <span class="c1"># Set log level (default ERROR)</span>
+      <span class="pi">-</span> <span class="s">--log.level=ERROR</span>
+      <span class="c1"># Define entrypoint that listens 80 port</span>
+      <span class="pi">-</span> <span class="s">--entryPoints.web.address=:80</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="c1"># The HTTP port</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">80:80"</span>
+      <span class="c1"># The Web UI (enabled by --api.insecure=true)</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">8080:8080"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="c1"># Mount docker socker from host machine</span>
+      <span class="pi">-</span> <span class="s">/var/run/docker.sock:/var/run/docker.sock:ro</span>
+
+  <span class="na">whoami</span><span class="pi">:</span>
+    <span class="c1"># A container that exposes an API to show its IP address</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">containous/whoami</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">whoami</span>
+    <span class="na">labels</span><span class="pi">:</span>
+      <span class="c1"># Create a route `whoami` and bound with defined entrypoint</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.whoami.entrypoints=web</span>
+      <span class="c1"># Create rule</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.whoami.rule=Host(`whoami.example.com`)</span>
+</code></pre></div></div>
+
+<p>We declare two services. First service is our traefik. Second one is a service response information about itself on web requests. Also we’ve enabled API along with the dashboard. And we can see it on <a href="http://localhost:8080/dashboard">localhost:8080/dashboard/</a>.</p>
+
+<p>After we append a hostname <code class="language-plaintext highlighter-rouge">whoami.example.com</code> to local DNS (i.e. to <code class="language-plaintext highlighter-rouge">/etc/hosts</code>) we can access to a created <code class="language-plaintext highlighter-rouge">whoami</code> container from browser by link <a href="http://whoami.example.com">http://whoami.example.com</a>.</p>
+
+<p>Without any changing DNS service we also could send request to <code class="language-plaintext highlighter-rouge">whoami</code> with curl:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># curl -H Host:whoami.example.com http://localhost
+
+Hostname: 3b64e9ee3e38
+IP: 127.0.0.1
+IP: 172.28.0.2
+RemoteAddr: 172.28.0.3:55870
+GET / HTTP/1.1
+Host: whoami.example.com
+User-Agent: curl/7.54.0
+Accept: */*
+Accept-Encoding: gzip
+X-Forwarded-For: 172.28.0.1
+X-Forwarded-Host: whoami.example.com
+X-Forwarded-Port: 80
+X-Forwarded-Proto: http
+X-Forwarded-Server: a9dfe96d5877
+X-Real-Ip: 172.28.0.1
+</code></pre></div></div>
+
+<h2 id="2-https-with-lets-encrypt">2. HTTPS with Let’s Encrypt</h2>
+
+<p>Today almost all services are accessed by secure https connection. Installing an SSL certificate is the most common work.
+It also could be done with Traefik. Let’s create a compose file with next content:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3'</span>
+
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">traefik</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">traefik:v2.1</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">traefik</span>
+    <span class="na">command</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">--api.dashboard=true</span>
+      <span class="pi">-</span> <span class="s">--api.insecure=true</span>
+      <span class="pi">-</span> <span class="s">--providers.docker=true</span>
+      <span class="pi">-</span> <span class="s">--accesslog=true</span>
+      <span class="pi">-</span> <span class="s">--entryPoints.web.address=:80</span>
+      <span class="pi">-</span> <span class="s">--entryPoints.websecure.address=:443</span>
+      <span class="c1"># Enable ACME (Let's Encrypt): automatic SSL.</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.letsencrypt.acme.email=user@example.com</span>
+      <span class="c1"># File or key used for certificates storage.</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.letsencrypt.acme.storage=/acme/acme.json</span>
+      <span class="c1"># Uncomment the line to use Let's Encrypt's staging server,</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory</span>
+      <span class="c1"># Use a TLS-ALPN-01 ACME challenge.</span>
+      <span class="c1"># - --certificatesResolvers.letsencrypt.acme.tlsChallenge=true</span>
+      <span class="c1"># Use a HTTP-01 ACME challenge.</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.letsencrypt.acme.httpChallenge=true</span>
+      <span class="c1"># EntryPoint to use for the HTTP-01 challenges.</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="c1"># The HTTP port</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">80:80"</span>
+      <span class="c1"># The HTTPS port</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">443:443"</span>
+      <span class="c1"># The Web UI (enabled by --api.insecure=true)</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">8080:8080"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">/var/run/docker.sock:/var/run/docker.sock</span>
+      <span class="c1"># ACME certificates can be stored in a JSON file that needs to have a 600 file mode</span>
+      <span class="pi">-</span> <span class="s">./acme:/acme</span>
+
+  <span class="na">whoami</span><span class="pi">:</span>
+    <span class="c1"># A container that exposes an API to show its IP address</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">containous/whoami</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">whoami</span>
+    <span class="na">labels</span><span class="pi">:</span>
+      <span class="c1"># Handle secure and insecure traffic from websecure,web entry points</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.whoami.entrypoints=websecure,web</span>
+      <span class="c1"># Accept requests that matched specific Host</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.whoami.rule=Host(`whoami.example.com`)</span>
+      <span class="c1"># Enable TLS/SSL</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.whoami.tls=true</span>
+      <span class="c1"># Bind with created certresolver `letsencrypt`</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.whoami.tls.certresolver=letsencrypt</span>
+</code></pre></div></div>
+
+<p>A traefik service will call <a href="https://letsencrypt.org/">Let’s encrypt</a> HTTP challenge to create a free SSL certificate.
+The server have to be explored from Internet by 80 port and specified DNS <code class="language-plaintext highlighter-rouge">whoami.example.com</code>.
+In this example to test purposes was setup a staging letsencrypt server. Comment the line with <code class="language-plaintext highlighter-rouge">acme.caServer</code> to use production server by default. Also don’t forget to change a mail address <code class="language-plaintext highlighter-rouge">user@example.com</code> to your.</p>
+
+<h2 id="3-add-basicauth-to-dashboard">3. Add BasicAuth to Dashboard</h2>
+
+<p>Once Traefik has found a match for the request, it can process it before forwarding it to the service.
+In the following example, we’ll add a <a href="https://en.wikipedia.org/wiki/Basic_access_authentication">BasicAuth</a> mechanism for our route.
+This is done with a few additional labels on <code class="language-plaintext highlighter-rouge">traefik</code> service. After that you could open <a href="https://docs.traefik.io/operations/dashboard/">Dashboard</a> by name <code class="language-plaintext highlighter-rouge">dashboard.example.com</code>.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3'</span>
+
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">traefik</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">traefik:v2.1</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">traefik</span>
+    <span class="na">command</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">--api=true</span>
+      <span class="pi">-</span> <span class="s">--api.dashboard=true</span>
+      <span class="pi">-</span> <span class="s">--providers.docker=true</span>
+      <span class="pi">-</span> <span class="s">--providers.docker.exposedbydefault=true</span>
+      <span class="pi">-</span> <span class="s">--accesslog=true</span>
+      <span class="pi">-</span> <span class="s">--entryPoints.web.address=:80</span>
+      <span class="pi">-</span> <span class="s">--entryPoints.websecure.address=:443</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.letsencrypt.acme.email=user@example.com</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.letsencrypt.acme.storage=/acme/acme.json</span>
+      <span class="c1"># Uncomment the line to use Let's Encrypt's staging server,</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.letsencrypt.acme.httpChallenge=true</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web</span>
+    <span class="na">labels</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.entrypoints=websecure,web</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.rule=Host(`dashboard.example.com`)</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.tls=true</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.tls.certresolver=letsencrypt</span>
+      <span class="c1"># Connect the router `api` to internal service 'api'</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.service=api@internal</span>
+      <span class="c1"># Declaring a middleware with name `auth`</span>
+      <span class="c1"># Declaring the user list - echo $(htpasswd -nb admin password) | sed -e s/\\$/\\$\\$/g</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$mW/l73Bf$$WsprkCzl5.QbLdY9c4kdB0"</span>
+      <span class="c1"># Referencing an `auth` middleware</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.middlewares=auth</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">80:80"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">443:443"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">/var/run/docker.sock:/var/run/docker.sock</span>
+      <span class="pi">-</span> <span class="s">./acme:/acme</span>
+
+  <span class="na">whoami</span><span class="pi">:</span>
+    <span class="c1"># A container that exposes an API to show its IP address</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">containous/whoami</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">whoami</span>
+    <span class="na">labels</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.whoami.entrypoints=websecure,web</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.whoami.rule=Host(`whoami.example.com`)</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.whoami.tls=true</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.whoami.tls.certresolver=letsencrypt</span>
+</code></pre></div></div>
+
+<p>Let’s explain what we made upper. First, we remove the insecure api (specifying <code class="language-plaintext highlighter-rouge">--api</code> instead of <code class="language-plaintext highlighter-rouge">--api.insecure</code>).
+We declare a tls connection to <code class="language-plaintext highlighter-rouge">api</code> router that we made in previous part.
+After that we bound the router with internal <code class="language-plaintext highlighter-rouge">api</code> service. Declaring a <a href="https://docs.traefik.io/middlewares/overview/">Middleware</a> with name <code class="language-plaintext highlighter-rouge">auth</code> (<code class="language-plaintext highlighter-rouge">traefik.http.middlewares.auth.basicauth.users</code>). The value of it was include a string in format <code class="language-plaintext highlighter-rouge">username:xxxx</code>.
+It could be generated with shell command - <code class="language-plaintext highlighter-rouge">echo $(htpasswd -nb username password) | sed -e s/\\$/\\$\\$/g</code>.
+And at the end, join the middleware to the router <code class="language-plaintext highlighter-rouge">api</code> (<code class="language-plaintext highlighter-rouge">traefik.http.routers.api.middlewares=auth</code>).</p>
+
+<p><a href="https://gainanov.pro/eng-blog/assets/images/traefik/dashboard_screenshot.png" class="align-center"><img src="https://gainanov.pro/eng-blog/assets/images/traefik/dashboard_screenshot.png" alt="traefik-dashboard" /></a></p>
+
+<h2 id="4-https-redirection">4. HTTPS Redirection</h2>
+
+<p>Now that we have HTTPS routes, let’s redirect every non-https requests to their https equivalent.
+For that, we’ll reuse the previous trick and add just 3 labels to declare a redirect middleware. <a href="https://docs.traefik.io/middlewares/redirectscheme/">RedirectScheme</a> will help us. It redirects request from a scheme to another. We will catch requests only for specific domain - <code class="language-plaintext highlighter-rouge">whoami.example.com</code>. See the example below:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3'</span>
+
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">traefik</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">traefik:v2.1</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">traefik</span>
+    <span class="na">command</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">--api=true</span>
+      <span class="pi">-</span> <span class="s">--api.dashboard=true</span>
+      <span class="pi">-</span> <span class="s">--providers.docker=true</span>
+      <span class="pi">-</span> <span class="s">--providers.docker.exposedbydefault=true</span>
+      <span class="pi">-</span> <span class="s">--accesslog=true</span>
+      <span class="pi">-</span> <span class="s">--entryPoints.web.address=:80</span>
+      <span class="pi">-</span> <span class="s">--entryPoints.websecure.address=:443</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.myresolver.acme.email=r.gainanov@skoltech.ru</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.myresolver.acme.storage=/acme/acme.json</span>
+      <span class="c1"># Uncomment the line to use Let's Encrypt's staging server,</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.myresolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.myresolver.acme.httpChallenge=true</span>
+      <span class="pi">-</span> <span class="s">--certificatesResolvers.myresolver.acme.httpChallenge.entryPoint=web</span>
+    <span class="na">labels</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.entrypoints=websecure,web</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.rule=Host(`dashboard.example.com`)</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.tls=true</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.tls.certresolver=letsencrypt</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.service=api@internal</span>
+      <span class="pi">-</span> <span class="s">traefik.http.routers.api.middlewares=auth</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$mW/l73Bf$$WsprkCzl5.QbLdY9c4kdB0"</span>
+      <span class="c1"># Declaring a middleware with name `https_redirect` uses Redirecting the Client to a `https` Scheme</span>
+      <span class="pi">-</span> <span class="s">traefik.http.middlewares.https_redirect.redirectscheme.scheme=https</span>
+      <span class="c1"># Set the permanent option to true to apply a permanent redirection.</span>
+      <span class="pi">-</span> <span class="s">traefik.http.middlewares.https_redirect.redirectscheme.permanent=true</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">80:80"</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">443:443"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">/var/run/docker.sock:/var/run/docker.sock:ro</span>
+      <span class="pi">-</span> <span class="s">./acme:/acme</span>
+
+  <span class="na">whoami</span><span class="pi">:</span>
+    <span class="c1"># A container that exposes an API to show its IP address</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">containous/whoami</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">whoami</span>
+    <span class="na">labels</span><span class="pi">:</span>
+      <span class="s">traefik.http.routers.app.rule</span><span class="pi">:</span> <span class="s">Host(`whoami.example.com`)</span>
+      <span class="s">traefik.http.routers.app.entrypoints</span><span class="pi">:</span> <span class="s">web</span>
+      <span class="c1"># Set the middleware `https_redirect` to `app` router to apply a redirection to https.</span>
+      <span class="s">traefik.http.routers.app.middlewares</span><span class="pi">:</span> <span class="s">https_redirect</span>
+
+      <span class="s">traefik.http.routers.appsecured.rule</span><span class="pi">:</span> <span class="s">Host(`whoami.example.com`)</span>
+      <span class="s">traefik.http.routers.appsecured.entrypoints</span><span class="pi">:</span> <span class="s">websecure</span>
+      <span class="s">traefik.http.routers.appsecured.tls</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="s">traefik.http.routers.appsecured.tls.certresolver</span><span class="pi">:</span> <span class="s">myresolver</span>
+</code></pre></div></div>
+
+<p>We use the previous example and add <code class="language-plaintext highlighter-rouge">middlewares.https_redirect</code> as traefik service label. After we bind this middleware to a router defined in whoami - <code class="language-plaintext highlighter-rouge">traefik.http.routers.app.middlewares: https_redirect</code>.</p>
+
+<p>Follow to next advice if want a global redirect rule for requests to all insecured hosts. Move 2 rows from <code class="language-plaintext highlighter-rouge">whoami</code> service into traefik label’s section <code class="language-plaintext highlighter-rouge">.app.rule</code>, <code class="language-plaintext highlighter-rouge">.app.entrypoints</code> and <code class="language-plaintext highlighter-rouge">.app.middlewares</code>. And change the value of the <a href="https://docs.traefik.io/routing/routers/#rule">Rule</a> <code class="language-plaintext highlighter-rouge">.rule: Host(`whoami.example.com`)</code> to <code class="language-plaintext highlighter-rouge">HostRegexp(`{host:.+}`)</code></p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Hopefully, I’ve gone through important questions you’ll have when dealing with Traefik 2.0 in a Docker setup, and I hope this examples get you a start point to explore more complex configurations.</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://docs.traefik.io/">Official Documentation</a> - the start point to know more about Traefik</li>
+  <li><a href="https://docs.traefik.io/user-guides/docker-compose/basic-example/">Basic Example - Traefik</a> - docker-compose basic example by Traefik</li>
+  <li><a href="https://docs.traefik.io/reference/dynamic-configuration/docker/">Docker Configuration Reference</a> - configure Traefik with Docker Labels</li>
+  <li><a href="https://containo.us/blog/traefik-2-0-docker-101-fc2893944b9d/">Traefik 2.0 &amp; Docker 101</a> - step by step with Traefik in an author blog</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/devops" class="page__taxonomy-item" rel="tag">devops</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/docker" class="page__taxonomy-item" rel="tag">docker</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/letsencrypt" class="page__taxonomy-item" rel="tag">letsencrypt</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/ssl" class="page__taxonomy-item" rel="tag">ssl</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/traefik" class="page__taxonomy-item" rel="tag">traefik</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/devops" class="page__taxonomy-item" rel="tag">devops</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-02-22T00:00:00+03:00">February 22, 2020</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Docker.+Create+secure+web+service+using+Let%27s+Encrypt+with+Traefik%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fdocker-web-service-with-traefik%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fdocker-web-service-with-traefik%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fdocker-web-service-with-traefik%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/devops/docker-traefik-concept-terms-explanation/" class="pagination--pager" title="Traefik. Concept term explanation
+">Previous</a>
+    
+    
+      <a href="/eng-blog/sysad/esxi-cli-networking/" class="pagination--pager" title="ESXi. Create and configure Management Network using ESXi Command line
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

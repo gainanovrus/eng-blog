@@ -1,0 +1,869 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Work with host system in Hetzner Rescue Mode - GAINANOV.PRO</title>
+<meta name="description" content="Hetzner Rescue Mode allow to repair host system when you cannot access in usually way. In this post I will show how to mount LVM volume and to change a some file. As example add new ssh-key to authorized_keys file.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="Work with host system in Hetzner Rescue Mode">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/linux/hetzner-rescue-mode/">
+
+
+  <meta property="og:description" content="Hetzner Rescue Mode allow to repair host system when you cannot access in usually way. In this post I will show how to mount LVM volume and to change a some file. As example add new ssh-key to authorized_keys file.">
+
+
+
+  <meta property="og:image" content="https://gainanov.pro/eng-blog/assets/images/hetzner-rescue/hetzner-rescue-teaser.jpg">
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="Work with host system in Hetzner Rescue Mode">
+  <meta name="twitter:description" content="Hetzner Rescue Mode allow to repair host system when you cannot access in usually way. In this post I will show how to mount LVM volume and to change a some file. As example add new ssh-key to authorized_keys file.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/linux/hetzner-rescue-mode/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://gainanov.pro/eng-blog/assets/images/hetzner-rescue/hetzner-rescue-teaser.jpg">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2018-09-11T00:00:00+03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/linux/hetzner-rescue-mode/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Work with host system in Hetzner Rescue Mode">
+    <meta itemprop="description" content="Hetzner Rescue Mode allow to repair host system when you cannot access in usually way. In this post I will show how to mount LVM volume and to change a some file. As example add new ssh-key to authorized_keys file.">
+    <meta itemprop="datePublished" content="2018-09-11T00:00:00+03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Work with host system in Hetzner Rescue Mode
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  5 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#problem">Problem</a></li>
+  <li><a href="#instructions">Instructions</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p>The Hetzner Rescue System is a Linux live environment that gives administrative
+access to you for your server. It helps to repair an installed system,
+to check file systems or to install a new operating system.</p>
+
+<h2 id="problem">Problem</h2>
+
+<p>I show you an example. There is a host with installed CentOS 7 with SWRAID 1 and LVM.
+I can’t get a remote access by ssh (because I’ve forgotten the <code class="language-plaintext highlighter-rouge">root</code> password):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ssh root@xxx.xxx.xxx.xxx
+root@xxx.xxx.xxx.xxx's password:
+Permission denied, please try again.
+root@xxx.xxx.xxx.xxx's password:
+Permission denied, please try again.
+root@xxx.xxx.xxx.xxx's password:
+Permission denied (publickey,password).
+</code></pre></div></div>
+
+<p>The string <code class="language-plaintext highlighter-rouge">xxx.xxx.xxx.xxx</code> is a public IP of the remote server.
+Let’s see what I do in this situation.</p>
+
+<h2 id="instructions">Instructions</h2>
+
+<ul>
+  <li>Activating a rescue mode for selected server in Hetzner <a href="https://robot.your-server.de/server">web panel</a>.
+Choose your ssh key for connecting to the rescue server without password.</li>
+</ul>
+
+<p><img src="https://gainanov.pro/eng-blog/assets/images/hetzner-rescue/activate-rescue.png" alt="activate-rescue" class="align-center" /></p>
+
+<ul>
+  <li>Reset the server: select first or second option</li>
+</ul>
+
+<p><img src="https://gainanov.pro/eng-blog/assets/images/hetzner-rescue/send-reboot.png" alt="send-reboot" class="align-center" />
+The rescue system will be loaded after the server reboot.
+And we can connects to it with our ssh key (the key that we inserted on step 1)</p>
+
+<ul>
+  <li>Connect to the server by ssh.</li>
+</ul>
+
+<p>Where is <code class="language-plaintext highlighter-rouge">xxx.xxx.xxx.xxx</code> public IP of the server
+(you can find it in the web panel)</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ssh root@xxx.xxx.xxx.xxx
+</code></pre></div></div>
+
+<p>The server will return some information</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-------------------------------------------------------------------
+
+  Welcome to the Hetzner Rescue System.
+
+  This Rescue System is based on Debian 8.0 (jessie) with a newer
+  kernel. You can install software as in a normal system.
+
+  To install a new operating system from one of our prebuilt
+  images, run 'installimage' and follow the instructions.
+
+  More information at http://wiki.hetzner.de
+
+-------------------------------------------------------------------
+
+Hardware data:
+
+   CPU1: AMD Ryzen 7 1700X Eight-Core Processor (Cores 16)
+   Memory:  64370 MB
+   Disk /dev/sda: 512 GB (=&gt; 476 GiB)
+   Disk /dev/sdb: 512 GB (=&gt; 476 GiB)
+   Total capacity 953 GiB with 2 Disks
+
+Network data:
+   eth0  LINK: yes
+         MAC:  00:00:00:00:00:00
+         IP:   xxx.xxx.xxx.xxx
+         IPv6: 1001:1001:1001:1001::2/64
+         RealTek RTL-8169 Gigabit Ethernet driver
+</code></pre></div></div>
+
+<ul>
+  <li>Because I use LVM in the host system, I run commands to scan disk for
+ Volume Groups and Physical Volumes.</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@rescue ~ # vgscan
+  Reading all physical volumes.  This may take a while...
+  Found volume group "vg0" using metadata type lvm2
+
+root@rescue ~ # pvscan
+  PV /dev/md1   VG vg0   lvm2 [476,31 GiB / 341,31 GiB free]
+  Total: 1 [476,31 GiB] / in use: 1 [476,31 GiB] / in no VG: 0 [0   ]
+</code></pre></div></div>
+
+<ul>
+  <li>Fine. Was founded a group named <code class="language-plaintext highlighter-rouge">vg0</code>. It is a group that I want to mount. Activate it.</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@rescue ~ # lvm vgchange -a y
+4 logical volume(s) in volume group "vg0" now active
+</code></pre></div></div>
+
+<p>And view a result of it.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@rescue ~ # lvscan
+ACTIVE            '/dev/vg0/root' [10,00 GiB] inherit
+ACTIVE            '/dev/vg0/tmp' [5,00 GiB] inherit
+ACTIVE            '/dev/vg0/home' [20,00 GiB] inherit
+</code></pre></div></div>
+
+<p>We see the a familiar file structure, don’t it?</p>
+
+<ul>
+  <li>Now display the devices that you can mount.</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@rescue ~ # ls -l /dev/mapper/vg*
+lrwxrwxrwx 1 root root 7 Sep 11 07:26 /dev/mapper/vg0-home -&gt; ../dm-2
+lrwxrwxrwx 1 root root 7 Sep 11 07:26 /dev/mapper/vg0-root -&gt; ../dm-0
+lrwxrwxrwx 1 root root 7 Sep 11 07:26 /dev/mapper/vg0-tmp -&gt; ../dm-1
+</code></pre></div></div>
+
+<ul>
+  <li>Then, mount the desired MD device of the host server.</li>
+</ul>
+
+<p>I will mount <code class="language-plaintext highlighter-rouge">/</code> in the host server as <code class="language-plaintext highlighter-rouge">/mnt</code> in the rescue server (current session)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@rescue ~ # mount /dev/mapper/vg0-root /mnt
+</code></pre></div></div>
+
+<p>Now we can work with files as usual</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@rescue ~ # ls -l /mnt
+total 1,2M
+lrwxrwxrwx  1 root root    7 May 14 08:39 bin -&gt; usr/bin
+drwxr-xr-x  2 root root 4,0K Sep 10 16:08 boot
+drwxr-xr-x  2 root root 4,0K Sep 10 16:08 dev
+drwxr-xr-x 71 root root 4,0K Sep 10 16:09 etc
+drwxr-xr-x  2 root root 4,0K Sep 10 16:08 home
+-rw-r-----  1 root root  733 Sep 10 16:09 installimage.conf
+-rw-r-----  1 root root 1,2M Sep 10 16:09 installimage.debug
+lrwxrwxrwx  1 root root    7 May 14 08:39 lib -&gt; usr/lib
+lrwxrwxrwx  1 root root    9 May 14 08:39 lib64 -&gt; usr/lib64
+drwx------  2 root root  16K Sep 10 16:07 lost+found
+drwxr-xr-x  2 root root 4,0K Apr 11 06:59 media
+drwxr-xr-x  2 root root 4,0K Apr 11 06:59 mnt
+drwxr-xr-x  2 root root 4,0K Apr 11 06:59 opt
+drwxr-xr-x  2 root root 4,0K Sep 10 16:08 proc
+dr-xr-x---  4 root root 4,0K Sep 10 16:08 root
+drwxr-xr-x  3 root root 4,0K Sep 10 16:08 run
+lrwxrwxrwx  1 root root    8 May 14 08:39 sbin -&gt; usr/sbin
+drwxr-xr-x  2 root root 4,0K Apr 11 06:59 srv
+drwxr-xr-x  2 root root 4,0K Sep 10 16:08 sys
+drwxr-xr-x  2 root root 4,0K Sep 10 16:08 tmp
+drwxr-xr-x 13 root root 4,0K May 14 08:39 usr
+drwxr-xr-x 19 root root 4,0K May 14 08:39 var
+</code></pre></div></div>
+
+<ul>
+  <li>Make some actions with host files.</li>
+</ul>
+
+<p>As I said I’ve lost a control to the server.
+Now I want to add the ssh-key for access without password to the host.</p>
+
+<p>Edit a file <code class="language-plaintext highlighter-rouge">.ssh/authorized_keys</code>, and add our public key in it.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@rescue ~ # vi /mnt/root/.ssh/authorized_keys
+
+root@rescue ~ # ls -l /mnt/root/.ssh/authorized_keys
+-rw-r--r-- 1 root root 747 Sep 11 07:28 /mnt/root/.ssh/authorized_keys
+
+root@rescue ~ # chmod 600 /mnt/root/.ssh/authorized_keys
+
+root@rescue ~ # ls -l /mnt/root/.ssh/authorized_keys
+-rw------- 1 root root 747 Sep 11 07:28 /mnt/root/.ssh/authorized_keys
+</code></pre></div></div>
+
+<ul>
+  <li>In the finish of work with the host files unmount the root device.</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@rescue ~ # umount /dev/mapper/vg0-root
+</code></pre></div></div>
+
+<p>And deactivate volume group <code class="language-plaintext highlighter-rouge">vg0</code></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@rescue ~ # lvm vgchange -a n vg0
+  0 logical volume(s) in volume group "vg0" now active
+</code></pre></div></div>
+
+<ul>
+  <li>Now you can exit from rescue mode. Just run a reboot command.</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@rescue ~ # reboot
+
+Broadcast message from root@rescue on pts/0 (Tue 2018-09-11 08:58:23 CEST):
+
+The system is going down for reboot NOW!
+</code></pre></div></div>
+
+<ul>
+  <li>That’s all. The server will reboot and the host system will start.</li>
+</ul>
+
+<p>Try to connect.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ssh root@xxx.xxx.xxx.xxx
+Last failed login: Mon Sep 10 16:10:44 CEST 2018 from yyy.yyy.yyy.yyy on ssh:notty
+There was 1 failed login attempt since the last successful login.
+
+[root@CentOS-75-64-minimal ~]# hostname
+CentOS-75-64-minimal
+</code></pre></div></div>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In my practice I often repair system in rescue mode. With rescue I monitor the
+logs when system didn’t start. It’s very useful tool for fix mistakes with
+network and firewall settings.</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<p><a href="https://linux.die.net/man/8/lvm">lvm(8) - Linux man page</a>
+<a href="https://www.hetzner.com/unternehmen/rescue-system">Hetzner Rescue System - Official Information</a>
+<a href="https://wiki.hetzner.de/index.php/Hetzner_Rescue-System/en">Hetzner Rescue System/en - Official Manual</a></p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/centos" class="page__taxonomy-item" rel="tag">centos</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/hetzner" class="page__taxonomy-item" rel="tag">hetzner</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/linux" class="page__taxonomy-item" rel="tag">linux</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/linux" class="page__taxonomy-item" rel="tag">linux</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-09-11T00:00:00+03:00">September 11, 2018</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Work+with+host+system+in+Hetzner+Rescue+Mode%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Flinux%2Fhetzner-rescue-mode%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Flinux%2Fhetzner-rescue-mode%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Flinux%2Fhetzner-rescue-mode%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/devops/gitlab-ci-create-first-pipeline/" class="pagination--pager" title="GitLab CI/CD. Create simple pipeline
+">Previous</a>
+    
+    
+      <a href="/eng-blog/devops/ansible-why-i-use-it/" class="pagination--pager" title="Ansible. Why I use it?
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

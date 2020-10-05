@@ -1,0 +1,1034 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>DELL. CLI commands - GAINANOV.PRO</title>
+<meta name="description" content="Here is a list of basic CLI commands which will help you manage your Dell PowerConnect series switches.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="DELL. CLI commands">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/sysad/dell-switch-console-commands/">
+
+
+  <meta property="og:description" content="Here is a list of basic CLI commands which will help you manage your Dell PowerConnect series switches.">
+
+
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="DELL. CLI commands">
+  <meta name="twitter:description" content="Here is a list of basic CLI commands which will help you manage your Dell PowerConnect series switches.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/sysad/dell-switch-console-commands/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2020-02-04T00:00:00+03:00">
+
+
+
+  <meta property="article:modified_time" content="2020-08-08T03:00:00+03:00">
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/sysad/dell-switch-console-commands/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="DELL. CLI commands">
+    <meta itemprop="description" content="Here is a list of basic CLI commands which will help you manage your Dell PowerConnect series switches.">
+    <meta itemprop="datePublished" content="2020-02-04T00:00:00+03:00">
+    <meta itemprop="dateModified" content="2020-08-08T03:00:00+03:00">
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">DELL. CLI commands
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  9 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#the-">The “?”</a></li>
+  <li><a href="#show-running-config">show running-config</a></li>
+  <li><a href="#copy-running-config-startup-config">copy running-config startup-config</a></li>
+  <li><a href="#command-modes">command modes</a></li>
+  <li><a href="#command-history">command history</a></li>
+  <li><a href="#device-version">device version</a></li>
+  <li><a href="#show-interfaces">show interfaces</a></li>
+  <li><a href="#monitor-interface">monitor interface</a></li>
+  <li><a href="#show-ip-interface">show ip interface</a></li>
+  <li><a href="#configure-interface">configure interface</a></li>
+  <li><a href="#no-shutdown">no shutdown</a></li>
+  <li><a href="#arp--mac-table">arp &amp; mac table</a></li>
+  <li><a href="#show-vlan">show vlan</a></li>
+  <li><a href="#current-time">current time</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p>I recently have experience in configuring a DELL PowerSwitch <a href="https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/Dell-EMC-Networking-S4048-ON-Spec-Sheet.pdf">S4048-ON</a>.
+It is 10/40GbE top-of-rack (ToR) switch built for applications in high performance data center and computing environments.</p>
+
+<p>Dell’s OS9 (S &amp; Z series) switches have a minimal differences from Cisco IOS. Many commands is similar.
+In this quick reference I want to share a basic commands you’ll need to rely on when handling various configuration and troubleshooting tasks. The output of something commands will included.</p>
+
+<p>So, here is a list of basic CLI commands which will help you manage your DELL PowerConnect series switches.</p>
+
+<h2 id="the-">The “?”</h2>
+<p>You can use the command <code class="language-plaintext highlighter-rouge">?</code> in many ways. First, use it when you don’t know what command to type.
+For example, type <code class="language-plaintext highlighter-rouge">?</code> At the command line for a list of all possible commands.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G&gt;?
+clock                           Manage the system clock                 
+crypto                          Crypto Commands                         
+disable                         Turn off privileged commands            
+dot1x                           802.1x commands                         
+enable                          Turn on privileged commands             
+ethernet                        Ethernet commands                       
+exit                            Exit from the EXEC                      
+fsck                            Filesystem check utility                
+ip                              Global IP subcommands                   
+ipv6                            Global IPv6 subcommands                 
+monitor                         Monitoring feature                      
+mtrace                          Trace reverse multicast path from destination to source
+package                         Automation package related commands     
+ping                            Send echo messages                      
+quit                            Exit from the EXEC                      
+show                            Show running system information         
+ssh                             Open a SSH connection                   
+ssh-peer-stack-unit             Open a SSH connection to the peer stack-unit
+start                           Start shell                             
+support-assist                  SupportAssist service                   
+telnet                          Open a telnet connection                
+telnet-peer-stack-unit          Open a telnet connection to the peer stack-unit
+terminal                        Set terminal line parameters            
+--More--
+</code></pre></div></div>
+
+<p>You can also use <code class="language-plaintext highlighter-rouge">?</code> When don’t know what a command’s next parameter should be. For example, you might type <code class="language-plaintext highlighter-rouge">interface</code>?
+If the router requires no other parameters for the command, the router will offer <code class="language-plaintext highlighter-rouge">CR</code> as the only option.
+Type a <code class="language-plaintext highlighter-rouge">?</code> at the prompt or after a keyword. There must always be a space before the <code class="language-plaintext highlighter-rouge">?</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G(conf)#interface ?
+fortyGigE               FortyGigabit Ethernet interface         
+gigabitethernet         Gigabit Ethernet interface              
+group                   Configure interface group               
+loopback                Loopback interface                      
+managementethernet      Management Ethernet interface           
+null                    Null interface                          
+port-channel            Port-channel interface                  
+range                   Configure interface range               
+tengigabitethernet      TenGigabit Ethernet interface           
+tunnel                  Tunnel interface                        
+vlan                    VLAN interface   
+</code></pre></div></div>
+
+<p>To see all commands that start with a particular letter. For example, show <code class="language-plaintext highlighter-rouge">c?</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#c?
+cd
+clear
+clock
+configure
+copy
+crypto
+</code></pre></div></div>
+
+<p>Will return a list of commands that start with the letter <code class="language-plaintext highlighter-rouge">c</code>.</p>
+
+<h2 id="show-running-config">show running-config</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">show running-config</code> command shows the router, switch, or firewall’s current configuration.
+The running-configuration is the config that is in the router’s memory.
+You change this config when you make changes to the router.
+Keep in mind that that config is not saved until you do copy it to startup.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#show running-config
+Current Configuration ...
+! Version 9.11(0.0P3)
+! Last configuration change at Mon Feb  3 18:09:01 2020 by admin
+!
+boot system stack-unit 1 primary system: A:
+boot system stack-unit 1 secondary system: B:
+boot system stack-unit 1 default system: A:
+!
+logging coredump stack-unit  1
+logging coredump stack-unit  2
+logging coredump stack-unit  3
+logging coredump stack-unit  4
+logging coredump stack-unit  5
+logging coredump stack-unit  6
+!
+hostname SWP_UP_10G
+!
+--More--
+</code></pre></div></div>
+
+<h2 id="copy-running-config-startup-config">copy running-config startup-config</h2>
+
+<p>This command will save the configuration that is currently being modified (in RAM),
+also known as the running-configuration, to the nonvolatile RAM (NVRAM).
+If the power is lost, the NVRAM will preserve this configuration.
+In other words, if you edit the router’s configuration, don’t use this command and reboot the router–those changes will be lost.
+This command can be abbreviated <code class="language-plaintext highlighter-rouge">copy run start</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#copy running-config startup-config
+</code></pre></div></div>
+
+<h2 id="command-modes">command modes</h2>
+
+<p>The DELL switch like Cisco has different command modes with distinctive prompts.
+These modes execute different switch commands. Each mode has a set of specific commands.</p>
+
+<p>To navigate and launch various CLI modes, use specific commands</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Prompt         CLI Command Mode
+Dell&gt;          EXEC
+Dell#          EXEC Privilege
+Dell(conf)#    CONFIGURATION
+</code></pre></div></div>
+
+<p>Enter EXEC Privilege mode or any other privilege level configured - <code class="language-plaintext highlighter-rouge">enable</code>.
+After entering this command, you may need to enter a password.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G&gt;enable
+Password:
+SWP_UP_10G#
+</code></pre></div></div>
+
+<p>Enter CONFIGURATION mode from EXEC Privilege mode - <code class="language-plaintext highlighter-rouge">configure</code>.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#configure
+SWP_UP_10G(conf)#
+</code></pre></div></div>
+
+<p>Return to the lower command mode - <code class="language-plaintext highlighter-rouge">exit</code>.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G(conf)#exit
+SWP_UP_10G#
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">do</code> command allows the execution of most EXEC-level commands from all CONFIGURATION levels without returning to the EXEC level.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G(conf)#do show clock       
+23:13:55.661 UTC Sat Jul 18 2020
+</code></pre></div></div>
+
+<h2 id="command-history">command history</h2>
+
+<p>Display a buffered log of all commands all users enter along with a time stamp</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#show command-history
+</code></pre></div></div>
+
+<h2 id="device-version">device version</h2>
+
+<p>Some useful information about Software version and device.
+Display the current Dell Networking Operating System (OS) version information on the system - <code class="language-plaintext highlighter-rouge">show version</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#show version
+Dell Real Time Operating System Software
+Dell Operating System Version:  2.0
+Dell Application Software Version:  9.11(0.0P3)
+Copyright (c) 1999-2017 by Dell Inc. All Rights Reserved.
+Build Time: Fri Jan 27 10:54:03 2017
+Build Path: /build/build02/SW/SRC
+Dell Networking OS uptime is 6 week(s), 1 day(s), 23 hour(s), 13 minute(s)
+
+System image file is "system://A"
+
+System Type: S4048-ON
+Control Processor: Intel Rangeley with 3 Gbytes (3201302528 bytes) of memory, core(s) 2.
+
+8G bytes of boot flash memory.
+
+  1 54-port TE/FG (SK-ON)
+ 48 Ten GigabitEthernet/IEEE 802.3 interface(s)
+  6 Forty GigabitEthernet/IEEE 802.3 interface(s)
+</code></pre></div></div>
+
+<h2 id="show-interfaces">show interfaces</h2>
+
+<p>Display information on a specific physical interface or virtual interface.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#show interfaces tengigabitethernet 1/1
+TenGigabitEthernet 1/1 is up, line protocol is up
+Description:
+Hardware is DellEth, address is 14:18:77:80:11:00
+    Current address is 14:18:77:80:11:00
+Pluggable media present, SFP+ type is 10GBASE-SR
+    Medium is MultiRate, Wavelength is 850nm
+    SFP+ receive power reading is -2.7344dBm
+    SFP+ transmit power reading is -2.2105dBm
+Interface index is 2097156
+Internet address is not set
+Mode of IPv4 Address Assignment : NONE
+DHCP Client-ID :1418778022e1
+MTU 1554 bytes, IP MTU 1500 bytes
+LineSpeed 10000 Mbit
+Flowcontrol rx off tx off
+ARP type: ARPA, ARP Timeout 04:00:00
+Last clearing of "show interface" counters 6w1d23h
+Queueing strategy: fifo
+Input Statistics:
+     12063517275 packets, 16273367119685 bytes
+     452219597 64-byte pkts, 3344945 over 64-byte pkts, 123343574 over 127-byte pkts
+     994638054 over 255-byte pkts, 4755930 over 511-byte pkts, 10485215175 over 1023-byte pkts
+     0 Multicasts, 6533 Broadcasts, 12063510742 Unicasts
+</code></pre></div></div>
+
+<p>To display status information on a specific interface only,
+display a summary of interface information or specify a stack-unit slot and interface.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#show interfaces status
+Port                 Description  Status Speed        Duplex Vlan  
+Te 1/1                            Up     10000 Mbit   Full   3
+Te 1/2                            Up     10000 Mbit   Full   3
+Te 1/3                            Up     10000 Mbit   Full   3
+Te 1/4                            Up     10000 Mbit   Full   3
+Te 1/5                            Up     10000 Mbit   Full   3
+Te 1/6                            Up     10000 Mbit   Full   3
+Te 1/7                            Up     10000 Mbit   Full   3
+--More--
+</code></pre></div></div>
+
+<h2 id="monitor-interface">monitor interface</h2>
+
+<p>Monitor counters on a single interface or all interfaces.
+The screen is refreshed every five seconds and the CLI prompt disappears.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#monitor interface te 1/1
+
+ Interface: Te 1/1, Enabled, Link is Up, Linespeed is 10000 Mbit
+
+  Traffic statistics:              Current           Rate                Delta
+         Input bytes:       16273367122653          0 Bps                    0
+        Output bytes:       13745541955640          0 Bps                    0
+       Input packets:          12063517303          0 pps                    0
+      Output packets:          10342234622          0 pps                    0
+         64B packets:            452219597          0 pps                    0
+    Over 64B packets:              3344973          0 pps                    0
+   Over 127B packets:            123343574          0 pps                    0
+   Over 255B packets:            994638054          0 pps                    0
+   Over 511B packets:              4755930          0 pps                    0
+  Over 1023B packets:          10485215175          0 pps                    0
+ Error statistics:
+     Input underruns:                    0          0 pps                    0
+        Input giants:                    0          0 pps                    0
+     Input throttles:                    0          0 pps                    0
+           Input CRC:                    0          0 pps                    0
+   Input IP checksum:                    0          0 pps                    0
+       Input overrun:                    0          0 pps                    0
+    Output underruns:                    0          0 pps                    0
+    Output throttles:                    0          0 pps                    0
+
+       m - Change mode                            c - Clear screen
+       l - Page up                                a - Page down
+       T - Increase refresh interval              t - Decrease refresh interval
+       q - Quit
+</code></pre></div></div>
+
+<h2 id="show-ip-interface">show ip interface</h2>
+
+<p>The command provides useful information about the configuration and status of the IP protocol and its services, on all interfaces, including their IP address, Layer 2 status, and Layer 3 status.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#show ip interface
+
+TenGigabitEthernet 1/1 is up, line protocol is up
+Description:
+Internet address is not set
+IP MTU is 1500 bytes
+Directed broadcast forwarding is disabled
+Proxy ARP is enabled
+Split Horizon is enabled
+Poison Reverse is disabled
+ICMP redirects are not sent
+ICMP unreachables are not sent
+IP unicast RPF check is not supported
+
+--More--
+</code></pre></div></div>
+
+<p>Or with defined name of interface</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#show ip interface managementethernet 1/1
+
+ManagementEthernet 1/1 is up, line protocol is up
+Internet address is 192.168.1.1/24
+Virtual-IP address is not set
+Broadcast address is 192.168.1.255
+Address determined by user input
+</code></pre></div></div>
+
+<h2 id="configure-interface">configure interface</h2>
+
+<p>Configure a physical or virtual interface on the switch.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#conf
+SWP_UP_10G(conf)#interface tengigabitethernet 1/1
+SWP_UP_10G(conf-if-te-1/1)#
+</code></pre></div></div>
+
+<p>Before configuring should be useful view a current settings for the interface</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G(conf-if-te-1/1)#show config
+!
+interface TenGigabitEthernet 1/1
+ no ip address
+ switchport
+ no shutdown
+</code></pre></div></div>
+
+<h2 id="no-shutdown">no shutdown</h2>
+
+<p>To disable, delete or return to default values, use the <code class="language-plaintext highlighter-rouge">no</code> form of the commands.
+The <code class="language-plaintext highlighter-rouge">no shutdown</code> command enables an interface (brings it up).
+This command must be used in <code class="language-plaintext highlighter-rouge">interface</code> configuration mode.
+It is useful for new interfaces and for troubleshooting.
+When you’re having trouble with an interface, you may want to try a <code class="language-plaintext highlighter-rouge">shut</code> and <code class="language-plaintext highlighter-rouge">no shut</code>.</p>
+
+<h2 id="arp--mac-table">arp &amp; mac table</h2>
+
+<p>For displaying the ARP table use <code class="language-plaintext highlighter-rouge">show arp</code> or <code class="language-plaintext highlighter-rouge">show arp interface te 1/1</code> for specific interface.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#show arp
+
+Protocol    Address         Age(min)  Hardware Address    Interface      VLAN             CPU
+---------------------------------------------------------------------------------------------
+Internet    172.16.1.1            6   64:00:6a:d8:00:00   Po 1           Vl 4             CP
+Internet    172.16.1.2            -   14:18:77:80:00:01        -         Vl 4             CP
+Internet    172.16.1.3            0   a0:36:9f:d8:00:02   Po 1           Vl 4             CP
+</code></pre></div></div>
+
+<p>Display the MAC address table.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SW_DWN_1G#show mac-address-table
+Codes: *N - VLT Peer Synced MAC
+*I - Internal MAC Address used for Inter Process Communication
+
+VlanId     Mac Address           Type          Interface        State
+ 3      00:0c:29:41:01:00       Dynamic         Gi 1/9          Active
+ 3      00:0c:29:dd:01:00       Dynamic         Gi 1/9          Active
+ 3      00:1e:67:f0:02:00       Dynamic         Gi 1/40         Active
+--More--
+</code></pre></div></div>
+
+<h2 id="show-vlan">show vlan</h2>
+
+<p>Display the current VLAN configurations on the switch - <code class="language-plaintext highlighter-rouge">show vlan</code>.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#show vlan
+
+Codes: * - Default VLAN, G - GVRP VLANs, R - Remote Port Mirroring VLANs, P - Primary, C - Community, I - Isolated
+       O - Openflow, Vx - Vxlan
+Q: U - Untagged, T - Tagged
+   x - Dot1x untagged, X - Dot1x tagged
+   o - OpenFlow untagged, O - OpenFlow tagged
+   G - GVRP tagged, M - Vlan-stack
+   i - Internal untagged, I - Internal tagged, v - VLT untagged, V - VLT tagged
+
+    NUM    Status    Description                     Q Ports
+*   1      Inactive                                  
+    3      Active    C-MGMT                          T Po1(Te 1/47-1/48)
+    4      Active    C-DATA                          T Po1(Te 1/47-1/48)
+                                                     U Te 1/1-1/28,1/30-1/46
+</code></pre></div></div>
+
+<h2 id="current-time">current time</h2>
+
+<p>Display the current clock settings.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SWP_UP_10G#show clock detail
+18:04:16.792 UTC Mon Feb 3 2020
+Time source is RTC hardware
+</code></pre></div></div>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In summary, the key differences between Dell and Cisco are the approach they take to where the untagging and tagging happens (Cisco: interface, Dell: VLAN), how the trunks allow VLANs and how dell OS9 does not have any form of Spanning tree by default.
+But other than that the CLI commands are very similar and any engineer familiar with Cisco will no problem using Dell OS9.</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://www.netwrix.com/cisco_commands_cheat_sheet.html">Cisco Commands Cheat Sheet</a> - cisco commands in one page</li>
+  <li><a href="https://www.dell.com/support/manuals/us/en/19/force10-s4048-on/s4048-on-9.14.0.0-cli/about-this-guide">Dell Command Line Reference Guide for the S4048–ON System 9.14.0.0</a> - dell man page included full command list</li>
+  <li><a href="https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/Dell-EMC-Networking-S4048-ON-Spec-Sheet.pdf">DELL EMC NETWORKING S4048-ON SWITCH</a> - dell spec sheet for S4048–ON switch</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/cisco" class="page__taxonomy-item" rel="tag">cisco</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/dell" class="page__taxonomy-item" rel="tag">dell</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/networks" class="page__taxonomy-item" rel="tag">networks</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/sysad" class="page__taxonomy-item" rel="tag">sysad</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-08-08">August 8, 2020</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=DELL.+CLI+commands%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fdell-switch-console-commands%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fdell-switch-console-commands%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fdell-switch-console-commands%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/linux/centos-posdman-installation/" class="pagination--pager" title="CentOS 8. Podman installation and basic usage
+">Previous</a>
+    
+    
+      <a href="/eng-blog/dev/selenium-python/" class="pagination--pager" title="Web Automation. Selenium WebDriver and Python
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

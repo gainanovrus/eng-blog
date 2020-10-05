@@ -1,0 +1,778 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Git. Squash Multiple Commits in to One Commit - GAINANOV.PRO</title>
+<meta name="description" content="This note shows how to merge an ugly feature branch with multiple dirty WIP commits back into the master as one pretty commit.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="Git. Squash Multiple Commits in to One Commit">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/dev/git-squash-multiple-commits/">
+
+
+  <meta property="og:description" content="This note shows how to merge an ugly feature branch with multiple dirty WIP commits back into the master as one pretty commit.">
+
+
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="Git. Squash Multiple Commits in to One Commit">
+  <meta name="twitter:description" content="This note shows how to merge an ugly feature branch with multiple dirty WIP commits back into the master as one pretty commit.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/dev/git-squash-multiple-commits/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2019-11-21T00:00:00+03:00">
+
+
+
+  <meta property="article:modified_time" content="2019-10-24T00:00:00+03:00">
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/dev/git-squash-multiple-commits/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Git. Squash Multiple Commits in to One Commit">
+    <meta itemprop="description" content="This note shows how to merge an ugly feature branch with multiple dirty WIP commits back into the master as one pretty commit.">
+    <meta itemprop="datePublished" content="2019-11-21T00:00:00+03:00">
+    <meta itemprop="dateModified" content="2019-10-24T00:00:00+03:00">
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Git. Squash Multiple Commits in to One Commit
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  4 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#choose-your-starting-commit">choose your starting commit</a></li>
+  <li><a href="#picking-and-squashing">picking and squashing</a></li>
+  <li><a href="#create-the-new-commit">create the new commit</a></li>
+  <li><a href="#pushing-the-squashed-commit">pushing the squashed commit</a></li>
+  <li><a href="#conclusion">conclusion</a></li>
+  <li><a href="#additional-information">additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p>In Git you can merge several commits into one with the powerful interactive rebase.
+It’s a handy tool I use quite often;
+I usually tidy up my working space by grouping together several small intermediate
+commits into a single lump to push upstream.</p>
+
+<h2 id="choose-your-starting-commit">choose your starting commit</h2>
+
+<p>When you squash commits, you’re combining 2 or more commits in to a single commit.
+For example, let’s say your recent commit history looks something like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git log --pretty=format:"%h %ad | %s [%an]" --graph --date=short
+
+* 639c220 2019-11-21 | #454, CI is fully implemented [Ruslan Gainanov]  --- newer commit
+* f1a9a3e 2019-11-21 | fix [Ruslan Gainanov]
+* 67f56b9 2019-11-21 | fix [Ruslan Gainanov]
+* 2673619 2019-11-21 | fix [Ruslan Gainanov]
+* a5398ae 2019-11-21 | fix [Ruslan Gainanov]
+* 6f577b6 2019-11-21 | fix [Ruslan Gainanov]
+* 3aee03c 2019-11-20 | #454, prepare new CI [Ruslan Gainanov]           --- older commit
+* e807180 2019-11-18 | #123, feature Y implemented [romanicus]          --- parent commit
+</code></pre></div></div>
+
+<p>I’m working on a CI feature. And this is what I would like to do:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>* 639c220 2019-11-21 | #454, CI is fully implemented [Ruslan Gainanov]  --- newer commit  --┐
+* f1a9a3e 2019-11-21 | fix [Ruslan Gainanov]                                                |
+* 67f56b9 2019-11-21 | fix [Ruslan Gainanov]                                                |
+* 2673619 2019-11-21 | fix [Ruslan Gainanov]                                                |---- Join these into one
+* a5398ae 2019-11-21 | fix [Ruslan Gainanov]                                                |
+* 6f577b6 2019-11-21 | fix [Ruslan Gainanov]                                                |
+* 3aee03c 2019-11-20 | #454, prepare new CI [Ruslan Gainanov]           --- older commit ---┘
+* e807180 2019-11-18 | #123, feature Y implemented [romanicus]
+</code></pre></div></div>
+
+<p>I often have tons of commits to squash. And a command <code class="language-plaintext highlighter-rouge">git rebase -i HEAD~[N]</code> with
+number of commits you want to join (<code class="language-plaintext highlighter-rouge">N</code>), starting from the most recent one, doesn’t accept for me.</p>
+
+<p>Also I don’t want to count how many commits should be squashed. So there is another way:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git rebase --interactive [commit-hash]
+</code></pre></div></div>
+
+<p>Where <code class="language-plaintext highlighter-rouge">commit-hash</code> is the hash of the commit just before the first one you want to rewrite from.
+So in my example the command would be:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git rebase --interactive e807180
+</code></pre></div></div>
+
+<p>Where <code class="language-plaintext highlighter-rouge">e807180</code> is Feature Y. You can read the whole thing as:</p>
+<blockquote>
+  <p>Merge all my commits on top of commit [commit-hash].</p>
+</blockquote>
+
+<p>Way easier, isn’t it?</p>
+
+<h2 id="picking-and-squashing">picking and squashing</h2>
+
+<p>At this point your editor of choice will pop up, showing the list of commits you want to merge.
+Note that it might be confusing at first, since they are displayed in a reverse order,
+where the older commit is on top.</p>
+
+<p>I’ve added <code class="language-plaintext highlighter-rouge">--- older commit</code> and <code class="language-plaintext highlighter-rouge">--- newer commit</code> to make it clear, you won’t find those notes in the editor.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>3aee03c #454, prepare new CI               --- older commit
+6f577b6 fix                 
+a5398ae fix
+2673619 fix
+67f56b9 fix
+f1a9a3e fix
+639c220 #454, CI is fully implemented      --- newer commit
+
+[...]
+</code></pre></div></div>
+
+<p>Below the commit list there is a short comment (omitted in my example)
+which outlines all the operations available.
+You can do many smart tricks during an interactive rebase,
+let’s stick with the basics for now though.
+Our task here is to mark all the commits as squashable, except the first/older one:
+it will be used as a starting point.</p>
+
+<p>You mark a commit as squashable by changing the work pick into squash next to it (or s for brevity, as stated in the comments). The result would be:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pick 3aee03c #454, prepare new CI                --- older commit
+s 6f577b6 fix                 
+s a5398ae fix
+s 2673619 fix
+s 67f56b9 fix
+s f1a9a3e fix
+s 639c220 #454, CI is fully implemented         --- newer commit
+
+[...]
+</code></pre></div></div>
+
+<p>Save the file and close the editor.</p>
+
+<h2 id="create-the-new-commit">create the new commit</h2>
+
+<p>You have just told Git to combine all seven commits into the the first commit in the list.
+It’s now time to give it a name: your editor pops up again with a default message,
+made of the names of all the commits you have squashed.</p>
+
+<p>I wipe out the default message and use something more self-explanatory like <code class="language-plaintext highlighter-rouge">Implemented CI</code>.</p>
+
+<h2 id="pushing-the-squashed-commit">pushing the squashed commit</h2>
+
+<p>If the commits have been pushed to the remote:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin +name-of-branch
+</code></pre></div></div>
+
+<p>The plus sign <a href="https://git-scm.com/docs/git-push#Documentation/git-push.txt---force">forces</a> the remote branch to accept your rewritten history,
+otherwise you will end up with divergent branches.</p>
+
+<p>If the commits have NOT yet been pushed to the remote:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin name-of-branch
+</code></pre></div></div>
+
+<p>In other words, just a normal push like any other</p>
+
+<h2 id="conclusion">conclusion</h2>
+
+<p>Fixing up your commits in this way is good practice before sharing with your team
+members or before pushing the changes to a remote repository.
+It’s much easier to read through a source tree and understand what bugs have been
+fixed when a single commit fixes a single bug, for example.</p>
+
+<h2 id="additional-information">additional information</h2>
+
+<ul>
+  <li><a href="https://git-scm.com/docs/git-rebase">git-rebase - Reapply commits on top of another base tip</a> -
+Full information about git-rebase command.</li>
+  <li><a href="https://www.internalpointers.com/post/squash-commits-into-one-git">Squash commits into one with Git</a> -
+The base of this article.</li>
+  <li><a href="https://stackabuse.com/git-squash-multiple-commits-in-to-one-commit/">Git_ Squash Multiple Commits in to One Commit</a> -
+Another good source that I use to get more knowledge about git squash.</li>
+  <li><a href="https://stackoverflow.com/questions/2563632/how-can-i-merge-two-commits-into-one-if-i-already-started-rebase">How can I merge two commits into one if I already started rebase - Stack Overflow</a> -
+Conversation in Stack Overflow about this topic.</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/git" class="page__taxonomy-item" rel="tag">git</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/linux" class="page__taxonomy-item" rel="tag">linux</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/dev" class="page__taxonomy-item" rel="tag">dev</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-10-24">October 24, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Git.+Squash+Multiple+Commits+in+to+One+Commit%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdev%2Fgit-squash-multiple-commits%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdev%2Fgit-squash-multiple-commits%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdev%2Fgit-squash-multiple-commits%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/sysad/centos-vlan/" class="pagination--pager" title="Setup VLAN interface on CentOS
+">Previous</a>
+    
+    
+      <a href="/eng-blog/devops/dockerfile-env-arg-differences/" class="pagination--pager" title="Dockerfile. ARG and ENV statement differences
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

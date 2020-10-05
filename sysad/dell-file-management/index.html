@@ -1,0 +1,874 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>DELL. File Management on S4048 switch (OS9-series system) - GAINANOV.PRO</title>
+<meta name="description" content="Some useful notes for working with files (save, copy and transfer) on Dell Networking system.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="DELL. File Management on S4048 switch (OS9-series system)">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/sysad/dell-file-management/">
+
+
+  <meta property="og:description" content="Some useful notes for working with files (save, copy and transfer) on Dell Networking system.">
+
+
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="DELL. File Management on S4048 switch (OS9-series system)">
+  <meta name="twitter:description" content="Some useful notes for working with files (save, copy and transfer) on Dell Networking system.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/sysad/dell-file-management/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2020-07-19T00:00:00+03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/sysad/dell-file-management/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="DELL. File Management on S4048 switch (OS9-series system)">
+    <meta itemprop="description" content="Some useful notes for working with files (save, copy and transfer) on Dell Networking system.">
+    <meta itemprop="datePublished" content="2020-07-19T00:00:00+03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">DELL. File Management on S4048 switch (OS9-series system)
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  4 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#local-and-remote-file-system">Local and remote file system</a>
+    <ul>
+      <li><a href="#show-file-systems">show file-systems</a></li>
+    </ul>
+  </li>
+  <li><a href="#operations-with-local-filesystem">Operations with local Filesystem</a>
+    <ul>
+      <li><a href="#dir">dir</a></li>
+      <li><a href="#mkdirrmdir">mkdir/rmdir</a></li>
+      <li><a href="#cdpwd">cd/pwd</a></li>
+      <li><a href="#copy">copy</a></li>
+      <li><a href="#rename">rename</a></li>
+      <li><a href="#show-file">show file</a></li>
+      <li><a href="#delete">delete</a></li>
+      <li><a href="#save">save</a></li>
+    </ul>
+  </li>
+  <li><a href="#copy-file-fromto-remote-network-device">Copy file from/to remote network device</a>
+    <ul>
+      <li><a href="#verify">verify</a></li>
+    </ul>
+  </li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p>This article I will continue speaking about DELL PowerSwitch <a href="https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/Dell-EMC-Networking-S4048-ON-Spec-Sheet.pdf">S4048-ON</a>.
+Recently have been showed a many helpful commands for working in console.
+There is I want to say more about file system and files management on this switch series.</p>
+
+<h2 id="local-and-remote-file-system">Local and remote file system</h2>
+
+<p>The Dell Networking system can use the internal Flash, external Flash, or remote devices to store files.
+Rename, delete, and copy files on the system from EXEC Privilege mode.
+The system stores files on the <strong>internal Flash</strong> by default but can be configured to store files elsewhere.</p>
+
+<h3 id="show-file-systems">show file-systems</h3>
+
+<p>To view file system information, use the following command - .</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# show file-systems
+
+      Size(b)     Free(b)      Feature      Type   Flags  Prefixes
+   2368282624  2304512000        FAT32 USERFLASH      rw  flash:
+            -           -  unformatted USERFLASH      rw  fcmfs:
+    218103808    64708608      Unknown  NFSMOUNT      rw  nfsmount:
+            -           -            -   network      rw  ftp:
+            -           -            -   network      rw  tftp:
+            -           -            -   network      rw  scp:
+            -           -            -   network      rw  http:
+            -           -            -   network      rw  https:
+</code></pre></div></div>
+
+<h2 id="operations-with-local-filesystem">Operations with local Filesystem</h2>
+
+<h3 id="dir">dir</h3>
+
+<p>Display the files in a file system. The default is the current directory.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# dir
+
+Directory of flash:
+
+  1  drwx       4096   Jan 01 1980 00:00:00 +00:00 .  
+  2  drwx       3580   Jul 18 2020 22:09:12 +00:00 ..  
+  3  drwx       4096   Dec 10 2019 14:49:54 +00:00 TRACE_LOG_DIR  
+  4  drwx       4096   Dec 10 2019 14:49:54 +00:00 CONFD_LOG_DIR  
+  5  drwx       4096   Dec 10 2019 14:49:54 +00:00 CORE_DUMP_DIR  
+  6  d---       4096   Dec 10 2019 14:49:54 +00:00 ADMIN_DIR  
+  7  drwx       4096   Dec 10 2019 14:49:54 +00:00 RUNTIME_PATCH_DIR  
+  8  -rwx          1   Jul 03 2020 22:54:24 +00:00 boots.txt  
+  9  drwx       4096   Jul 14 2020 15:28:26 +00:00 CONFIG_TEMPLATE  
+ 10  -rwx          0   Jul 14 2020 15:28:56 +00:00 pdtrc.lo0  
+ 11  -rwx       4276   Jul 14 2020 15:29:04 +00:00 last-cold-st-config  
+ 12  -rwx       4435   Jul 03 2020 23:45:50 +00:00 startup-config  
+ 13  -rwx     314038   Jul 03 2020 23:45:54 +00:00 confd_cdb.tar.gz  
+ 14  -rwx         56   Jul 03 2020 23:45:54 +00:00 confd_cdb.tar.gz.version  
+ 15  -rwx          0   Jul 14 2020 15:28:26 +00:00 earlyCliParserDbg  
+
+flash: 2368282624 bytes total (2304438272 bytes free)
+</code></pre></div></div>
+
+<h3 id="mkdirrmdir">mkdir/rmdir</h3>
+
+<p>To create a directory on file system uses <code class="language-plaintext highlighter-rouge">mkdir</code>, to remove - <code class="language-plaintext highlighter-rouge">rmdir</code></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# mkdir tmp_dir
+
+DellEMC# dir tmp_dir
+Directory of flash:/tmp_dir
+
+  1  drwx       4096   Jul 18 2020 22:35:30 +00:00 .  
+  2  drwx       4096   Jan 01 1980 00:00:00 +00:00 ..  
+
+DellEMC# rmdir tmp_dir
+Proceed to remove the directory [confirm yes/no]: y   
+
+DellEMC# dir tmp_dir  
+% Error: The specified file or directory does not exist.
+</code></pre></div></div>
+
+<h3 id="cdpwd">cd/pwd</h3>
+
+<p>To change the default directory, use the following command.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cd directory
+</code></pre></div></div>
+
+<p>Display the current working directory.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pwd
+</code></pre></div></div>
+
+<h3 id="copy">copy</h3>
+
+<p>Copy one file to another location.
+Dell EMC Networking OS supports IPv4 and IPv6 addressing for FTP, HTTP, TFTP, and SCP (in the hostip field).</p>
+
+<p>Syntax: <code class="language-plaintext highlighter-rouge">copy source-file-url destination-file-url</code></p>
+
+<p>Example:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# copy startup-config startup-config.2
+!
+4435 bytes successfully copied
+</code></pre></div></div>
+
+<h3 id="rename">rename</h3>
+
+<p>Rename a file in the local file system.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# rename startup-config.2 startup-config.3
+</code></pre></div></div>
+
+<h3 id="show-file">show file</h3>
+
+<p>To show a content of text file use <code class="language-plaintext highlighter-rouge">show file</code> command. It will print a file into stdout of console. Example:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# show file startup-config.3
+
+! Version 9.13(0.1)
+! Last configuration change at Fri Jul  3 23:43:25 2020 by default
+! Startup-config last updated at Fri Jul  3 23:45:50 2020 by default
+!
+boot system stack-unit 1 primary system: A:
+boot system stack....
+</code></pre></div></div>
+
+<h3 id="delete">delete</h3>
+
+<p>Delete a file from the flash. After deletion, files cannot be restored.</p>
+
+<p>Syntax: <code class="language-plaintext highlighter-rouge">delete [flash://]filepath [no-confirm]</code></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">no-confirm</code> - does not require user input for each file prior to deletion.</li>
+</ul>
+
+<p>Example:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# delete flash://startup-config.2
+Proceed to delete startup-config.2 [confirm yes/no]: y
+
+DellEMC# delete startup-config.3 no-confirm
+</code></pre></div></div>
+
+<h3 id="save">save</h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">save</code> command save the output of <code class="language-plaintext highlighter-rouge">show</code> command into file on flash memory.
+The <code class="language-plaintext highlighter-rouge">save</code> entry must always be the last option.</p>
+
+<p>For example:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# show command-history | save flash://command-history.txt
+Start saving show command report .......
+
+DellEMC# dir command-history.txt
+Directory of flash:
+  1  -rwx      76096   Jul 18 2020 22:30:16 +00:00 command-history.txt
+</code></pre></div></div>
+
+<h2 id="copy-file-fromto-remote-network-device">Copy file from/to remote network device</h2>
+
+<p>Files can be copied from many places. You should input the URL to desired place.</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ftp</code>: ftp://userid:password@hostip/filepath</li>
+  <li><code class="language-plaintext highlighter-rouge">http</code>: http://hostip/filepath</li>
+  <li><code class="language-plaintext highlighter-rouge">nfsmount</code>: nfsmount://<mount-point>/filepath</mount-point></li>
+  <li><code class="language-plaintext highlighter-rouge">scp</code>: scp://userid:password@hostip/filepath</li>
+  <li><code class="language-plaintext highlighter-rouge">tftp</code>: tftp://hostip/filepath</li>
+</ul>
+
+<p>When copying a file to a remote location (for example, <code class="language-plaintext highlighter-rouge">scp</code>), enter only the keywords and DellOS prompts you need for the rest of the information. For example, you can enter <code class="language-plaintext highlighter-rouge">copy running-config scp:</code></p>
+
+<p>To copy a file to NFS server the remote directory need to be mounted. Use a command <code class="language-plaintext highlighter-rouge">mount nfs</code>. For example, mount nfs</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# mount nfs 192.168.101.2:/dell_shared /dell_shared
+</code></pre></div></div>
+
+<p>Examples:</p>
+<ol>
+  <li>Copy from remote system to <code class="language-plaintext highlighter-rouge">flash:</code> by SCP
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# copy scp://admin:some_strong_password@192.168.101.2/firmware.bin  flash://firmware.bin
+!
+65059 bytes successfully copied
+</code></pre></div>    </div>
+  </li>
+  <li>Copy back (from local to remote)
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# copy running-config scp://admin:some_strong_password@192.168.101.2/
+!
+4324 bytes successfully copied
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="verify">verify</h3>
+
+<p>Validate a file on the flash drive after it has been transferred to the system.</p>
+
+<p>Syntax: <code class="language-plaintext highlighter-rouge">verify {md5|sha256} file [hash-value]</code>
+Parameters:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">md5</code> - to use the MD5 message-digest algorithm.</li>
+  <li><code class="language-plaintext highlighter-rouge">sha256</code> - to use the SHA256 Secure Hash Algorithm</li>
+  <li><code class="language-plaintext highlighter-rouge">file</code> - a filename that will verified</li>
+  <li><code class="language-plaintext highlighter-rouge">hash-value</code> - the hash that has gotten on the remote system</li>
+</ul>
+
+<p>Example:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DellEMC# verify md5 firmware.bin 4659f3b278b52fb09c7ed759b2f10474
+MD5 hash VERIFIED for firmware.bin
+</code></pre></div></div>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>As you can see above many of Dell commands seems on Unix shell commands.
+In this post I would like to save in the “memory” my experience in file management Operations.
+I test it on the Dell Networking OS9 switch, so it helps you easy find a desired command in one page.
+This quick and small manual to work with files, firmware and cofigs without handling big official papers.
+Besides to know more about this commands see the links in the next section.</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://www.dell.com/support/article/en-us/how10841/how-to-manage-files-copy-and-delete-on-dell-networking-force10-switches?lang=en">How to manage files (Copy and Delete) on Dell Networking Force10 switches</a> - some short note about managing files on Dell site</li>
+  <li><a href="https://www.dell.com/support/home/en-us/product-support/product/force10-s4048-on/docs">PowerSwitch S4048-ON Documentation</a> - a page that consists all documentation for the 10G switch of Dell company</li>
+  <li><a href="https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/Dell-EMC-Networking-S4048-ON-Spec-Sheet.pdf">DELL EMC NETWORKING S4048-ON SWITCH</a> - Dell spec sheet for S4048–ON switch</li>
+  <li><a href="https://topics-cdn.dell.com/pdf/force10-s4048-on_administrator-guide7_en-us.pdf">Dell Command Line Reference Guide for the S4048–ON System</a> - Dell man page included full command list</li>
+  <li><a href="https://topics-cdn.dell.com/pdf/force10-s4048-on_administrator-guide8_en-us.pdf">Dell Configuration Guide for the S4048–ON System</a> - almost two thousands pages about configuration of Dell switch</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/dell" class="page__taxonomy-item" rel="tag">dell</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/networks" class="page__taxonomy-item" rel="tag">networks</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/sysad" class="page__taxonomy-item" rel="tag">sysad</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-07-19T00:00:00+03:00">July 19, 2020</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=DELL.+File+Management+on+S4048+switch+%28OS9-series+system%29%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fdell-file-management%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fdell-file-management%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fdell-file-management%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/sysad/wifi-cracking/" class="pagination--pager" title="Hacking. Wi-Fi Penetration on MacOS
+">Previous</a>
+    
+    
+      <a href="/eng-blog/sysad/dell-ssh-server-configure/" class="pagination--pager" title="DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

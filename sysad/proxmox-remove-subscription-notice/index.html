@@ -9,30 +9,30 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>BLOG: About IT, SysAd, Dev &amp; Ops - GAINANOV.PRO</title>
-<meta name="description" content="Hi! I’m Ruslan. I’m interested in the development of software and administration of systems. This is another personal blog about IT, servers and software. I’ve made the site for writing my notes about everything I have ever done. I hope it is helpful to someone.">
+<!-- begin _includes/seo.html --><title>Proxmox. Remove subscription notice - GAINANOV.PRO</title>
+<meta name="description" content="Removing madden subscription notice and disabling PVE repository from apt-update list.">
 
 
   <meta name="author" content="Ruslan Gainanov">
 
 
-<meta property="og:type" content="website">
+<meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="GAINANOV.PRO">
-<meta property="og:title" content="BLOG: About IT, SysAd, Dev &amp; Ops">
-<meta property="og:url" content="https://gainanov.pro/eng-blog/">
+<meta property="og:title" content="Proxmox. Remove subscription notice">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/sysad/proxmox-remove-subscription-notice/">
 
 
-  <meta property="og:description" content="Hi! I’m Ruslan. I’m interested in the development of software and administration of systems. This is another personal blog about IT, servers and software. I’ve made the site for writing my notes about everything I have ever done. I hope it is helpful to someone.">
+  <meta property="og:description" content="Removing madden subscription notice and disabling PVE repository from apt-update list.">
 
 
 
 
 
   <meta name="twitter:site" content="@gainanovrus">
-  <meta name="twitter:title" content="BLOG: About IT, SysAd, Dev &amp; Ops">
-  <meta name="twitter:description" content="Hi! I’m Ruslan. I’m interested in the development of software and administration of systems. This is another personal blog about IT, servers and software. I’ve made the site for writing my notes about everything I have ever done. I hope it is helpful to someone.">
-  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/">
+  <meta name="twitter:title" content="Proxmox. Remove subscription notice">
+  <meta name="twitter:description" content="Removing madden subscription notice and disabling PVE repository from apt-update list.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/sysad/proxmox-remove-subscription-notice/">
 
   
     <meta name="twitter:card" content="summary">
@@ -43,6 +43,8 @@
 
 
 
+  <meta property="article:published_time" content="2019-11-25T00:00:00+03:00">
+
 
 
 
@@ -52,11 +54,9 @@
   
 
 
-<link rel="canonical" href="https://gainanov.pro/eng-blog/">
+<link rel="canonical" href="https://gainanov.pro/eng-blog/sysad/proxmox-remove-subscription-notice/">
 
 
-
-  <link rel="next" href="https://gainanov.pro/eng-blog/page2/">
 
 
 <script type="application/ld+json">
@@ -154,7 +154,7 @@
 
   </head>
 
-  <body class="layout--home">
+  <body class="layout--single">
     <nav class="skip-links">
   <h2 class="screen-reader-text">Skip links</h2>
   <ul>
@@ -342,13 +342,112 @@
 
 
 
-  <div class="archive">
-    
-      <h1 id="page-title" class="page__title">BLOG: About IT, SysAd, Dev & Ops</h1>
-    
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Proxmox. Remove subscription notice">
+    <meta itemprop="description" content="Removing madden subscription notice and disabling PVE repository from apt-update list.">
+    <meta itemprop="datePublished" content="2019-11-25T00:00:00+03:00">
     
 
-<h3 class="archive__subtitle">Recent Posts</h3>
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Proxmox. Remove subscription notice
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <blockquote>
+  <p>You do not have a valid subscription for this server. Please visit www.proxmox.com to get a list of available options</p>
+</blockquote>
+
+<p>If you also like me tired to view this message again and again after login in to
+<a href="https://www.proxmox.com/en/">Proxmox</a> you want to remove it. This message appears from 5.1 version and newer (including 6.0).</p>
+
+<p>To remove it run the command bellow.
+You will need to SSH to your Proxmox machine or use the node console through the PVE web interface.</p>
+
+<p>Run the following commands and then clear your browser cache:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sed -i.bak "s/data.status !== 'Active'/false/g" /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+
+systemctl restart pveproxy.service
+</code></pre></div></div>
+
+<p>After that the message will be hided. But for full disable unnecessary Enterprise functions need remove PVE repository from <code class="language-plaintext highlighter-rouge">apt</code> repo list.</p>
+
+<p>Remove the repository:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rm /etc/apt/sources.list.d/pve-enterprise.list
+</code></pre></div></div>
+
+<p>Add a repository for free community version (<code class="language-plaintext highlighter-rouge">buster</code> - for Debian 10 (<strong>Proxmox 6.x</strong>)):</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo "deb http://download.proxmox.com/debian/pve buster pve-no-subscription" &gt; /etc/apt/sources.list.d/pve-install-repo.list
+
+wget http://download.proxmox.com/debian/proxmox-ve-release-6.x.gpg -O /etc/apt/trusted.gpg.d/proxmox-ve-release-6.x.gpg
+</code></pre></div></div>
+
+<p>Next update packages and system and reboot PVE.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt-get update &amp;&amp; apt-get upgrade -y
+apt-get dist-upgrade
+reboot
+</code></pre></div></div>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://johnscs.com/remove-proxmox51-subscription-notice/">Remove Subscription Notice</a> -
+There I found the solution to remove the notice in one line</li>
+  <li><a href="https://www.init-d.ru/2018/03/21/proxmox-message/">Как убрать сообщение о подписке в Proxmox?</a> -
+Second part of this instruction</li>
+  <li><a href="https://forum.netgate.com/topic/120102/proxmox-ceph-zfs-pfsense-%D0%B8-%D0%B2%D1%81%D0%B5-%D0%B2%D1%81%D0%B5-%D0%B2%D1%81%D0%B5">Proxmox, Ceph, ZFS, pfsense и все-все-все</a> -
+The maximum information about Proxmox on one page</li>
+</ul>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/debian" class="page__taxonomy-item" rel="tag">debian</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/linux" class="page__taxonomy-item" rel="tag">linux</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/proxmox" class="page__taxonomy-item" rel="tag">proxmox</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/vm" class="page__taxonomy-item" rel="tag">vm</a>
+    
+    </span>
+  </p>
 
 
 
@@ -356,8 +455,67 @@
   
 
 
+  
+  
+  
 
-<div class="list__item">
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/sysad" class="page__taxonomy-item" rel="tag">sysad</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-11-25T00:00:00+03:00">November 25, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Proxmox.+Remove+subscription+notice%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fproxmox-remove-subscription-notice%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fproxmox-remove-subscription-notice%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fsysad%2Fproxmox-remove-subscription-notice%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/sysad/esxi-enable-nested-virtualization/" class="pagination--pager" title="ESXi. Enabling Nested virtualization
+">Previous</a>
+    
+    
+      <a href="/eng-blog/sysad/esxi-ntp-configuration/" class="pagination--pager" title="ESXi. NTP Configuration
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -372,7 +530,7 @@
 
 
 
-  7 minute read
+  8 minute read
 
 </p>
     
@@ -381,12 +539,12 @@
   </article>
 </div>
 
+        
+          
 
-  
 
 
-
-<div class="list__item">
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -410,12 +568,12 @@
   </article>
 </div>
 
+        
+          
 
-  
 
 
-
-<div class="list__item">
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -439,12 +597,12 @@
   </article>
 </div>
 
+        
+          
 
-  
 
 
-
-<div class="list__item">
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -468,94 +626,13 @@
   </article>
 </div>
 
-
+        
+      </div>
+    </div>
   
-
-
-
-<div class="list__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/eng-blog/sysad/dell-file-management/" rel="permalink">DELL. File Management on S4048 switch (OS9-series system)
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  4 minute read
-
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">Some useful notes for working with files (save, copy and transfer) on Dell Networking system.
-</p>
-  </article>
+  
 </div>
 
-
-
-
-<nav class="pagination">
-  
-  <ul>
-    
-    
-    <li><a href="#" class="disabled"><span aria-hidden="true">Previous</span></a></li>
-    
-
-    
-    
-      <li><a href="#" class="disabled current">1</a></li>
-    
-
-    
-    
-
-    
-    
-    
-
-    
-      
-        
-        
-        
-        <li><a href="/eng-blog/page2/">2</a></li>
-      
-    
-      
-        
-        
-        
-        <li><a href="/eng-blog/page3/">3</a></li>
-      
-    
-
-    
-    
-      <li><a href="#" class="disabled">&hellip;</a></li>
-    
-
-    
-      <li><a href="/eng-blog/page10/">10</a></li>
-    
-
-    
-    
-      <li><a href="/eng-blog/page2/">Next</a></li>
-    
-  </ul>
-</nav>
-
-
-
-  </div>
-</div>
     </div>
 
     

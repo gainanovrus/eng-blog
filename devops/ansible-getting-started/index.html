@@ -1,0 +1,810 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Ansible. Getting started - GAINANOV.PRO</title>
+<meta name="description" content="In this post I will speak about installation and configuration the remote and control machine for running basic commands and the first playbook.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="Ansible. Getting started">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/devops/ansible-getting-started/">
+
+
+  <meta property="og:description" content="In this post I will speak about installation and configuration the remote and control machine for running basic commands and the first playbook.">
+
+
+
+  <meta property="og:image" content="https://gainanov.pro/eng-blog/assets/images/ansible-getting-started.png">
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="Ansible. Getting started">
+  <meta name="twitter:description" content="In this post I will speak about installation and configuration the remote and control machine for running basic commands and the first playbook.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/devops/ansible-getting-started/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://gainanov.pro/eng-blog/assets/images/ansible-getting-started.png">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2019-01-09T00:00:00+03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/devops/ansible-getting-started/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Ansible. Getting started">
+    <meta itemprop="description" content="In this post I will speak about installation and configuration the remote and control machine for running basic commands and the first playbook.">
+    <meta itemprop="datePublished" content="2019-01-09T00:00:00+03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Ansible. Getting started
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  4 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#installation">Installation</a></li>
+  <li><a href="#configuration">Configuration</a></li>
+  <li><a href="#prepare-control-host">Prepare Control host</a></li>
+  <li><a href="#configure-ansible">Configure Ansible</a></li>
+  <li><a href="#edit-inventory">Edit Inventory</a></li>
+  <li><a href="#test-access">Test access</a></li>
+  <li><a href="#write-playbook">Write Playbook</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <h2 id="installation">Installation</h2>
+
+<p>Ansible communicates with remote machines over SSH. Each host should be accessed by SSH.
+In the beginning sure that hosts has reached like this</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ssh root@192.168.123.101
+Last login: Wed Jan  9 14:04:15 2019 from localhost
+#
+</code></pre></div></div>
+<p>If you see it, it has enough to communicate with managed host 192.168.123.123 with Ansible.</p>
+
+<p>Next step is installation Ansible to control machine.
+On <strong>CentOS</strong> (RHEL):</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo yum install ansible
+</code></pre></div></div>
+
+<p>On <strong>Ubuntu</strong> (via APT) run these commands:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get update
+$ sudo apt-get install software-properties-common
+$ sudo apt-add-repository --yes --update ppa:ansible/ansible
+$ sudo apt-get install ansible
+</code></pre></div></div>
+
+<h2 id="configuration">Configuration</h2>
+
+<h2 id="prepare-control-host">Prepare Control host</h2>
+
+<p>By default, OpenSSH use options from file <code class="language-plaintext highlighter-rouge">~/.ssh/config</code>. I recommend add information about remote host there. For instance:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Host websrv1
+HostName 192.168.123.101
+User root
+Port 43211
+</code></pre></div></div>
+<p>With it communication with host will be easy (<code class="language-plaintext highlighter-rouge">ssh websrv1</code>).</p>
+
+<h2 id="configure-ansible">Configure Ansible</h2>
+
+<p>Create the directory that will include all playbooks and tasks. For example I create the <code class="language-plaintext highlighter-rouge">~/myansible</code> dir.
+By default options are loading from file <code class="language-plaintext highlighter-rouge">ansible.cfg</code> in the current directory and after from system path (<code class="language-plaintext highlighter-rouge">/etc/ansible/ansible.cfg</code>).
+So have to create the <code class="language-plaintext highlighter-rouge">~/myansible/ansible.cfg</code> file. And write next content into it:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[defaults]
+inventory      = hosts
+</code></pre></div></div>
+<p>There are means that inventory file was found in the file hosts from the current directory.
+It helps us for storing everything in one directory.</p>
+
+<h2 id="edit-inventory">Edit Inventory</h2>
+
+<p>Use the simple inventory includes one host. Create a file <code class="language-plaintext highlighter-rouge">hosts</code> with next contents:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>all:
+  hosts:
+    websrv1:
+</code></pre></div></div>
+
+<h2 id="test-access">Test access</h2>
+
+<p>Ok, now we can run ansible task that will executed on remote host <code class="language-plaintext highlighter-rouge">websrv1</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ansible websrv1 -m ping
+websrv1 | SUCCESS =&gt; {
+    "changed": false,
+    "ping": "pong"
+}
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">SUCCESS</code> status telling us that everything is fine and control machine can communicate with selected remote host.</p>
+
+<p>Now run a live command on all of your nodes:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ansible websrv1 -a "hostname"
+websrv1 | SUCCESS | rc=0 &gt;&gt;
+stand
+</code></pre></div></div>
+
+<p>Congratulations!
+But Ansible is not just about running commands, it also has powerful configuration management and deployment features.
+Lets try to write an our playbook.</p>
+
+<h2 id="write-playbook">Write Playbook</h2>
+
+<p>Create a simple playbook that will install nginx web server and will start the daemon. Then test it in the browser.
+I will use a server with Debian system.</p>
+
+<p>But before let explain what I did if ansible didn’t exist. I would connect to the server over SSH and install the nginx package with APT</p>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ssh websrv1
+root@websrv1:~# apt update
+Ign:1 http://mirror.yandex.ru/debian stretch InRelease
+Get:2 http://mirror.yandex.ru/debian stretch-updates InRelease <span class="o">[</span>91.0 kB]
+Get:3 http://security.debian.org/debian-security stretch/updates InRelease <span class="o">[</span>94.3 kB]
+Hit:4 http://mirror.yandex.ru/debian stretch Release
+Get:5 http://mirror.yandex.ru/debian stretch-updates/main Sources.diff/Index <span class="o">[</span>6,640 B]
+Get:6 http://mirror.yandex.ru/debian stretch-updates/main amd64 Packages.diff/Index <span class="o">[</span>6,640 B]
+Get:7 http://mirror.yandex.ru/debian stretch-updates/main Sources 2019-01-02-2012.38.pdiff <span class="o">[</span>551 B]
+Get:7 http://mirror.yandex.ru/debian stretch-updates/main Sources 2019-01-02-2012.38.pdiff <span class="o">[</span>551 B]
+Get:9 http://mirror.yandex.ru/debian stretch-updates/main amd64 Packages 2019-01-02-2012.38.pdiff <span class="o">[</span>332 B]
+Get:9 http://mirror.yandex.ru/debian stretch-updates/main amd64 Packages 2019-01-02-2012.38.pdiff <span class="o">[</span>332 B]
+Get:10 http://security.debian.org/debian-security stretch/updates/main Sources <span class="o">[</span>188 kB]
+Hit:11 https://deb.nodesource.com/node_10.x stretch InRelease
+Get:12 http://security.debian.org/debian-security stretch/updates/main amd64 Packages <span class="o">[</span>464 kB]
+Fetched 851 kB <span class="k">in </span>2s <span class="o">(</span>329 kB/s<span class="o">)</span>
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+
+root@websrv1:~# apt <span class="nb">install</span> <span class="nt">-y</span> nginx
+Reading package lists... Done
+Building dependency tree
+...
+Setting up nginx <span class="o">(</span>1.10.3-1+deb9u2<span class="o">)</span> ...
+</code></pre></div></div>
+<p>After that I can see the a ‘hello’ page from Nginx by <code class="language-plaintext highlighter-rouge">192.168.123.101</code> local network address (it corresponds to the <code class="language-plaintext highlighter-rouge">websrv1</code> host).</p>
+
+<p><img src="https://gainanov.pro/eng-blog/assets/images/ansible/ansible-nginx-hello.png" alt="ansible-nginx-hello" class="align-center" /></p>
+
+<p>Good! Now the host <code class="language-plaintext highlighter-rouge">websrv1</code> has work as real web server.
+Then write the same with Ansible’s playbook. Open the file <code class="language-plaintext highlighter-rouge">~/myansible/nginx-install.yml</code> and add</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">hosts</span><span class="pi">:</span> <span class="s">websrv1</span>
+  <span class="na">tasks</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install nginx web server</span>
+      <span class="na">apt</span><span class="pi">:</span>
+        <span class="na">pkg</span><span class="pi">:</span> <span class="s">nginx</span>
+        <span class="na">state</span><span class="pi">:</span> <span class="s">installed</span>
+        <span class="na">update_cache</span><span class="pi">:</span> <span class="no">true</span>
+</code></pre></div></div>
+
+<p>We just tell Ansible the it should use an <a href="https://docs.ansible.com/ansible/latest/modules/apt_module.html">apt module</a> and also update cache before.
+Ok, we clean our Debian system and restore it to the state when Nginx wouldn’t installed.
+Now we want to run this playbook. Use next command:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ansible-playbook websrv1 nginx-install.yml
+PLAY [websrv1] *********************
+
+GATHERING FACTS *********************
+ok: [websrv1]
+
+TASK: [Install nginx web server] *********************
+changed: [websrv1]
+
+PLAY RECAP *********************
+websrv1                        : ok=2    changed=1    unreachable=0    failed=0   
+</code></pre></div></div>
+
+<p>Our task was executed and it changes something in the server.
+The flag <code class="language-plaintext highlighter-rouge">changed</code> is telling about it.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>TASK: [Install nginx web server] *********************
+changed: [websrv1]
+</code></pre></div></div>
+
+<p>If we open the browser and input the server IP we view the nginx ‘hello’ page.
+The same that we have before.</p>
+
+<p>So we prepare the controller host for a big things.
+We installed Ansible, created a catalog (<code class="language-plaintext highlighter-rouge">~/myansible</code>) for the future complex playbooks, added a server in our host file.
+And we run simple task from playbook.
+Next, I recommend you to follow the documentation and learn more about <a href="https://docs.ansible.com/ansible/latest/user_guide/playbooks.html">playbooks</a>.</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://docs.ansible.com/ansible/latest/user_guide/intro_getting_started.html">Getting Started with Ansible</a> - A simple guide to Ansible’s community and resources.</li>
+  <li><a href="https://docs.ansible.com/">Ansible Documentation</a> - Covers all Ansible options in depth. There are few open source projects with documentation as clear and thorough.</li>
+  <li><a href="https://docs.ansible.com/ansible/latest/reference_appendices/glossary.html">Ansible Glossary</a> - If there is ever a term in this book you don’t seem to fully understand, check the glossary.</li>
+  <li><a href="https://leanpub.com/ansible-for-devops">Ansible for DevOps</a> - this book helps reach an expert level of Ansible using.</li>
+  <li><a href="https://www.youtube.com/playlist?list=PLFiccIuLB0OiWh7cbryhCaGPoqjQ62NpU">Ansible - A Beginner’s Tutorial</a> - youtube lessons about the basics of Ansible.</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/ansible" class="page__taxonomy-item" rel="tag">ansible</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/devops" class="page__taxonomy-item" rel="tag">devops</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/devops" class="page__taxonomy-item" rel="tag">devops</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-01-09T00:00:00+03:00">January 9, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Ansible.+Getting+started%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fansible-getting-started%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fansible-getting-started%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fansible-getting-started%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/devops/ansible-architecture/" class="pagination--pager" title="Ansible. Architecture
+">Previous</a>
+    
+    
+      <a href="/eng-blog/devops/ansible-preferred-modules/" class="pagination--pager" title="Ansible. My preferred modules
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

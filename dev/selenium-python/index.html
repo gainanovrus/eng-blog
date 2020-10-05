@@ -1,0 +1,808 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Web Automation. Selenium WebDriver and Python - GAINANOV.PRO</title>
+<meta name="description" content="Selenium is an open-source web-based automation tool. It can be used for many purposes: to test designed web applications, to scrapping content from web pages, etc. This post will explain some basic implementation of Selenium with Python.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="Web Automation. Selenium WebDriver and Python">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/dev/selenium-python/">
+
+
+  <meta property="og:description" content="Selenium is an open-source web-based automation tool. It can be used for many purposes: to test designed web applications, to scrapping content from web pages, etc. This post will explain some basic implementation of Selenium with Python.">
+
+
+
+  <meta property="og:image" content="https://gainanov.pro/eng-blog/assets/images/selenium/selenium_python_logo.png">
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="Web Automation. Selenium WebDriver and Python">
+  <meta name="twitter:description" content="Selenium is an open-source web-based automation tool. It can be used for many purposes: to test designed web applications, to scrapping content from web pages, etc. This post will explain some basic implementation of Selenium with Python.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/dev/selenium-python/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://gainanov.pro/eng-blog/assets/images/selenium/selenium_python_logo.png">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2020-02-06T00:00:00+03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/dev/selenium-python/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Web Automation. Selenium WebDriver and Python">
+    <meta itemprop="description" content="Selenium is an open-source web-based automation tool. It can be used for many purposes: to test designed web applications, to scrapping content from web pages, etc. This post will explain some basic implementation of Selenium with Python.">
+    <meta itemprop="datePublished" content="2020-02-06T00:00:00+03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Web Automation. Selenium WebDriver and Python
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#setup-and-tools">Setup and tools</a>
+    <ul>
+      <li><a href="#install-selenium-using-pip">install selenium using pip</a></li>
+      <li><a href="#install-chrome-driver">install chrome driver</a></li>
+      <li><a href="#initiate-the-driver">initiate the driver</a></li>
+    </ul>
+  </li>
+  <li><a href="#lets-automate">Let’s Automate</a>
+    <ul>
+      <li><a href="#first-script">First Script</a></li>
+      <li><a href="#more-action">More action</a>
+        <ul>
+          <li><a href="#search-in-google">search in google</a></li>
+          <li><a href="#waiting">waiting</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p><a href="https://selenium.dev/">Selenium</a> is a Web Browser Automation Tool.
+Primarily, it is for automating web applications for testing purposes, but is certainly not limited to just that.
+It allows you to open a browser of your choice &amp; perform tasks as a human being would, such as:</p>
+<ul>
+  <li>Clicking buttons</li>
+  <li>Entering information in forms</li>
+  <li>Searching for specific information on the web pages</li>
+</ul>
+
+<h2 id="setup-and-tools">Setup and tools</h2>
+
+<p>I’m assuming you know how to use pip and virtual environments. If not, start here.</p>
+
+<h3 id="install-selenium-using-pip">install selenium using pip</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install selenium
+</code></pre></div></div>
+
+<h3 id="install-chrome-driver">install chrome driver</h3>
+
+<p>You will also need the Google Chrome Driver found <a href="https://sites.google.com/a/chromium.org/chromedriver/">here</a>.
+If you run into an error: <code class="language-plaintext highlighter-rouge">chromedriver</code> executable needs to be in <code class="language-plaintext highlighter-rouge">PATH</code>, you have a few options.
+First, add <code class="language-plaintext highlighter-rouge">chromedriver</code> to your system path variables.
+Second, add <code class="language-plaintext highlighter-rouge">chromedriver.exe</code> to your Scripts folder of the virtual environment.
+Third, explicitly give the location of the driver.</p>
+
+<h3 id="initiate-the-driver">initiate the driver</h3>
+
+<p>I will use MacOS and the last option that explicitly point to <code class="language-plaintext highlighter-rouge">chromedriver</code>.
+So, for using webdriver open Python console or create py-file and insert initialization commands:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="p">.</span><span class="n">Chrome</span><span class="p">(</span><span class="n">executable_path</span><span class="o">=</span><span class="s">'./chromedriver'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="lets-automate">Let’s Automate</h2>
+
+<h3 id="first-script">First Script</h3>
+
+<p>Our first example will be simple.
+The script will open a browser, input some URL (<code class="language-plaintext highlighter-rouge">https://www.google.com</code>) and get title of the loaded site.
+Returned title will print into console.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+
+<span class="n">chrome</span> <span class="o">=</span> <span class="n">webdriver</span><span class="p">.</span><span class="n">Chrome</span><span class="p">(</span><span class="n">executable_path</span><span class="o">=</span><span class="s">'./chromedriver'</span><span class="p">)</span>
+<span class="n">chrome</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'https://www.google.com'</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">chrome</span><span class="p">.</span><span class="n">title</span><span class="p">)</span>
+<span class="n">chrome</span><span class="p">.</span><span class="n">quit</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="more-action">More action</h3>
+
+<p>You can find proper documentation on selenium <a href="https://selenium-python.readthedocs.io/">here</a>.</p>
+
+<p>Following methods will help to find elements in a webpage (these methods will return a list):</p>
+<ul>
+  <li>find_elements_by_name</li>
+  <li>find_elements_by_xpath</li>
+  <li>find_elements_by_link_text</li>
+  <li>find_elements_by_partial_link_text</li>
+  <li>find_elements_by_tag_name</li>
+  <li>find_elements_by_class_name</li>
+  <li>find_elements_by_css_selector</li>
+</ul>
+
+<h4 id="search-in-google">search in google</h4>
+
+<p>Once we make a request and it is successful we need to get a response.
+With response we can make some actions for example input a search string.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.keys</span> <span class="kn">import</span> <span class="n">Keys</span>
+
+<span class="n">chrome</span> <span class="o">=</span> <span class="n">webdriver</span><span class="p">.</span><span class="n">Chrome</span><span class="p">(</span><span class="n">executable_path</span><span class="o">=</span><span class="s">'./chromedriver'</span><span class="p">)</span>
+
+<span class="n">chrome</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"https://www.google.com"</span><span class="p">)</span>
+<span class="n">element</span> <span class="o">=</span> <span class="n">chrome</span><span class="p">.</span><span class="n">find_element_by_xpath</span><span class="p">(</span><span class="s">'//input[@name="q"]'</span><span class="p">)</span>
+<span class="n">element</span><span class="p">.</span><span class="n">click</span><span class="p">()</span>
+<span class="n">element</span><span class="p">.</span><span class="n">send_keys</span><span class="p">(</span><span class="s">'site:gainanov.pro Web Automation: Selenium WebDriver and Python'</span><span class="p">)</span>
+<span class="n">element</span><span class="p">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">Keys</span><span class="p">.</span><span class="n">RETURN</span><span class="p">)</span>
+
+<span class="n">chrome</span><span class="p">.</span><span class="n">quit</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>XPaths allow the script to determine the exact web element you want.
+In the XPath, double forward slash (<code class="language-plaintext highlighter-rouge">//</code>) means find an element anywhere on the page.
+The star (<code class="language-plaintext highlighter-rouge">*</code>) means find any element.
+The <code class="language-plaintext highlighter-rouge">@</code> sign specifies the attribute you want.
+In this case, I wanted input element with attribute name=”q” - <code class="language-plaintext highlighter-rouge">//input[@name="q"]</code>.</p>
+
+<p>Once you grab a web element, you can act with elements.
+For example, I send a search phrase and press return key with <code class="language-plaintext highlighter-rouge">send_keys</code> method.</p>
+
+<p>Read the <a href="https://selenium-python.readthedocs.io/locating-elements.html#locating-by-xpath">documentation</a> and <a href="https://www.lambdatest.com/blog/complete-guide-for-using-xpath-in-selenium-with-examples">examples</a>, you can search by XPath or by other means.</p>
+
+<h4 id="waiting">waiting</h4>
+
+<p>Selenium Webdriver provides two types of waits - <strong>implicit</strong> &amp; <strong>explicit</strong>.
+An explicit wait makes WebDriver wait for a certain condition to occur before proceeding further with execution.
+An implicit wait makes WebDriver poll the DOM for a certain amount of time when trying to locate an element.</p>
+
+<p>Change the row with <code class="language-plaintext highlighter-rouge">find_element_by_xpath</code> method to new the method with explicit waits.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.by</span> <span class="kn">import</span> <span class="n">By</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.support.ui</span> <span class="kn">import</span> <span class="n">WebDriverWait</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.support</span> <span class="kn">import</span> <span class="n">expected_conditions</span> <span class="k">as</span> <span class="n">EC</span>
+
+<span class="c1"># ...
+</span><span class="n">element</span> <span class="o">=</span> <span class="n">WebDriverWait</span><span class="p">(</span><span class="n">chrome</span><span class="p">,</span> <span class="mi">10</span><span class="p">).</span><span class="n">until</span><span class="p">(</span>
+        <span class="n">EC</span><span class="p">.</span><span class="n">visibility_of_element_located</span><span class="p">((</span><span class="n">By</span><span class="p">.</span><span class="n">XPATH</span><span class="p">,</span> <span class="s">"//input[@name='q']"</span><span class="p">)))</span>
+<span class="c1"># ...
+</span></code></pre></div></div>
+<p>This waits up to 10 seconds before throwing a <code class="language-plaintext highlighter-rouge">TimeoutException</code> unless it finds the element to return within 10 seconds.</p>
+
+<p>An implicit wait tells WebDriver to poll the DOM for a certain amount of time when trying to find any element (or elements) not immediately available.
+The default setting is 0.
+Once set, the implicit wait is set for the life of the WebDriver object.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">chrome</span><span class="p">.</span><span class="n">implicitly_wait</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1"># seconds
+</span></code></pre></div></div>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>You now have the foundational skills necessary to scrape websites and automate test a web interface.
+But this solution can be run only on local environment.
+For the best performance and remote testing read my next <a href="/eng-blog/devops/selenium-in-docker-with-selenoid/">post</a>.
+It will include materials about <a href="https://aerokube.com/selenoid/latest/">Selenoid</a> can help you save time to run parallel scripts remote.</p>
+
+<p>Thank you for reading.</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://www.edureka.co/blog/what-is-selenium/">What is Selenium? Getting started with Selenium Automation Testing</a> - good explanation from Edureka education platform</li>
+  <li><a href="https://www.edureka.co/blog/xpath-in-selenium/">How to Get Started with XPath in Selenium – XPath Tutorial</a> - Getting started XPath</li>
+  <li><a href="https://selenium-python.readthedocs.io/">Selenium with Python</a> - Selenium library for Python</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/python" class="page__taxonomy-item" rel="tag">python</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/qa" class="page__taxonomy-item" rel="tag">QA</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/scrapping" class="page__taxonomy-item" rel="tag">scrapping</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/selenium" class="page__taxonomy-item" rel="tag">selenium</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/testing" class="page__taxonomy-item" rel="tag">testing</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/dev" class="page__taxonomy-item" rel="tag">dev</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-02-06T00:00:00+03:00">February 6, 2020</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Web+Automation.+Selenium+WebDriver+and+Python%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdev%2Fselenium-python%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdev%2Fselenium-python%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdev%2Fselenium-python%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/sysad/dell-switch-console-commands/" class="pagination--pager" title="DELL. CLI commands
+">Previous</a>
+    
+    
+      <a href="/eng-blog/devops/selenium-in-docker-with-selenoid/" class="pagination--pager" title="Selenoid. Selenium in Docker
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

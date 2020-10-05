@@ -1,0 +1,1181 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Ansible. My preferred modules - GAINANOV.PRO</title>
+<meta name="description" content="Ansible ships with a number of modules (module library) that can be executed directly on remote hosts or through Playbooks. Modules are the ones that do the actual work in Ansible. Ansible provides over 2000 modules. There is less 40 most used from them. I explain about my preferred modules in this post.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="Ansible. My preferred modules">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/devops/ansible-preferred-modules/">
+
+
+  <meta property="og:description" content="Ansible ships with a number of modules (module library) that can be executed directly on remote hosts or through Playbooks. Modules are the ones that do the actual work in Ansible. Ansible provides over 2000 modules. There is less 40 most used from them. I explain about my preferred modules in this post.">
+
+
+
+  <meta property="og:image" content="https://gainanov.pro/eng-blog/assets/images/ansible-preferred-modules.png">
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="Ansible. My preferred modules">
+  <meta name="twitter:description" content="Ansible ships with a number of modules (module library) that can be executed directly on remote hosts or through Playbooks. Modules are the ones that do the actual work in Ansible. Ansible provides over 2000 modules. There is less 40 most used from them. I explain about my preferred modules in this post.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/devops/ansible-preferred-modules/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://gainanov.pro/eng-blog/assets/images/ansible-preferred-modules.png">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2019-01-18T00:00:00+03:00">
+
+
+
+  <meta property="article:modified_time" content="2019-01-21T00:00:00+03:00">
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/devops/ansible-preferred-modules/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Ansible. My preferred modules">
+    <meta itemprop="description" content="Ansible ships with a number of modules (module library) that can be executed directly on remote hosts or through Playbooks. Modules are the ones that do the actual work in Ansible. Ansible provides over 2000 modules. There is less 40 most used from them. I explain about my preferred modules in this post.">
+    <meta itemprop="datePublished" content="2019-01-18T00:00:00+03:00">
+    <meta itemprop="dateModified" content="2019-01-21T00:00:00+03:00">
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Ansible. My preferred modules
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  9 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#copy">copy</a></li>
+  <li><a href="#fetch">fetch</a></li>
+  <li><a href="#template">template</a></li>
+  <li><a href="#file">file</a></li>
+  <li><a href="#synchronize">synchronize</a></li>
+  <li><a href="#command">command</a></li>
+  <li><a href="#shell">shell</a></li>
+  <li><a href="#raw">raw</a></li>
+  <li><a href="#service">service</a></li>
+  <li><a href="#yum">yum</a></li>
+  <li><a href="#apt">apt</a></li>
+  <li><a href="#pkgng">pkgng</a></li>
+  <li><a href="#apt_repository">apt_repository</a></li>
+  <li><a href="#yum_repository">yum_repository</a></li>
+  <li><a href="#user">user</a></li>
+  <li><a href="#authorized_key">authorized_key</a></li>
+  <li><a href="#lineinfile">lineinfile</a></li>
+  <li><a href="#blockinfile">blockinfile</a></li>
+  <li><a href="#debug">debug</a></li>
+  <li><a href="#pause">pause</a></li>
+  <li><a href="#fail">fail</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p><a href="https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html">Modules</a> are the main building blocks of Ansible and are basically reusable scripts that are used by Ansible playbooks.
+Ansible comes with a number of reusable modules.
+These include functionality for controlling services, software package installation, working with files and directories etc.</p>
+
+<p>In the <a href="/eng-blog/devops/ansible-getting-started/">previous</a> article was showed about basic actions with Ansible like a execution a task, a playbook.
+This one explains modules that I often use in playbooks. It covers over 80% cases of using Ansible.
+I want to write it for storing information in one page.
+It expected you know how to write and custom Ansible playbook.</p>
+
+<p>For start see the next simple task that used module <code class="language-plaintext highlighter-rouge">reboot</code> for <a href="https://docs.ansible.com/ansible/latest/modules/reboot_module.html">rebooting a server</a>:</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Reboot a slow machine that might have lots of updates to apply</span>
+  <span class="na">reboot</span><span class="pi">:</span>
+    <span class="na">reboot_timeout</span><span class="pi">:</span> <span class="m">3600</span>
+</code></pre></div></div>
+
+<p>In there the field <code class="language-plaintext highlighter-rouge">name</code> is a some description that helps to understand what doing this task.
+The keyword <code class="language-plaintext highlighter-rouge">reboot</code> is a name of used module. And the module could have a parameters that write with new row begins with a indention.
+The <code class="language-plaintext highlighter-rouge">reboot_timeout</code> is a name of parameter that need to setup the maximum seconds to wait for machine to reboot, <code class="language-plaintext highlighter-rouge">3600</code> - value of the parameter.
+Also you could write the parameters in one row (i.e. <code class="language-plaintext highlighter-rouge">reboot: reboot_timeout=3600</code>) but I don’t recommend do it because it has reduce readability.</p>
+
+<p>Ok, now I list the my list of ‘must have’ modules.</p>
+
+<h2 id="copy">copy</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/copy_module.html"><code class="language-plaintext highlighter-rouge">copy</code></a> module copies a file from the local or remote machine to a location on the remote machine.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Copying file with owner and permissions</span>
+  <span class="na">copy</span><span class="pi">:</span>
+    <span class="na">src</span><span class="pi">:</span> <span class="s">/srv/myfiles/foo.conf</span>
+    <span class="na">dest</span><span class="pi">:</span> <span class="s">/etc/foo.conf</span>
+    <span class="na">owner</span><span class="pi">:</span> <span class="s">foo</span>
+    <span class="na">group</span><span class="pi">:</span> <span class="s">foo</span>
+    <span class="na">mode</span><span class="pi">:</span> <span class="m">0644</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Copy modules.d directory to remote hosts</span>
+  <span class="na">copy</span><span class="pi">:</span>
+    <span class="na">src</span><span class="pi">:</span>  <span class="s">config/filebeat/modules.d/</span>
+    <span class="na">dest</span><span class="pi">:</span> <span class="s">/etc/filebeat/modules.d/</span>
+    <span class="na">directory_mode</span><span class="pi">:</span> <span class="s">yes</span>
+    <span class="na">owner</span><span class="pi">:</span> <span class="s">root</span>
+    <span class="na">group</span><span class="pi">:</span> <span class="s">root</span>
+    <span class="na">mode</span><span class="pi">:</span>  <span class="m">0644</span>
+</code></pre></div></div>
+
+<h2 id="fetch">fetch</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/fetch_module.html"><code class="language-plaintext highlighter-rouge">fetch</code></a> module works like <code class="language-plaintext highlighter-rouge">copy</code>, but in reverse.
+It is used for fetching files from remote machines and storing them locally in a file tree, organized by hostname.
+It works with only ONE file (not directory).</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Copy file into local storage in /tmp/fetched/host.example.com/tmp/somefile</span>
+<span class="pi">-</span> <span class="na">fetch</span><span class="pi">:</span>
+    <span class="na">src</span><span class="pi">:</span> <span class="s">/tmp/somefile</span>
+    <span class="na">dest</span><span class="pi">:</span> <span class="s">/tmp/fetched</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Copy ssh_key.pub to master machine</span>
+  <span class="na">fetch</span><span class="pi">:</span>
+    <span class="na">src</span><span class="pi">:</span> <span class="s">/root/.ssh/id_rsa.pub</span>
+    <span class="na">dest</span><span class="pi">:</span> <span class="s2">"</span><span class="s">./"</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Copy postgresql config file to local machine</span>
+  <span class="na">fetch</span><span class="pi">:</span>
+    <span class="na">src</span><span class="pi">:</span> <span class="s">/usr/local/pgsql/data/postgresql.conf</span>
+    <span class="na">dest</span><span class="pi">:</span> <span class="s2">"</span><span class="s">backup/pgconf/{{</span><span class="nv"> </span><span class="s">inventory_hostname</span><span class="nv"> </span><span class="s">}}/"</span>
+    <span class="na">flat</span><span class="pi">:</span> <span class="s">yes</span>
+</code></pre></div></div>
+
+<h2 id="template">template</h2>
+
+<p>Templates are processed by the <a href="http://jinja.pocoo.org/docs/">Jinja2</a> templating language.
+<a href="https://docs.ansible.com/ansible/latest/modules/template_module.html">This module</a> like <code class="language-plaintext highlighter-rouge">copy</code> module - copies files to remote hosts.
+But it has provide autocomplete special files - templates, that include variables in them.
+For instance the template has contents <code class="language-plaintext highlighter-rouge">This is a test file on {{ ansible_hostname }}</code>.
+After run playbook with <code class="language-plaintext highlighter-rouge">template</code> task, the file will be copied and included <code class="language-plaintext highlighter-rouge">This is a test file on some_hostname</code>.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Copy a template /mytemplates/foo.j2 to master machine</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">src</span><span class="pi">:</span> <span class="s">/mytemplates/foo.j2</span>
+    <span class="na">dest</span><span class="pi">:</span> <span class="s">/etc/file.conf</span>
+    <span class="na">owner</span><span class="pi">:</span> <span class="s">root</span>
+    <span class="na">group</span><span class="pi">:</span> <span class="s">wheel</span>
+    <span class="na">mode</span><span class="pi">:</span> <span class="m">0644</span>
+</code></pre></div></div>
+
+<h2 id="file">file</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/file_module.html"><code class="language-plaintext highlighter-rouge">file</code></a> module creates or removes files, symlinks or directories.
+Also, set attributes of files, symlinks or directories.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Change file ownership, group and permissions</span>
+  <span class="na">file</span><span class="pi">:</span>
+    <span class="na">path</span><span class="pi">:</span> <span class="s">/etc/foo.conf</span>
+    <span class="na">owner</span><span class="pi">:</span> <span class="s">foo</span>
+    <span class="na">group</span><span class="pi">:</span> <span class="s">foo</span>
+    <span class="na">mode</span><span class="pi">:</span> <span class="m">0644</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Creates borgmatic directory if it does not exist</span>
+  <span class="na">file</span><span class="pi">:</span>
+    <span class="na">path</span><span class="pi">:</span> <span class="s">/etc/borgmatic</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">directory</span>
+    <span class="na">mode</span><span class="pi">:</span> <span class="m">0755</span>
+    <span class="na">owner</span><span class="pi">:</span> <span class="s">root</span>
+    <span class="na">group</span><span class="pi">:</span> <span class="s">root</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create file /etc/sudoers.d/telegraf</span>
+  <span class="na">file</span><span class="pi">:</span>
+    <span class="na">path</span><span class="pi">:</span> <span class="s">/etc/sudoers.d/telegraf</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">touch</span>
+    <span class="na">owner</span><span class="pi">:</span> <span class="s">root</span>
+    <span class="na">group</span><span class="pi">:</span> <span class="s">root</span>
+    <span class="na">mode</span><span class="pi">:</span> <span class="s2">"</span><span class="s">u=rw,g=,o="</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Remove file web-master.war</span>
+  <span class="na">file</span><span class="pi">:</span>
+    <span class="na">path</span><span class="pi">:</span> <span class="s">/foo/bar/web-master.war</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">absent</span>
+</code></pre></div></div>
+
+<h2 id="synchronize">synchronize</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">copy</code> and <code class="language-plaintext highlighter-rouge">fetch</code> modules copies only the defined files not full directory.
+I use the <a href="https://docs.ansible.com/ansible/latest/modules/synchronize_module.html"><code class="language-plaintext highlighter-rouge">synchronize</code></a> module for copy directory recursive with files from control to remote machine.
+It is a wrapper around <code class="language-plaintext highlighter-rouge">rsync</code> command. <code class="language-plaintext highlighter-rouge">rsync</code> must be installed on both the local and remote host.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Synchronization of src on the control machine to dest on the remote hosts</span>
+  <span class="na">synchronize</span><span class="pi">:</span>
+    <span class="na">src</span><span class="pi">:</span> <span class="s">some/relative/path</span>
+    <span class="na">dest</span><span class="pi">:</span> <span class="s">/some/absolute/path</span>
+
+<span class="c1"># cp -r some/relative/path/* /second/absolute/path/</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Synchronize two directories on one remote host</span>
+  <span class="na">synchronize</span><span class="pi">:</span>
+    <span class="na">src</span><span class="pi">:</span> <span class="s">/first/absolute/path/</span>
+    <span class="na">dest</span><span class="pi">:</span> <span class="s">/second/absolute/path/</span>
+  <span class="na">delegate_to</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">inventory_hostname</span><span class="nv"> </span><span class="s">}}"</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Synchronization of two paths both on the control machine</span>
+  <span class="na">synchronize</span><span class="pi">:</span>
+    <span class="na">src</span><span class="pi">:</span> <span class="s">some/relative/path</span>
+    <span class="na">dest</span><span class="pi">:</span> <span class="s">/some/absolute/path</span>
+  <span class="na">delegate_to</span><span class="pi">:</span> <span class="s">localhost</span>
+</code></pre></div></div>
+
+<h2 id="command">command</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/command_module.html"><code class="language-plaintext highlighter-rouge">command</code></a> module takes the command name followed by a list of space-delimited arguments.
+It will not be processed through the shell, so variables like <code class="language-plaintext highlighter-rouge">$HOME</code> and operations like “&lt;”, “&gt;”, “|”, “;” and “&amp;” will not work (use the <code class="language-plaintext highlighter-rouge">shell</code> module if you need these features).</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Return somefile to registered var - somefile_content</span>
+  <span class="na">command</span><span class="pi">:</span> <span class="s">cat somefile</span>
+  <span class="na">args</span><span class="pi">:</span>
+    <span class="na">chdir</span><span class="pi">:</span> <span class="s">somedir/</span>
+  <span class="na">register</span><span class="pi">:</span> <span class="s">somefile_content</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run the command if the specified file does not exist.</span>
+  <span class="na">command</span><span class="pi">:</span> <span class="s">/usr/bin/make_database.sh arg1 arg2</span>
+  <span class="na">args</span><span class="pi">:</span>
+    <span class="na">creates</span><span class="pi">:</span> <span class="s">/path/to/database</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run the command if the specified file already exists.</span>
+  <span class="na">command</span><span class="pi">:</span> <span class="s">/usr/bin/remove_database.sh arg1 arg2</span>
+  <span class="na">args</span><span class="pi">:</span>
+    <span class="na">removes</span><span class="pi">:</span> <span class="s">/path/to/database</span>
+</code></pre></div></div>
+
+<h2 id="shell">shell</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/shell_module.html"><code class="language-plaintext highlighter-rouge">shell</code></a> module takes the command name followed by a list of space-delimited arguments.
+It is almost exactly like the command module but runs the command through a shell (<code class="language-plaintext highlighter-rouge">/bin/sh</code>) on the remote node.
+It also has the <code class="language-plaintext highlighter-rouge">creates</code> and <code class="language-plaintext highlighter-rouge">removes</code> parameters.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run liquibase</span>
+  <span class="na">shell</span><span class="pi">:</span> <span class="pi">|</span>
+    <span class="s">docker-compose up -d db       &amp;&amp;</span>
+    <span class="s">docker-compose run liquibase  &amp;&amp;</span>
+    <span class="s">docker-compose down</span>
+  <span class="na">args</span><span class="pi">:</span>
+    <span class="na">chdir</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">project_dir</span><span class="nv"> </span><span class="s">}}"</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Show replication slots</span>
+  <span class="na">shell</span><span class="pi">:</span> <span class="pi">|</span>
+    <span class="s">psql -U postgres -c 'SELECT * FROM pg_replication_slots;'</span>
+  <span class="na">register</span><span class="pi">:</span> <span class="s">out</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Run a command using a templated variable (always use quote filter to avoid injection)</span>
+  <span class="na">shell</span><span class="pi">:</span> <span class="s2">"</span><span class="s">cat</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">myfile|quote</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></div>
+
+<h2 id="raw">raw</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/raw_module.html"><code class="language-plaintext highlighter-rouge">raw</code></a> module allows execute command on the remote hosts that haven’t got installed Python.
+It is works when any other modules doesn’t.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install python2 for Ansible on Debian host</span>
+   <span class="s">raw</span><span class="pi">:</span> <span class="s">bash -c "test -e /usr/bin/python || (apt -qqy update &amp;&amp; apt install -qqy python-minimal python-simplejson)"</span>
+   <span class="s">register</span><span class="pi">:</span> <span class="s">output</span>
+   <span class="s">changed_when</span><span class="pi">:</span> <span class="s">output.stdout != ""</span>
+</code></pre></div></div>
+
+<h2 id="service">service</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/service_module.html"><code class="language-plaintext highlighter-rouge">service</code></a> module controls services on remote hosts.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Start and enable service httpd, if not started</span>
+  <span class="na">service</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">httpd</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">started</span>
+    <span class="na">enabled</span><span class="pi">:</span> <span class="s">yes</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Stop service httpd, if started</span>
+  <span class="na">service</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">httpd</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">stopped</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Restart service httpd, in all cases</span>
+  <span class="na">service</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">httpd</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">restarted</span>
+</code></pre></div></div>
+
+<h2 id="yum">yum</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/yum_module.html"><code class="language-plaintext highlighter-rouge">yum</code></a> module installs, upgrades, downgrades, removes, and lists packages and groups with the <code class="language-plaintext highlighter-rouge">yum</code> package manager (such as for RedHat/CentOS).
+This module only works on Python 2. If you require Python 3 support see the <code class="language-plaintext highlighter-rouge">dnf</code> module.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install the latest version of Apache</span>
+  <span class="na">yum</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">httpd</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">latest</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Remove the Apache package</span>
+  <span class="na">yum</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">httpd</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">absent</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upgrade all packages</span>
+  <span class="na">yum</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">*'</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">latest</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install KVM packages</span>
+  <span class="na">vars</span><span class="pi">:</span>
+    <span class="na">ansible_python_interpreter</span><span class="pi">:</span> <span class="s">/usr/bin/python</span>
+  <span class="na">yum</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">item</span><span class="nv"> </span><span class="s">}}"</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">present</span>
+  <span class="na">with_items</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">qemu-kvm</span>
+    <span class="pi">-</span> <span class="s">libvirt</span>
+    <span class="pi">-</span> <span class="s">libvirt-python</span>
+    <span class="pi">-</span> <span class="s">libguestfs-tools</span>
+    <span class="pi">-</span> <span class="s">virt-install</span>
+    <span class="pi">-</span> <span class="s">bridge-utils</span>
+</code></pre></div></div>
+
+<h2 id="apt">apt</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/apt_module.html"><code class="language-plaintext highlighter-rouge">apt</code></a> module manages <code class="language-plaintext highlighter-rouge">apt</code> packages (such as for Debian/Ubuntu).</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Update repositories cache and install Apache package</span>
+  <span class="na">apt</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">apache2</span>
+    <span class="na">update_cache</span><span class="pi">:</span> <span class="s">yes</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Remove Apache package</span>
+  <span class="na">apt</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">apache2</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">absent</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upgrade all packages to the latest version</span>
+  <span class="na">apt</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">*"</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">latest</span>
+    <span class="na">update_cache</span><span class="pi">:</span> <span class="s">yes</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Update all packages to the latest version</span>
+  <span class="na">apt</span><span class="pi">:</span>
+    <span class="na">upgrade</span><span class="pi">:</span> <span class="s">dist</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install KVM packages</span>
+  <span class="na">apt</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">item</span><span class="nv"> </span><span class="s">}}"</span>
+  <span class="na">with_items</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">qemu-kvm</span>
+    <span class="pi">-</span> <span class="s">bridge-utils</span>
+    <span class="pi">-</span> <span class="s">libvirt-daemon</span>
+    <span class="pi">-</span> <span class="s">libvirt-daemon-system</span>
+    <span class="pi">-</span> <span class="s">libvirt-clients</span>
+
+</code></pre></div></div>
+
+<h2 id="pkgng">pkgng</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/pkgng_module.html"><code class="language-plaintext highlighter-rouge">pkgng</code></a> module manages binary packages for FreeBSD after 9.0.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Install package telegraf | FreeBSD</span>
+  <span class="na">pkgng</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">telegraf</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">present</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Remove package beats</span>
+  <span class="na">pkgng</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">beats</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">absent</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upgrade package telegraf</span>
+  <span class="na">pkgng</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">telegraf</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">latest</span>
+</code></pre></div></div>
+
+<h2 id="apt_repository">apt_repository</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/apt_repository_module.html"><code class="language-plaintext highlighter-rouge">apt_repository</code></a> module another useful module for working with package lists.
+It adds or removes an APT repositories in Ubuntu and Debian.
+It often is used with <a href="https://docs.ansible.com/ansible/latest/modules/apt_key_module.html"><code class="language-plaintext highlighter-rouge">apt_key</code></a> module.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Download apt key</span>
+  <span class="na">apt_key</span><span class="pi">:</span>
+    <span class="na">url</span><span class="pi">:</span> <span class="s">https://artifacts.elastic.co/GPG-KEY-elasticsearch</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Add Elastic repository</span>
+  <span class="na">apt_repository</span><span class="pi">:</span>
+    <span class="na">repo</span><span class="pi">:</span> <span class="s">deb https://artifacts.elastic.co/packages/6.x/apt stable main</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Remove specified repository from sources list</span>
+  <span class="na">apt_repository</span><span class="pi">:</span>
+    <span class="na">repo</span><span class="pi">:</span> <span class="s">deb http://archive.canonical.com/ubuntu hardy partner</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">absent</span>
+</code></pre></div></div>
+
+<h2 id="yum_repository">yum_repository</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/yum_repository_module.html"><code class="language-plaintext highlighter-rouge">yum_repository</code></a> module like <code class="language-plaintext highlighter-rouge">apt_repository</code> adds or removes repositories in RPM-based Linux distributions.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Add EPEL repository</span>
+  <span class="na">yum_repository</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">epel</span>
+    <span class="na">description</span><span class="pi">:</span> <span class="s">EPEL YUM repo</span>
+    <span class="na">baseurl</span><span class="pi">:</span> <span class="s">https://download.fedoraproject.org/pub/epel/$releasever/$basearch/</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Remove repository</span>
+  <span class="na">yum_repository</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">epel</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">absent</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Add OpenNebula repository</span>
+  <span class="na">when</span><span class="pi">:</span> <span class="s">ansible_os_family|lower == 'redhat'</span>
+  <span class="na">yum_repository</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">opennebula</span>
+    <span class="na">description</span><span class="pi">:</span> <span class="s">OpenNebula Repository - RHEL</span>
+    <span class="na">baseurl</span><span class="pi">:</span> <span class="s">https://downloads.opennebula.org/repo/5.6/CentOS/7/x86_64</span>
+    <span class="na">gpgcheck</span><span class="pi">:</span> <span class="s">yes</span>
+    <span class="na">gpgkey</span><span class="pi">:</span> <span class="s">https://downloads.opennebula.org/repo/repo.key</span>
+</code></pre></div></div>
+
+<h2 id="user">user</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/user_module.html"><code class="language-plaintext highlighter-rouge">user</code></a> module manages user accounts and user attributes.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create a backup user</span>
+  <span class="na">user</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">backup</span>
+    <span class="na">home</span><span class="pi">:</span> <span class="s">/nfsstore/backup/</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Remove the user 'johnd'</span>
+  <span class="na">user</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">johnd</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">absent</span>
+    <span class="na">remove</span><span class="pi">:</span> <span class="s">yes</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create a 2048-bit SSH key for user 'jsmith'</span>
+  <span class="na">user</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">jsmith</span>
+    <span class="na">generate_ssh_key</span><span class="pi">:</span> <span class="s">yes</span>
+    <span class="na">ssh_key_bits</span><span class="pi">:</span> <span class="m">2048</span>
+</code></pre></div></div>
+
+<h2 id="authorized_key">authorized_key</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html"><code class="language-plaintext highlighter-rouge">authorized_key</code></a> module adds or removes SSH authorized keys for particular user accounts.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set authorized key taken from file on control machine</span>
+  <span class="na">authorized_key</span><span class="pi">:</span>
+    <span class="na">user</span><span class="pi">:</span> <span class="s">backup</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">present</span>
+    <span class="na">key</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">lookup('file',</span><span class="nv"> </span><span class="s">'backup/id_rsa.pub')</span><span class="nv"> </span><span class="s">}}"</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Set multiple authorized key taken from selected files</span>
+  <span class="na">authorized_key</span><span class="pi">:</span>
+    <span class="na">user</span><span class="pi">:</span> <span class="s">root</span>
+    <span class="na">state</span><span class="pi">:</span> <span class="s">present</span>
+    <span class="na">key</span><span class="pi">:</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">lookup('file',</span><span class="nv"> </span><span class="s">item</span><span class="nv"> </span><span class="s">+</span><span class="nv"> </span><span class="s">'_id_rsa.pub')</span><span class="nv"> </span><span class="s">}}"</span>
+  <span class="na">loop</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">jsmith</span>
+    <span class="pi">-</span> <span class="s">sjobs</span>
+    <span class="pi">-</span> <span class="s">rgreen</span>
+</code></pre></div></div>
+
+<h2 id="lineinfile">lineinfile</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/lineinfile_module.html"><code class="language-plaintext highlighter-rouge">lineinfile</code></a> module ensures a particular line is in a file, or replace an existing line using a back-referenced regular expression.
+This is primarily useful when you want to change a single line in a file only.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Disable SElinux (config) | RedHat</span>
+  <span class="na">lineinfile</span><span class="pi">:</span>
+    <span class="na">path</span><span class="pi">:</span> <span class="s">/etc/selinux/config</span>
+    <span class="na">regexp</span><span class="pi">:</span> <span class="s1">'</span><span class="s">^SELINUX=enforcing'</span>
+    <span class="na">line</span><span class="pi">:</span> <span class="s1">'</span><span class="s">SELINUX=disabled'</span>
+
+<span class="c1"># Disable selinux immediately</span>
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Disable SElinux (setenforce) | RedHat</span>
+  <span class="na">shell</span><span class="pi">:</span> <span class="s">setenforce 0 || </span><span class="no">true</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Add node IP to /etc/hosts</span>
+  <span class="na">lineinfile</span><span class="pi">:</span>
+    <span class="na">path</span><span class="pi">:</span> <span class="s">/etc/hosts</span>
+    <span class="na">regexp</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">item.name</span><span class="nv"> </span><span class="s">}}$'</span>
+    <span class="na">line</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">item.ip</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">item.name</span><span class="nv"> </span><span class="s">}}'</span>
+  <span class="na">with_items</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">ip</span><span class="pi">:</span> <span class="s">10.0.0.1</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">srv1</span>
+    <span class="pi">-</span> <span class="na">ip</span><span class="pi">:</span> <span class="s">10.0.0.2</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">srv2</span>
+</code></pre></div></div>
+
+<h2 id="blockinfile">blockinfile</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/blockinfile_module.html"><code class="language-plaintext highlighter-rouge">blockinfile</code></a> module will insert/update/remove a block of multi-line text surrounded by customizable marker lines.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Add parameters for connection to host into ssh-config</span>
+  <span class="na">blockinfile</span><span class="pi">:</span>
+    <span class="na">path</span><span class="pi">:</span> <span class="s">~/.ssh/config</span>
+    <span class="na">marker_begin</span><span class="pi">:</span> <span class="s2">"</span><span class="s">BEGIN</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">item.name</span><span class="nv"> </span><span class="s">}}"</span>
+    <span class="na">marker_end</span><span class="pi">:</span> <span class="s2">"</span><span class="s">END</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">item.name</span><span class="nv"> </span><span class="s">}}"</span>
+    <span class="na">marker</span><span class="pi">:</span> <span class="s2">"</span><span class="s">#</span><span class="nv"> </span><span class="s">{mark}"</span>
+    <span class="na">block</span><span class="pi">:</span> <span class="pi">|</span>
+      <span class="s">Host {{ item.name }}</span>
+      <span class="s">HostName {{ item.name }}</span>
+      <span class="s">User oneadmin</span>
+    <span class="na">with_items</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">ip</span><span class="pi">:</span> <span class="s">10.0.0.1</span>
+        <span class="na">name</span><span class="pi">:</span> <span class="s">srv1</span>
+      <span class="pi">-</span> <span class="na">ip</span><span class="pi">:</span> <span class="s">10.0.0.2</span>
+        <span class="na">name</span><span class="pi">:</span> <span class="s">srv2</span>
+</code></pre></div></div>
+
+<h2 id="debug">debug</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/debug_module.html"><code class="language-plaintext highlighter-rouge">debug</code></a> module prints statements during execution.
+It can be useful for debugging variables or expressions.
+Useful for debugging together with the ‘when:’ directive.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">debug</span><span class="pi">:</span>
+    <span class="na">msg</span><span class="pi">:</span> <span class="s2">"</span><span class="s">System</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">inventory_hostname</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">has</span><span class="nv"> </span><span class="s">gateway</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">ansible_default_ipv4.gateway</span><span class="nv"> </span><span class="s">}}"</span>
+  <span class="na">when</span><span class="pi">:</span> <span class="s">ansible_default_ipv4.gateway is defined</span>
+
+<span class="pi">-</span> <span class="na">shell</span><span class="pi">:</span> <span class="s">/usr/bin/uptime</span>
+  <span class="na">register</span><span class="pi">:</span> <span class="s">result</span>
+
+<span class="pi">-</span> <span class="na">debug</span><span class="pi">:</span>
+    <span class="na">var</span><span class="pi">:</span> <span class="s">result</span>
+    <span class="na">verbosity</span><span class="pi">:</span> <span class="m">2</span>
+</code></pre></div></div>
+
+<h2 id="pause">pause</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/pause_module.html"><code class="language-plaintext highlighter-rouge">pause</code></a> module pauses playbook execution for a set amount of time, or until a prompt is acknowledged.
+Use <code class="language-plaintext highlighter-rouge">ctrl+c</code> to advance a pause earlier than it is set to expire or if you need to abort a playbook run entirely.
+To continue early press <code class="language-plaintext highlighter-rouge">ctrl+c</code> and then <code class="language-plaintext highlighter-rouge">c</code>. To abort a playbook press <code class="language-plaintext highlighter-rouge">ctrl+c</code> and then <code class="language-plaintext highlighter-rouge">a</code>.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Pause for 5 minutes</span>
+  <span class="na">pause</span><span class="pi">:</span>
+    <span class="na">minutes</span><span class="pi">:</span> <span class="m">5</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Pause for 30 seconds</span>
+  <span class="na">pause</span><span class="pi">:</span>
+    <span class="na">seconds</span><span class="pi">:</span> <span class="m">5</span>
+</code></pre></div></div>
+
+<h2 id="fail">fail</h2>
+
+<p>The <a href="https://docs.ansible.com/ansible/latest/modules/fail_module.html"><code class="language-plaintext highlighter-rouge">fail</code></a> module fails the progress with a custom message.
+It can be useful with flag <code class="language-plaintext highlighter-rouge">ingnore_error</code> in previous task. It’s often used with some condition.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">build app</span>
+  <span class="na">docker_container</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">maven</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+     <span class="pi">-</span> <span class="s2">"</span><span class="s">{{</span><span class="nv"> </span><span class="s">project_dir</span><span class="nv"> </span><span class="s">}}:/pd"</span>
+    <span class="na">working_dir</span><span class="pi">:</span> <span class="s">/pd</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="s">mvn clean install</span>
+  <span class="na">register</span><span class="pi">:</span> <span class="s">app_build</span>
+  <span class="na">ignore_errors</span><span class="pi">:</span> <span class="s">yes</span>
+
+<span class="pi">-</span> <span class="na">debug</span><span class="pi">:</span>
+    <span class="s">var=app_build.ansible_facts.docker_container.Output.split('\n')</span>
+
+<span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">fail exit when app_build failed</span>
+  <span class="na">fail</span><span class="pi">:</span>
+    <span class="na">msg</span><span class="pi">:</span> <span class="pi">|</span>
+      <span class="s">app build failed!</span>
+  <span class="na">when</span><span class="pi">:</span> <span class="s">app_build.failed|default(false)|bool == </span><span class="no">true</span>
+</code></pre></div></div>
+
+<p>In this article I show you how to use some modules in Ansible playbooks.
+This list has included my preferred modules.
+I hope, it will be a good start to meet full features of Ansible.
+Also, these notes will help me to remember forgotten things.</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="/eng-blog/devops/ansible-getting-started/">Getting Started with Ansible</a> - A simple guide to Ansible’s community and resources.</li>
+  <li><a href="https://docs.ansible.com/">Ansible Documentation</a> - Covers all Ansible options in depth. There are few open source projects with documentation as clear and thorough.</li>
+  <li><a href="https://leanpub.com/ansible-for-devops">Ansible for DevOps</a> - this book helps reach an expert level of Ansible using.</li>
+  <li><a href="http://codeheaven.io/15-things-you-should-know-about-ansible/">15 Things You Should Know About Ansible</a> - some notes to dive deep into Ansible.</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/ansible" class="page__taxonomy-item" rel="tag">ansible</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/devops" class="page__taxonomy-item" rel="tag">devops</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/devops" class="page__taxonomy-item" rel="tag">devops</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-01-21">January 21, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Ansible.+My+preferred+modules%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fansible-preferred-modules%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fansible-preferred-modules%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fansible-preferred-modules%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/devops/ansible-getting-started/" class="pagination--pager" title="Ansible. Getting started
+">Previous</a>
+    
+    
+      <a href="/eng-blog/devops/deploy-gitlab-in-docker/" class="pagination--pager" title="GitLab CE in Docker. Deploying
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

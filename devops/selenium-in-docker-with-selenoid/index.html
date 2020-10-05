@@ -1,0 +1,857 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Selenoid. Selenium in Docker - GAINANOV.PRO</title>
+<meta name="description" content="Selenoid is a server, that launches isolated browsers within Docker containers. All browser processes are fully isolated. This allows launching an unhindered number of multiple browser versions concurrently. Selenoid is written in Golang and supports all popular browsers.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="Selenoid. Selenium in Docker">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/devops/selenium-in-docker-with-selenoid/">
+
+
+  <meta property="og:description" content="Selenoid is a server, that launches isolated browsers within Docker containers. All browser processes are fully isolated. This allows launching an unhindered number of multiple browser versions concurrently. Selenoid is written in Golang and supports all popular browsers.">
+
+
+
+  <meta property="og:image" content="https://gainanov.pro/eng-blog/assets/images/selenium/selenoid_logo.png">
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="Selenoid. Selenium in Docker">
+  <meta name="twitter:description" content="Selenoid is a server, that launches isolated browsers within Docker containers. All browser processes are fully isolated. This allows launching an unhindered number of multiple browser versions concurrently. Selenoid is written in Golang and supports all popular browsers.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/devops/selenium-in-docker-with-selenoid/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://gainanov.pro/eng-blog/assets/images/selenium/selenoid_logo.png">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2020-02-07T00:00:00+03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/devops/selenium-in-docker-with-selenoid/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Selenoid. Selenium in Docker">
+    <meta itemprop="description" content="Selenoid is a server, that launches isolated browsers within Docker containers. All browser processes are fully isolated. This allows launching an unhindered number of multiple browser versions concurrently. Selenoid is written in Golang and supports all popular browsers.">
+    <meta itemprop="datePublished" content="2020-02-07T00:00:00+03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Selenoid. Selenium in Docker
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  4 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#selenoid-grid">Selenoid Grid</a></li>
+  <li><a href="#selenoid-grid-composition">Selenoid Grid composition</a></li>
+  <li><a href="#prerequisite">Prerequisite</a></li>
+  <li><a href="#quick-start-guide">Quick Start Guide</a>
+    <ul>
+      <li><a href="#create-a-dockercompose-file">Create a DockerCompose File</a></li>
+      <li><a href="#create-browsersjson">Create browsers.json</a></li>
+      <li><a href="#what-is-selenoid-ui">What is Selenoid UI</a></li>
+      <li><a href="#start-the-selenoid-grid">Start the Selenoid Grid</a></li>
+    </ul>
+  </li>
+  <li><a href="#create-tests">Create tests</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p>My <a href="/eng-blog/dev/selenium-python/">previous post</a> will include a introduction into writing tests with Selenium.
+In this I want to share you my experience with Selenoid.
+And we create a test environment that help us to run the tests remotely in Docker.</p>
+
+<h2 id="selenoid-grid">Selenoid Grid</h2>
+
+<p><a href="https://aerokube.com/selenoid/latest/">Selenoid Grid</a> or simple Selenoid is a robust implementation of the Selenium Hub using Docker containers to launch browsers.
+No need to manually install browsers or dive into WebDriver documentation.
+Any browser session can be saved to the H.264 video.
+An API to list, download, and delete saved log files.
+Suitable for personal usage and in big clusters.</p>
+<ul>
+  <li>Consumes 10 times less memory than Java-based Selenium server under the same load</li>
+  <li>Small 6 Mb binary with no external dependencies (no need to install Java)</li>
+  <li>Browser consumption API working out of the box</li>
+  <li>Ability to send browser logs to centralized log storage</li>
+  <li>Fully isolated and reproducible environment</li>
+</ul>
+
+<p><img src="https://gainanov.pro/eng-blog/assets/images/selenium/selenoid-animation.gif" alt="selenoid-flow" class="align-center" /></p>
+
+<h2 id="selenoid-grid-composition">Selenoid Grid composition</h2>
+
+<p>Selenoid should be used with two components:</p>
+<ul>
+  <li><a href="https://github.com/aerokube/selenoid">Selenoid</a> - Selenium Hub successor running browsers within containers.</li>
+  <li><a href="https://github.com/aerokube/selenoid-ui">Selenoid-ui</a> - Graphical user interface for Selenoid project and check run time browsers and logs.</li>
+</ul>
+
+<p>Now let’s create a simple Grid by using Selenoid Images with Docker on the local machine and you can run Test cases.</p>
+
+<h2 id="prerequisite">Prerequisite</h2>
+
+<p>Docker should be installed on your machine where you want to run this Selenium Grid.</p>
+
+<h2 id="quick-start-guide">Quick Start Guide</h2>
+
+<h3 id="create-a-dockercompose-file">Create a DockerCompose File</h3>
+
+<p>docker-compose file is a configuration file for docker, by using the compose files its easy to create and stop Containers.
+We are creating 2 services <code class="language-plaintext highlighter-rouge">selenoid</code> and <code class="language-plaintext highlighter-rouge">selenoid-ui</code> in <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> file,
+which will run as 2 containers. You can read <a href="https://docs.docker.com/compose/">official documentation</a> of docker compose file.</p>
+
+<p>Let’s create a <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> file in you local system.</p>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3'</span>
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">selenoid</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s2">"</span><span class="s">aerokube/selenoid"</span>
+    <span class="na">network_mode</span><span class="pi">:</span> <span class="s">bridge</span>
+    <span class="na">restart</span><span class="pi">:</span> <span class="s">always</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">4444:4444"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">$PWD:/etc/selenoid/"</span> <span class="c1"># assumed current dir contains browsers.json</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">/var/run/docker.sock:/var/run/docker.sock"</span>
+  <span class="na">selenoid-ui</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s2">"</span><span class="s">aerokube/selenoid-ui"</span>
+    <span class="na">network_mode</span><span class="pi">:</span> <span class="s">bridge</span>
+    <span class="na">restart</span><span class="pi">:</span> <span class="s">always</span>
+    <span class="na">links</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">selenoid</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">8080:8080"</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">--selenoid-uri"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">http://selenoid:4444"</span><span class="pi">]</span>
+</code></pre></div></div>
+
+<h3 id="create-browsersjson">Create browsers.json</h3>
+
+<p>Using the docker-compose file we have to pass the browsers using a Json file.
+<code class="language-plaintext highlighter-rouge">browsers.json</code> file contains all the browsers and their version we want to run in the Selenoid Grid.
+In our JSON file we are defining two last versions for both browsers - Chrome and Firefox.
+We define VNC and non-VNC version. VNC allows to see and interact with browser at real time and you can check the logs from the container which is showing all the actions. But it has required additional resource consumption.
+Different default locales will help us to get more predictable results.</p>
+
+<p>Let’s create a browsers.json file in the current directory where docker-compose.yml file is present.</p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"firefox"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"72.0"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"versions"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"72.0_VNC"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"image"</span><span class="p">:</span><span class="w"> </span><span class="s2">"selenoid/vnc:firefox_72.0"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"port"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4444"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/wd/hub"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"env"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"TZ=Europe/Moscow"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LANG=ru_RU.UTF-8"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LANGUAGE=ru:en"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LC_ALL=ru_RU.UTF-8"</span><span class="p">]</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nl">"72.0"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"image"</span><span class="p">:</span><span class="w"> </span><span class="s2">"selenoid/firefox:72.0"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"port"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4444"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/wd/hub"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"env"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"TZ=Europe/Moscow"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LANG=ru_RU.UTF-8"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LANGUAGE=ru:en"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LC_ALL=ru_RU.UTF-8"</span><span class="p">]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"chrome"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"default"</span><span class="p">:</span><span class="w"> </span><span class="s2">"80.0"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"versions"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"80.0"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"image"</span><span class="p">:</span><span class="w"> </span><span class="s2">"selenoid/chrome:80.0"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"port"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4444"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"env"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"TZ=Europe/Moscow"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LANG=ru_RU.UTF-8"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LANGUAGE=ru:en"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LC_ALL=ru_RU.UTF-8"</span><span class="p">]</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nl">"80.0_VNC"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"image"</span><span class="p">:</span><span class="w"> </span><span class="s2">"selenoid/vnc:chrome_80.0"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"port"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4444"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"env"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"TZ=Europe/Moscow"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LANG=ru_RU.UTF-8"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LANGUAGE=ru:en"</span><span class="p">,</span><span class="w"> </span><span class="s2">"LC_ALL=ru_RU.UTF-8"</span><span class="p">]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="what-is-selenoid-ui">What is Selenoid UI</h3>
+
+<p><a href="https://aerokube.com/selenoid-ui/latest/">Selenoid UI</a> is also a very cool feature in the Selenoid project where we can see the Live Test Running on multiple containers.
+If you look closely in to the composer file above the <code class="language-plaintext highlighter-rouge">selenoid-ui</code> service is running on port <code class="language-plaintext highlighter-rouge">8080</code> and linked with the <code class="language-plaintext highlighter-rouge">selenoid</code> service.</p>
+
+<p>So if we run the docker compose file above the docker container will start both the service by default.
+We can access the UI using the URL: <code class="language-plaintext highlighter-rouge">localhost:8080</code></p>
+
+<h3 id="start-the-selenoid-grid">Start the Selenoid Grid</h3>
+
+<p>Starting the Selenoid Grid is very easy and simple by using the docker-compose file we have made in above steps.
+Let’s run the following command from where our <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> file is present:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up -d
+</code></pre></div></div>
+
+<p>After running the docker compose command, Docker will automatically download the proper images of selenoid before starting the container. But sometimes you have to manually download defined browser images.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker pull selenoid/chrome:80.0
+docker pull selenoid/firefox:72.0
+docker pull selenoid/vnc:chrome_80.0
+docker pull selenoid/vnc:firefox_72.0
+</code></pre></div></div>
+
+<p>As Selenoid Hub which is running on 4444 port will receive the request and create a container with the browser asked from Test script and will kill the container after the Test.</p>
+
+<h2 id="create-tests">Create tests</h2>
+
+<p>With the previous article we already learn how to run a simple tests with Python. Let’s create a new one.
+We will connect it to our remote Selenoid Hub by localhost network.</p>
+
+<p>Open Python interpreter and copy next commands:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.desired_capabilities</span> <span class="kn">import</span> <span class="n">DesiredCapabilities</span>
+
+<span class="n">chrome</span> <span class="o">=</span> <span class="n">webdriver</span><span class="p">.</span><span class="n">Remote</span><span class="p">(</span>
+          <span class="n">command_executor</span><span class="o">=</span><span class="s">'http://localhost:4444/wd/hub'</span><span class="p">,</span>
+          <span class="n">desired_capabilities</span><span class="o">=</span><span class="n">DesiredCapabilities</span><span class="p">.</span><span class="n">CHROME</span><span class="p">)</span>
+<span class="n">firefox</span> <span class="o">=</span> <span class="n">webdriver</span><span class="p">.</span><span class="n">Remote</span><span class="p">(</span>
+          <span class="n">command_executor</span><span class="o">=</span><span class="s">'http://localhost:4444/wd/hub'</span><span class="p">,</span>
+          <span class="n">desired_capabilities</span><span class="o">=</span><span class="n">DesiredCapabilities</span><span class="p">.</span><span class="n">FIREFOX</span><span class="p">)</span>
+
+<span class="n">chrome</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'https://www.google.com'</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">chrome</span><span class="p">.</span><span class="n">title</span><span class="p">)</span>
+
+<span class="n">firefox</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">'https://www.google.com'</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">firefox</span><span class="p">.</span><span class="n">title</span><span class="p">)</span>
+
+<span class="n">chrome</span><span class="p">.</span><span class="n">quit</span><span class="p">()</span>
+<span class="n">firefox</span><span class="p">.</span><span class="n">quit</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>If we run it, we could view two sessions in Selenoid UI available at the link:
+<a href="http://localhost:8080/">http://localhost:8080/</a></p>
+
+<p><a href="https://gainanov.pro/eng-blog/assets/images/selenium/selenoid-ui.png" class="align-center"><img src="https://gainanov.pro/eng-blog/assets/images/selenium/selenoid-ui.png" alt="selenoid-ui" /></a></p>
+
+<p>If we talk about simultaneous testing on different devices, e.g: we have a cross-platform web app with a real-life chat function, we can simultaneously test the interaction between them, that is obviously comfortable.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Solution on the basis of Selenium in Docker demonstrates high flexibility for configuration of the runtime environment.
+The stability of this solution, significant time savings when using it and a number of additional features allow us to optimize the process and ensure high-quality software products in a short time.
+As a result, it allow us to perform test automation tasks quickly and accurately.</p>
+
+<p><a href="https://github.com/GRomR1/python-selenium-tests">Here</a> you can download the fully configured project and play with it.</p>
+
+<p>Happy testing!</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://aerokube.com/">Aerokube. Efficient Selenium Testing Infrastructure</a> - the start page to explore automation testing</li>
+  <li><a href="https://selenium-python.readthedocs.io/">Selenium with Python</a> - Selenium library for Python</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/docker" class="page__taxonomy-item" rel="tag">docker</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/python" class="page__taxonomy-item" rel="tag">python</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/qa" class="page__taxonomy-item" rel="tag">QA</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/selenium" class="page__taxonomy-item" rel="tag">selenium</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/selenoid" class="page__taxonomy-item" rel="tag">selenoid</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/testing" class="page__taxonomy-item" rel="tag">testing</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/devops" class="page__taxonomy-item" rel="tag">devops</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-02-07T00:00:00+03:00">February 7, 2020</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Selenoid.+Selenium+in+Docker%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fselenium-in-docker-with-selenoid%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fselenium-in-docker-with-selenoid%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fselenium-in-docker-with-selenoid%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/dev/selenium-python/" class="pagination--pager" title="Web Automation. Selenium WebDriver and Python
+">Previous</a>
+    
+    
+      <a href="/eng-blog/devops/docker-traefik-concept-terms-explanation/" class="pagination--pager" title="Traefik. Concept term explanation
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

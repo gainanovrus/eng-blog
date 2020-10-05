@@ -1,0 +1,796 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>RHEL8. Install to DELL server with RAID (SAS2008) - GAINANOV.PRO</title>
+<meta name="description" content="In RHEL/CentOS 8 was be removed many drivers for popular enterprise raid-controllers. It brings some troubles when you try to install OS. Without drivers an installation destination section will be empty. No drives will be found. To see your HDD in the server need add drivers back.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="RHEL8. Install to DELL server with RAID (SAS2008)">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/linux/rhel8-install-to-dell-raid/">
+
+
+  <meta property="og:description" content="In RHEL/CentOS 8 was be removed many drivers for popular enterprise raid-controllers. It brings some troubles when you try to install OS. Without drivers an installation destination section will be empty. No drives will be found. To see your HDD in the server need add drivers back.">
+
+
+
+  <meta property="og:image" content="https://gainanov.pro/eng-blog/assets/images/dell-rhel8-install-drivers.jpg">
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="RHEL8. Install to DELL server with RAID (SAS2008)">
+  <meta name="twitter:description" content="In RHEL/CentOS 8 was be removed many drivers for popular enterprise raid-controllers. It brings some troubles when you try to install OS. Without drivers an installation destination section will be empty. No drives will be found. To see your HDD in the server need add drivers back.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/linux/rhel8-install-to-dell-raid/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://gainanov.pro/eng-blog/assets/images/dell-rhel8-install-drivers.jpg">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2020-01-17T00:00:00+03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/linux/rhel8-install-to-dell-raid/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="RHEL8. Install to DELL server with RAID (SAS2008)">
+    <meta itemprop="description" content="In RHEL/CentOS 8 was be removed many drivers for popular enterprise raid-controllers. It brings some troubles when you try to install OS. Without drivers an installation destination section will be empty. No drives will be found. To see your HDD in the server need add drivers back.">
+    <meta itemprop="datePublished" content="2020-01-17T00:00:00+03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">RHEL8. Install to DELL server with RAID (SAS2008)
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#setup">Setup</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p>In RHEL/CentOS 8 was be <a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/considerations_in_adopting_rhel_8/hardware-enablement_considerations-in-adopting-rhel-8#removed-adapters_hardware-enablement">removed many drivers</a> for popular enterprise raid-controllers.
+It brings some troubles when you try to install OS.
+Without drivers an installation destination section will be empty.
+No drives will be found. To see your HDD in the server need add drivers back.</p>
+
+<p>With ELRepo it will be easy. <a href="https://elrepo.org/linux/dud/el8/x86_64/">ELRepo repository</a> includes a lot of drivers.
+The full list of supported drives <a href="http://elrepo.org/tiki/DeviceIDs">here</a>.
+I found an ID of raid-controller for my DELL PowerEdge C6320 in the list.
+Read next, and I show how it is possible install CentOS 8 in the DELL server.</p>
+
+<h2 id="setup">Setup</h2>
+
+<p>First of all we must understand what raid controller is installed into server. Use command <code class="language-plaintext highlighter-rouge">lspci -nn</code> for show all connected devices</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Serial Attached SCSI controller [0107]:
+LSI Logic / Symbios Logic SAS2008 PCI-Express Fusion-MPT SAS-2 [Falcon] [1000:0072] (rev 03)
+</code></pre></div></div>
+<p>I get this output in my another similar server with CentOS 7.</p>
+
+<p>Also I check it in the BIOS, and the name is similar - <code class="language-plaintext highlighter-rouge">LSI SAS2 MPT Controller SAS2008</code>.</p>
+
+<p>Main part of this - <code class="language-plaintext highlighter-rouge">1000:0072</code> - is a device ID.
+It helps to us found a right driver from ELRepo.</p>
+
+<p>Next, we need to choose what DUD (driver update disk) we should to use in installation process for our hardware.
+Follow to <a href="http://elrepo.org/tiki/DeviceIDs">this</a> page and find our ID (<code class="language-plaintext highlighter-rouge">1000:0072</code>).
+It point to the <code class="language-plaintext highlighter-rouge">mpt3sas.ko</code> section.
+So, we need to use a las <code class="language-plaintext highlighter-rouge">mpt3sas</code> iso images from <a href="https://elrepo.org/linux/dud/el8/x86_64/">here</a>.
+When I wrote this article it is - <a href="https://elrepo.org/linux/dud/el8/x86_64/dd-mpt3sas-28.100.00.00-2.el8_1.elrepo.iso"><code class="language-plaintext highlighter-rouge">dd-mpt3sas-28.100.00.00-2.el8_1.elrepo.iso</code></a>.</p>
+
+<p>For using them during installation need to made some required actions.
+Read the <a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_installation/updating-drivers-during-installation_installing-rhel-as-an-experienced-user#performing-an-assisted-driver-update_updating-drivers-during-installation">instruction</a> from Red Hat about it.</p>
+
+<p>I just show you the simple method that I used.
+My server has connected to local network and internet.
+DHCP-server in the LAN assign an IP-address to the server, and server can download any resources from network.
+So it is the reason why I prefer to add drivers by http link. What we will need to do?</p>
+
+<p>Run the installation process. When boot menu window has been shown,
+press the <code class="language-plaintext highlighter-rouge">Tab</code> key on your keyboard to display the boot command line.</p>
+
+<p><img src="https://gainanov.pro/eng-blog/assets/images/dell-centos/boot-menu.png" alt="boot-menu" class="align-center" /></p>
+
+<p>Append the <code class="language-plaintext highlighter-rouge">inst.dd=https://elrepo.org/linux/dud/el8/x86_64/dd-mpt3sas-28.100.00.00-2.el8_1.elrepo.iso</code>
+boot option to the command line and press <code class="language-plaintext highlighter-rouge">Enter</code> to execute the boot process.</p>
+
+<p>The installer should detect the DUD iso and install the proper drivers.
+And raid controller with drives will be accessed as installation destination.</p>
+
+<p><img src="https://gainanov.pro/eng-blog/assets/images/dell-centos/destination-with-raid.png" alt="destination-window-with-raid-controller" class="align-center" /></p>
+
+<p>So, now you can install the last RHEL/CentOS into DELL Server.
+After reboot the system the drivers will be included into installed system.</p>
+
+<p>The information about the mpt3sas module presented below:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@cpu7 ~]# modinfo mpt3sas
+filename:       /lib/modules/4.18.0-147.3.1.el8_1.x86_64/weak-updates/mpt3sas/mpt3sas.ko
+alias:          mpt2sas
+version:        28.100.00.00
+license:        GPL
+description:    LSI MPT Fusion SAS 3.0 Device Driver
+author:         Avago Technologies &lt;MPT-FusionLinux.pdl@avagotech.com&gt;
+rhelversion:    8.1
+srcversion:     6ABC8F89B061AC0B78BCED5
+alias:          pci:v00001000d000000E6sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000E5sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000B2sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000E2sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000E1sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000D1sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000ACsv*sd*bc*sc*i*
+alias:          pci:v00001000d000000ABsv*sd*bc*sc*i*
+alias:          pci:v00001000d000000AAsv*sd*bc*sc*i*
+alias:          pci:v00001000d000000AFsv*sd*bc*sc*i*
+alias:          pci:v00001000d000000AEsv*sd*bc*sc*i*
+alias:          pci:v00001000d000000ADsv*sd*bc*sc*i*
+alias:          pci:v00001000d000000C3sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000C2sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000C1sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000C0sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000C8sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000C7sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000C6sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000C5sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000C4sv*sd*bc*sc*i*
+alias:          pci:v00001000d000000C9sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000095sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000094sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000091sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000090sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000097sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000096sv*sd*bc*sc*i*
+alias:          pci:v00001000d0000007Esv*sd*bc*sc*i*
+alias:          pci:v00001000d000002B1sv*sd*bc*sc*i*
+alias:          pci:v00001000d000002B0sv*sd*bc*sc*i*
+alias:          pci:v00001000d0000006Esv*sd*bc*sc*i*
+alias:          pci:v00001000d00000087sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000086sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000085sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000084sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000083sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000082sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000081sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000080sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000065sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000064sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000077sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000076sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000074sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000072sv*sd*bc*sc*i*
+alias:          pci:v00001000d00000070sv*sd*bc*sc*i*
+depends:        scsi_transport_sas,raid_class
+name:           mpt3sas
+vermagic:       4.18.0-147.el8.x86_64 SMP mod_unload modversions
+sig_id:         PKCS#7
+signer:         ELRepo.org Secure Boot Key
+sig_key:        E9:D4:71:CF:B4:FE:13:6C
+sig_hashalgo:   sha256
+signature:      15:E2:B9:0D:5D:4D:A8:C0:4B:A6:75:CD:F7:53:C4:E9:C8:02:88:94:
+                8F:2F:36:13:E8:56:55:FE:FC:D7:74:CD:37:29:25:7D:11:11:99:E5:
+                8C:B2:98:3F:C6:A6:FA:CC:BC:53:66:26
+parm:           logging_level: bits for enabling additional logging info (default=0)
+parm:           max_sectors:max sectors, range 64 to 32767  default=32767 (ushort)
+parm:           missing_delay: device missing delay , io missing delay (array of int)
+parm:           max_lun: max lun, default=16895  (ullong)
+parm:           hbas_to_enumerate: 0 - enumerates both SAS 2.0 &amp; SAS 3.0 generation HBAs
+                  1 - enumerates only SAS 2.0 generation HBAs
+                  2 - enumerates only SAS 3.0 generation HBAs (default=0) (ushort)
+parm:           diag_buffer_enable: post diag buffers (TRACE=1/SNAPSHOT=2/EXTENDED=4/default=0) (int)
+parm:           disable_discovery: disable discovery  (int)
+parm:           prot_mask: host protection capabilities mask, def=7  (int)
+parm:           max_queue_depth: max controller queue depth  (int)
+parm:           max_sgl_entries: max sg entries  (int)
+parm:           msix_disable: disable msix routed interrupts (default=0) (int)
+parm:           smp_affinity_enable:SMP affinity feature enable/disable Default: enable(1) (int)
+parm:           max_msix_vectors: max msix vectors (int)
+parm:           irqpoll_weight:irq poll weight (default= one fourth of HBA queue depth) (int)
+parm:           mpt3sas_fwfault_debug: enable detection of firmware fault and halt firmware - (default=0)
+</code></pre></div></div>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://elrepoproject.blogspot.com/2019/08/rhel-80-and-support-for-removed-adapters.html">The ELRepo Blog - RHEL 8.0 and support for removed adapters</a> - an article in ELRepo blog about DUD that they provide to community</li>
+  <li><a href="https://fatmin.com/2019/11/23/installing-rhel-8-1-on-dell-r710-r610-with-h700-raid-controller/">Installing RHEL 8.1 on Dell R710_R610 with H700 Raid Controller _ FATMIN</a> - instruction for another DELL server with megaraid_sas drivers</li>
+  <li><a href="https://access.redhat.com/discussions/3722151">removal of SAS-2 controller drivers in RHEL 8 - Red Hat Customer Portal</a> - a hot discussions in redhat forum about removed drivers</li>
+  <li><a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_installation/updating-drivers-during-installation_installing-rhel-as-an-experienced-user">Updating drivers during installation Red Hat Enterprise Linux 8</a> - official instruction about driver update during installation process</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/centos" class="page__taxonomy-item" rel="tag">centos</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/dell" class="page__taxonomy-item" rel="tag">dell</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/drivers" class="page__taxonomy-item" rel="tag">drivers</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/raid" class="page__taxonomy-item" rel="tag">raid</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/linux" class="page__taxonomy-item" rel="tag">linux</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-01-17T00:00:00+03:00">January 17, 2020</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=RHEL8.+Install+to+DELL+server+with+RAID+%28SAS2008%29%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Flinux%2Frhel8-install-to-dell-raid%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Flinux%2Frhel8-install-to-dell-raid%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Flinux%2Frhel8-install-to-dell-raid%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/sysad/esxi-ntp-configuration/" class="pagination--pager" title="ESXi. NTP Configuration
+">Previous</a>
+    
+    
+      <a href="/eng-blog/linux/centos-installation-with-kickstart/" class="pagination--pager" title="CentOS 8. Automated installation using Kickstart
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

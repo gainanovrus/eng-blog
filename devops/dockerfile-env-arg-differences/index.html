@@ -9,30 +9,30 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>BLOG: About IT, SysAd, Dev &amp; Ops - GAINANOV.PRO</title>
-<meta name="description" content="Hi! I’m Ruslan. I’m interested in the development of software and administration of systems. This is another personal blog about IT, servers and software. I’ve made the site for writing my notes about everything I have ever done. I hope it is helpful to someone.">
+<!-- begin _includes/seo.html --><title>Dockerfile. ARG and ENV statement differences - GAINANOV.PRO</title>
+<meta name="description" content="The both words use for define variables in to Dockerfile. It may be difficult to understand the difference, but it will be explained here.">
 
 
   <meta name="author" content="Ruslan Gainanov">
 
 
-<meta property="og:type" content="website">
+<meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="GAINANOV.PRO">
-<meta property="og:title" content="BLOG: About IT, SysAd, Dev &amp; Ops">
-<meta property="og:url" content="https://gainanov.pro/eng-blog/">
+<meta property="og:title" content="Dockerfile. ARG and ENV statement differences">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/devops/dockerfile-env-arg-differences/">
 
 
-  <meta property="og:description" content="Hi! I’m Ruslan. I’m interested in the development of software and administration of systems. This is another personal blog about IT, servers and software. I’ve made the site for writing my notes about everything I have ever done. I hope it is helpful to someone.">
+  <meta property="og:description" content="The both words use for define variables in to Dockerfile. It may be difficult to understand the difference, but it will be explained here.">
 
 
 
 
 
   <meta name="twitter:site" content="@gainanovrus">
-  <meta name="twitter:title" content="BLOG: About IT, SysAd, Dev &amp; Ops">
-  <meta name="twitter:description" content="Hi! I’m Ruslan. I’m interested in the development of software and administration of systems. This is another personal blog about IT, servers and software. I’ve made the site for writing my notes about everything I have ever done. I hope it is helpful to someone.">
-  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/">
+  <meta name="twitter:title" content="Dockerfile. ARG and ENV statement differences">
+  <meta name="twitter:description" content="The both words use for define variables in to Dockerfile. It may be difficult to understand the difference, but it will be explained here.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/devops/dockerfile-env-arg-differences/">
 
   
     <meta name="twitter:card" content="summary">
@@ -43,7 +43,11 @@
 
 
 
+  <meta property="article:published_time" content="2019-11-22T00:00:00+03:00">
 
+
+
+  <meta property="article:modified_time" content="2019-11-22T00:00:00+03:00">
 
 
 
@@ -52,11 +56,9 @@
   
 
 
-<link rel="canonical" href="https://gainanov.pro/eng-blog/">
+<link rel="canonical" href="https://gainanov.pro/eng-blog/devops/dockerfile-env-arg-differences/">
 
 
-
-  <link rel="next" href="https://gainanov.pro/eng-blog/page2/">
 
 
 <script type="application/ld+json">
@@ -154,7 +156,7 @@
 
   </head>
 
-  <body class="layout--home">
+  <body class="layout--single">
     <nav class="skip-links">
   <h2 class="screen-reader-text">Skip links</h2>
   <ul>
@@ -342,13 +344,117 @@
 
 
 
-  <div class="archive">
-    
-      <h1 id="page-title" class="page__title">BLOG: About IT, SysAd, Dev & Ops</h1>
-    
-    
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Dockerfile. ARG and ENV statement differences">
+    <meta itemprop="description" content="The both words use for define variables in to Dockerfile. It may be difficult to understand the difference, but it will be explained here.">
+    <meta itemprop="datePublished" content="2019-11-22T00:00:00+03:00">
+    <meta itemprop="dateModified" content="2019-11-22T00:00:00+03:00">
 
-<h3 class="archive__subtitle">Recent Posts</h3>
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Dockerfile. ARG and ENV statement differences
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  1 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#conclusion">conclusion</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p>The ARG and ENV statements use for define variables in to Dockerfile.
+It may be difficult to understand the difference. The difference is when variables will be utilized.</p>
+
+<p>If you need <strong>build-time</strong> customization, <strong>ARG</strong> is best choice.
+From docker <a href="https://docs.docker.com/engine/reference/builder/#arg">reference</a>:</p>
+<blockquote>
+  <p>The <code class="language-plaintext highlighter-rouge">ARG</code> instruction defines a variable that users can pass at build-time to the builder with the docker build command using the –build-arg <varname>=<value> flag.</value></varname></p>
+</blockquote>
+
+<p>If you need <strong>run-time</strong> customization (to run the same image with different settings), <strong>ENV</strong> is well-suited.
+What you should know from <a href="https://docs.docker.com/engine/reference/builder/#env">docs</a>:</p>
+<blockquote>
+  <p>The <code class="language-plaintext highlighter-rouge">ENV</code> instruction sets the environment variable <key> to the value <value>.
+The environment variables set using ENV will persist when a container is run from the resulting image.</value></key></p>
+</blockquote>
+
+<p>To define them as the command line instructions use next (for <code class="language-plaintext highlighter-rouge">ARG var</code> or ):</p>
+
+<p>ARG (for <code class="language-plaintext highlighter-rouge">ARG var</code>): <code class="language-plaintext highlighter-rouge">docker build --build-arg var=xxx</code></p>
+
+<p>ENV (for <code class="language-plaintext highlighter-rouge">ENV var</code>): <code class="language-plaintext highlighter-rouge">docker run --env var=yyy</code></p>
+
+<p>The best way define them is write a <a href="https://docs.docker.com/compose/compose-file/">docker-compose</a> file with defined next section:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>version: "3"
+services:
+  ubuntu:
+    build:
+      context: .
+      args:
+        var: xxx
+    environment:
+      var: yyy
+</code></pre></div></div>
+
+<p>To run container with build image use next command</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up --build
+</code></pre></div></div>
+
+<h2 id="conclusion">conclusion</h2>
+
+<p>I hope this explanation has helped you to learn a bit more about using dockerfile statements,
+and will save you time to understand the basis of Docker.</p>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/devops" class="page__taxonomy-item" rel="tag">devops</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/dockerfile" class="page__taxonomy-item" rel="tag">dockerfile</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/docker" class="page__taxonomy-item" rel="tag">docker</a>
+    
+    </span>
+  </p>
 
 
 
@@ -356,8 +462,67 @@
   
 
 
+  
+  
+  
 
-<div class="list__item">
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/devops" class="page__taxonomy-item" rel="tag">devops</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-11-22">November 22, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Dockerfile.+ARG+and+ENV+statement+differences%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fdockerfile-env-arg-differences%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fdockerfile-env-arg-differences%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fdockerfile-env-arg-differences%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/dev/git-squash-multiple-commits/" class="pagination--pager" title="Git. Squash Multiple Commits in to One Commit
+">Previous</a>
+    
+    
+      <a href="/eng-blog/sysad/esxi-enable-nested-virtualization/" class="pagination--pager" title="ESXi. Enabling Nested virtualization
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -372,7 +537,7 @@
 
 
 
-  7 minute read
+  8 minute read
 
 </p>
     
@@ -381,12 +546,12 @@
   </article>
 </div>
 
+        
+          
 
-  
 
 
-
-<div class="list__item">
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -410,12 +575,12 @@
   </article>
 </div>
 
+        
+          
 
-  
 
 
-
-<div class="list__item">
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -439,12 +604,12 @@
   </article>
 </div>
 
+        
+          
 
-  
 
 
-
-<div class="list__item">
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -468,94 +633,13 @@
   </article>
 </div>
 
-
+        
+      </div>
+    </div>
   
-
-
-
-<div class="list__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/eng-blog/sysad/dell-file-management/" rel="permalink">DELL. File Management on S4048 switch (OS9-series system)
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  4 minute read
-
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">Some useful notes for working with files (save, copy and transfer) on Dell Networking system.
-</p>
-  </article>
+  
 </div>
 
-
-
-
-<nav class="pagination">
-  
-  <ul>
-    
-    
-    <li><a href="#" class="disabled"><span aria-hidden="true">Previous</span></a></li>
-    
-
-    
-    
-      <li><a href="#" class="disabled current">1</a></li>
-    
-
-    
-    
-
-    
-    
-    
-
-    
-      
-        
-        
-        
-        <li><a href="/eng-blog/page2/">2</a></li>
-      
-    
-      
-        
-        
-        
-        <li><a href="/eng-blog/page3/">3</a></li>
-      
-    
-
-    
-    
-      <li><a href="#" class="disabled">&hellip;</a></li>
-    
-
-    
-      <li><a href="/eng-blog/page10/">10</a></li>
-    
-
-    
-    
-      <li><a href="/eng-blog/page2/">Next</a></li>
-    
-  </ul>
-</nav>
-
-
-
-  </div>
-</div>
     </div>
 
     

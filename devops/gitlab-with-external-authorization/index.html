@@ -1,0 +1,769 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>GitLab CE in Docker. External OAuth2 Authorization - GAINANOV.PRO</title>
+<meta name="description" content="GitLab allows to sign up and login with many external application like Google, Facebook, Github. Also a custom OAuth provider supported by a internal library - OmniAuth.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="GitLab CE in Docker. External OAuth2 Authorization">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/devops/gitlab-with-external-authorization/">
+
+
+  <meta property="og:description" content="GitLab allows to sign up and login with many external application like Google, Facebook, Github. Also a custom OAuth provider supported by a internal library - OmniAuth.">
+
+
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="GitLab CE in Docker. External OAuth2 Authorization">
+  <meta name="twitter:description" content="GitLab allows to sign up and login with many external application like Google, Facebook, Github. Also a custom OAuth provider supported by a internal library - OmniAuth.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/devops/gitlab-with-external-authorization/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2019-10-04T00:00:00+03:00">
+
+
+
+  <meta property="article:modified_time" content="2019-10-04T00:00:00+03:00">
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/devops/gitlab-with-external-authorization/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/eng-blog/assets/images/author-150x150.jpg" alt="Ruslan Gainanov" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Ruslan Gainanov</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>System &amp; Software engineer</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <li><a href="https://linkedin.com/in/gainanovrus" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></a></li>
+          
+        
+      
+
+      
+        <li>
+          <a href="http://gainanov.pro" itemprop="url">
+            <i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">Website</span>
+          </a>
+        </li>
+      
+
+      
+        <li>
+          <a href="mailto:gromrx1@gmail.com">
+            <meta itemprop="email" content="gromrx1@gmail.com" />
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+      
+
+      
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="GitLab CE in Docker. External OAuth2 Authorization">
+    <meta itemprop="description" content="GitLab allows to sign up and login with many external application like Google, Facebook, Github. Also a custom OAuth provider supported by a internal library - OmniAuth.">
+    <meta itemprop="datePublished" content="2019-10-04T00:00:00+03:00">
+    <meta itemprop="dateModified" content="2019-10-04T00:00:00+03:00">
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">GitLab CE in Docker. External OAuth2 Authorization
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  2 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#environment">Environment</a></li>
+  <li><a href="#configuration">Configuration</a></li>
+  <li><a href="#some-notes">Some notes</a></li>
+  <li><a href="#additional-information">Additional information</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p>In the previous post was showed how to install GitLab CE.
+I want to continue the work with GitLab and want to show how to set up some
+configuration.</p>
+
+<p>If you already has a system that stored a user profiles.
+And the system provides an OAuth2 interface. You can use it as single sign-on
+(<a href="sso">SSO</a>) point for other systems like GitLab.
+You shouldn’t create new users, not require to import any other profiles.</p>
+
+<h2 id="environment">Environment</h2>
+
+<ol>
+  <li>GitLab CE 12.3.0 (Omnibus package for Docker) - <code class="language-plaintext highlighter-rouge">gitlab.example.com</code>
+    <ul>
+      <li>omniauth-oauth2-generic plugin (usually installed default)</li>
+    </ul>
+  </li>
+  <li>External OAuth2 provider - <code class="language-plaintext highlighter-rouge">provider.example.com</code></li>
+</ol>
+
+<h2 id="configuration">Configuration</h2>
+
+<p>Full docs are available <a href="https://docs.gitlab.com/ee/integration/omniauth.html">here</a>.</p>
+
+<p>Although the <a href="https://docs.gitlab.com/ee/integration/omniauth.html#using-custom-omniauth-providers">official note</a>
+the installed GitLab has already have the <code class="language-plaintext highlighter-rouge">omniauth-oauth2-generic</code> package.</p>
+
+<ol>
+  <li>Adding new application to our OAuth2 provider
+and input Redirect URI to our GitLab:
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Redirect URI: https://gitlab.example.com/users/auth/&lt;provider&gt;/callback
+</code></pre></div>    </div>
+    <p>Where is <code class="language-plaintext highlighter-rouge">&lt;provider&gt;</code> is name of our External OAuth2 provider (i.e. <code class="language-plaintext highlighter-rouge">provider.example.com</code>) .</p>
+  </li>
+  <li>
+    <p>After submit a creation, you will get <code class="language-plaintext highlighter-rouge">app-id</code> and <code class="language-plaintext highlighter-rouge">app-secret</code>. Keep in mind them.</p>
+  </li>
+  <li>Open GitLab configuration file - <code class="language-plaintext highlighter-rouge">gitlab.rb</code>. Find <code class="language-plaintext highlighter-rouge">OmniAuth Settings</code> section.</li>
+</ol>
+
+<p>Add next settings to the file:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gitlab_rails</span><span class="p">[</span><span class="s1">'omniauth_enabled'</span><span class="p">]</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="n">gitlab_rails</span><span class="p">[</span><span class="s1">'omniauth_allow_single_sign_on'</span><span class="p">]</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="n">gitlab_rails</span><span class="p">[</span><span class="s1">'omniauth_block_auto_created_users'</span><span class="p">]</span> <span class="o">=</span> <span class="kp">false</span>
+<span class="n">gitlab_rails</span><span class="p">[</span><span class="s1">'omniauth_providers'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="p">{</span>
+    <span class="s1">'name'</span> <span class="o">=&gt;</span> <span class="s1">'oauth2_generic'</span><span class="p">,</span>
+    <span class="s1">'app_id'</span> <span class="o">=&gt;</span> <span class="s1">'YOUR-APP-ID'</span><span class="p">,</span>
+    <span class="s1">'app_secret'</span> <span class="o">=&gt;</span> <span class="s1">'YOUR-APP-SECRET'</span><span class="p">,</span>
+    <span class="s1">'args'</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="ss">client_options: </span><span class="p">{</span>
+        <span class="s1">'site'</span> <span class="o">=&gt;</span> <span class="s1">'https://provider.example.com'</span><span class="p">,</span> <span class="c1"># including port if necessary</span>
+        <span class="s1">'user_info_url'</span> <span class="o">=&gt;</span> <span class="s1">'/api/v1/session'</span><span class="p">,</span>     <span class="c1"># user profile in JSON</span>
+        <span class="s1">'authorize_url'</span> <span class="o">=&gt;</span> <span class="s1">'/oauth/authorize'</span><span class="p">,</span>    <span class="c1"># The authorization endpoint for your OAuth server</span>
+        <span class="s1">'token_url'</span> <span class="o">=&gt;</span> <span class="s1">'/oauth/token'</span>             <span class="c1"># The token request endpoint for your OAuth server</span>
+      <span class="p">},</span>
+      <span class="ss">user_response_structure: </span><span class="p">{</span>         <span class="c1"># change this if necessary (there is my configuration)</span>
+        <span class="ss">root_path: </span><span class="p">[</span><span class="s1">'current_user'</span><span class="p">],</span>     <span class="c1"># i.e. if attributes are returned in JsonAPI format (in a 'user' node nested under a 'data' node)</span>
+        <span class="ss">attributes: </span><span class="p">{</span> <span class="ss">nickname: </span><span class="s1">'name'</span> <span class="p">}</span> <span class="c1"># if the nickname attribute of a user is called 'username'</span>
+      <span class="p">},</span>
+      <span class="c1"># optionally, you can add the following two lines to "white label" the display name</span>
+      <span class="c1"># of this strategy (appears in urls and Gitlab login buttons)</span>
+      <span class="c1"># If you do this, you must also replace oauth2_generic, everywhere it appears above, with the new name.</span>
+      <span class="ss">name: </span><span class="s1">'Provider'</span><span class="p">,</span> <span class="c1"># display name for this strategy</span>
+      <span class="ss">strategy_class: </span><span class="s2">"OmniAuth::Strategies::OAuth2Generic"</span> <span class="c1"># Devise-specific config option Gitlab uses to find renamed strategy</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div></div>
+
+<p>Change <code class="language-plaintext highlighter-rouge">YOUR-APP-ID</code> and <code class="language-plaintext highlighter-rouge">YOUR-APP-SECRET</code> to the generated <code class="language-plaintext highlighter-rouge">app-id</code> and <code class="language-plaintext highlighter-rouge">app-secret</code> earlier.
+And check the <code class="language-plaintext highlighter-rouge">client_options</code> and <code class="language-plaintext highlighter-rouge">user_response_structure</code>.
+I’ve change them to my provider.
+Save the modification <code class="language-plaintext highlighter-rouge">gitlab.rb</code> file.</p>
+
+<ol>
+  <li>Restart GitLab. Run command in the console on the host</li>
+</ol>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># gitlab-ctl reconfigure
+</code></pre></div></div>
+
+<ol>
+  <li>Optional. Disable standard sign up and sign in option in the first screen.</li>
+</ol>
+
+<p>Login as admin and following to the section: <strong>Admin -&gt; Settings -&gt; General</strong> -
+https://gitlab.example.com/admin/application_settings</p>
+
+<p><img src="https://gainanov.pro/eng-blog/assets/images/gitlab-docker/signup-disable.png" alt="signup-disable" class="align-center" />
+<img src="https://gainanov.pro/eng-blog/assets/images/gitlab-docker/signin-disable.png" alt="signin-disable" class="align-center" /></p>
+
+<p>This keeps only authorize with our configured OAuth2 Provider.</p>
+
+<p>That’s all. Open another browser (or incognito mode of current one) and test the
+authorization process with external sign up.</p>
+
+<p>After successful login return to the browser with admin session and set up
+the new user that authorized before as a new admin.</p>
+
+<h2 id="some-notes">Some notes</h2>
+
+<p>If you want to enable sign-in after you disable sign-in.
+There is no reconfigure option in omnibus-gitlab that will enable that again.
+After <code class="language-plaintext highlighter-rouge">gitlab-rails console</code> opens up,
+type <code class="language-plaintext highlighter-rouge">ApplicationSetting.last.update_attributes(signin_enabled: true)</code>
+and then <code class="language-plaintext highlighter-rouge">gitlab-ctl restart</code>.
+The solution was found <a href="https://gitlab.com/gitlab-org/omnibus-gitlab/issues/561">here</a>.
+I found it after I block the internal authorization and can’t login as admin.</p>
+
+<h2 id="additional-information">Additional information</h2>
+
+<ul>
+  <li><a href="https://gitlab.com/satorix/omniauth-oauth2-generic">omniauth-oauth2-generic gem</a> -
+  Provides an OmniAuth strategy for authenticating with an External OAuth2 service.</li>
+  <li><a href="https://docs.gitlab.com/ee/integration/omniauth.html">OmniAuth</a> -
+  Allows users to sign in using Twitter, GitHub, and other popular services.</li>
+  <li><a href="https://gitlab.com/gitlab-org/omnibus-gitlab/issues/561">Enable signin repeat</a> -
+  How to enable signin after disable signin in the application setting.</li>
+  <li><a href="https://about.gitlab.com/pricing/self-managed/feature-comparison/">GitLab Feature Comparison</a> -
+  Find the difference between version of self-hosted GitLab.</li>
+</ul>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/tags/devops" class="page__taxonomy-item" rel="tag">devops</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/docker" class="page__taxonomy-item" rel="tag">docker</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/eng-blog/tags/gitlab" class="page__taxonomy-item" rel="tag">gitlab</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/eng-blog/categories/devops" class="page__taxonomy-item" rel="tag">devops</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2019-10-04">October 4, 2019</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=GitLab+CE+in+Docker.+External+OAuth2+Authorization%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fgitlab-with-external-authorization%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fgitlab-with-external-authorization%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fdevops%2Fgitlab-with-external-authorization%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/eng-blog/devops/gitlab-disable-https/" class="pagination--pager" title="GitLab CE in Docker. Disable HTTPS
+">Previous</a>
+    
+    
+      <a href="/eng-blog/linux/installing-lets-encrypt-pfsense/" class="pagination--pager" title="Installing Let’s Encrypt SSL Certificate with pfSense
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/devops/dell-ansible-playbook/" rel="permalink">DELL. Configure Dell 10 gigabit switch with Ansible
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Use Ansible playbooks to easy configure Dell Networking OS9 system. The post contains many practical examples of using dellos9 modules
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-switch-upgrade-firmware/" rel="permalink">DELL. Upgrade firmware on Dell S4048 switch (S-series, OS9)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Instructions for upgrading the last firmware of Dell Networking system.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-smartassist-disable/" rel="permalink">DELL. Disabling SupportAssist on switch
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">SupportAssist is a daemon for sending technical reports to Dell servers. It enables by default. Here we disable this unwanted feature (and may be unsecured).
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/eng-blog/sysad/dell-ssh-server-configure/" rel="permalink">DELL. Setup SSH server on OS9 switch (S4048 10G switch)
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  3 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Setup and configure ssh server on Dell Networking system with RSA and password authentication.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

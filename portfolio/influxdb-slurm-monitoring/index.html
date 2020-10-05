@@ -1,0 +1,418 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Monitoring system for Docker SLURM cluster - GAINANOV.PRO</title>
+<meta name="description" content="Design and deploy a system for collect, store and visualize data from SLURM cluster realized on Docker environment.">
+
+
+  <meta name="author" content="Ruslan Gainanov">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="GAINANOV.PRO">
+<meta property="og:title" content="Monitoring system for Docker SLURM cluster">
+<meta property="og:url" content="https://gainanov.pro/eng-blog/portfolio/influxdb-slurm-monitoring/">
+
+
+  <meta property="og:description" content="Design and deploy a system for collect, store and visualize data from SLURM cluster realized on Docker environment.">
+
+
+
+  <meta property="og:image" content="https://gainanov.pro/eng-blog/assets/images/influxdb-slurm-monitoring/influxdb-slurm-monitoring-banner.png">
+
+
+
+  <meta name="twitter:site" content="@gainanovrus">
+  <meta name="twitter:title" content="Monitoring system for Docker SLURM cluster">
+  <meta name="twitter:description" content="Design and deploy a system for collect, store and visualize data from SLURM cluster realized on Docker environment.">
+  <meta name="twitter:url" content="https://gainanov.pro/eng-blog/portfolio/influxdb-slurm-monitoring/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://gainanov.pro/eng-blog/assets/images/influxdb-slurm-monitoring/influxdb-slurm-monitoring-banner.png">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2020-10-05T12:58:47+03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://gainanov.pro/eng-blog/portfolio/influxdb-slurm-monitoring/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Ruslan Gainanov",
+      "url": "https://gainanov.pro/eng-blog/",
+      "sameAs": ["https://www.facebook.com/gainanovrus","https://twitter.com/gainanovrus","https://linkedin.com/in/gainanovrus"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="Wq8i7X_W6EpXbttUnWRWiok4EyvFVb-nyUaY_kDLDMc" />
+
+
+
+
+  <meta name="yandex-verification" content="cfbcdd4107182b42">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/eng-blog/feed.xml" type="application/atom+xml" rel="alternate" title="GAINANOV.PRO Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/eng-blog/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+  
+    <script src="/eng-blog/assets/js/buttons.js"></script>
+  
+
+
+    <!-- start custom head snippets -->
+<!-- <link href="/assets/css/tagcloud04.css" rel="stylesheet" type="text/css"> -->
+<link href="https://gainanov.pro/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!-- Add style to button that change languages (GR) -->
+<link rel="stylesheet" href="/eng-blog/assets/css/language-button.css">
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-115465350-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-115465350-1');
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+   ym(57089593, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true
+   });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/57089593" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    <div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        <!-- Change language button (GR) -->
+        <a title="Change to RUS" class="language-button" style="margin-left: 0px;" onclick="location.pathname = '/rus-blog';" role="button"></a>
+        <a class="site-title" href="/eng-blog/">GAINANOV.PRO</a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/eng-blog/categories/" >Categories</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/tags/" >Tags</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/portfolio/" >Portfolio</a>
+            </li><li class="masthead__menu-item">
+              <a href="/eng-blog/about/" >About me</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+  
+
+
+
+
+
+
+
+<div class="page__hero"
+  style=" background-image: url('');"
+>
+  
+    <img src="/eng-blog/assets/images/influxdb-slurm-monitoring/influxdb-slurm-monitoring-banner.png" alt="Monitoring system for Docker SLURM cluster" class="page__hero-image">
+  
+  
+</div>
+
+
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+  
+    
+      
+        <img src="/eng-blog/assets/images/influxdb-slurm-monitoring/icmm_logo-min.png"
+             alt="logo">
+      
+      <h3>Place</h3>
+      <p>Institute of Continuous Media Mechanics UB RAS (ICMM UB RAS), Perm</p>
+
+      
+    
+      
+      <h3>Role</h3>
+      <p>DevOps engineer</p>
+
+      
+    
+      
+      <h3>Achievements</h3>
+      <p>Design a system for monitoring tasks queue, node loads and system statics of SLURM cluster</p>
+
+      
+    
+    
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Monitoring system for Docker SLURM cluster">
+    <meta itemprop="description" content="Design and deploy a system for collect, store and visualize data from SLURM cluster realized on Docker environment.">
+    <meta itemprop="datePublished" content="2020-10-05T12:58:47+03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Monitoring system for Docker SLURM cluster
+</h1>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Institute of Continuous Media Mechanics (<a href="https://www.icmm.ru/en/about-institute">ICMM UB RAS</a>) has a high-performance cluster consist of about 50 nodes with &gt;400 CPUs and more than 1 TB RAM.
+It’s needed to make models of new materials and calculate its properties.
+And in the future, the Institute has plans to upgrade his infrastructure and virtualize his resources to get less dependencies of a hardware layer.
+The cluster uses <a href="https://slurm.schedmd.com/overview.html">Slurm workload manager</a> to run programs on compute nodes.
+With SLURM many scientist can easy run his programs on the cluster in parallel and independent.</p>
+
+<p>And I should work with these systems.
+My primary task is to make scripts for deploying virtual compute infrastructure with <a href="https://www.docker.com/">Docker</a>.
+My second task is to design and configure a monitoring system to collect and view system statics in the real-time.</p>
+
+<p>Has been developed a script that deploying a simple SLURM configuration with docker-compose.
+Instead of docker-compose could be used <a href="https://docs.docker.com/engine/reference/commandline/stack/">docker stack</a> command with Docker <a href="https://docs.docker.com/engine/swarm/">Swarm</a> to deploy containers to a compute nodes with included SLURM software.
+All information is described on <a href="https://github.com/GRomR1/docker-slurmbase">GitHub</a>.</p>
+
+<p>I have used a stack <a href="http://influxdata.com">InfluxDB</a>+<a href="http://grafana.com">Grafana</a>, I’ve known good from my <a href="_portfolio/visualisation-jinr-cloud.md">previous</a> work, to realize a monitoring system.
+I use HDF5 profiling plugin for collecting data about runned tasks.
+This plugin was based of work of the <a href="https://github.com/cfenoy/influxdb-slurm-monitoring">cfenoy</a> user.
+I’ve modified it to work with the last SLURM version and add gathering some new fields.
+Also was configured a Grafana dashboard that helps view all statistics about task that have been ever run on the HPC cluster.</p>
+
+<hr />
+<h3 id="docker-slurmbase">docker-slurmbase:</h3>
+
+<p><a href="https://github.com/GRomR1/docker-slurmbase">https://github.com/GRomR1/docker-slurmbase</a></p>
+
+<h3 id="influxdb-slurm-monitoring">influxdb-slurm-monitoring:</h3>
+
+<p><a href="https://github.com/GRomR1/influxdb-slurm-monitoring">https://github.com/GRomR1/influxdb-slurm-monitoring</a></p>
+
+<hr />
+
+<figure class="half ">
+  
+    
+      <a href="/eng-blog/assets/images/influxdb-slurm-monitoring/influxdb-slurm-monitoring-scheme.png">
+          <img src="/eng-blog/assets/images/influxdb-slurm-monitoring/influxdb-slurm-monitoring-scheme.png" alt="Scheme of SLURM cluster and monitoring system" />
+      </a>
+    
+  
+    
+      <a href="/eng-blog/assets/images/influxdb-slurm-monitoring/grafana-all-panels.png">
+          <img src="/eng-blog/assets/images/influxdb-slurm-monitoring/grafana-all-panels.png" alt="An example dashboard to view system statistics" />
+      </a>
+    
+  
+  
+</figure>
+
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-10-05T12:58:47+03:00">October 5, 2020</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?via=gainanovrus&text=Monitoring+system+for+Docker+SLURM+cluster%20https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fportfolio%2Finfluxdb-slurm-monitoring%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fportfolio%2Finfluxdb-slurm-monitoring%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgainanov.pro%2Feng-blog%2Fportfolio%2Finfluxdb-slurm-monitoring%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="#" class="pagination--pager disabled">Previous</a>
+    
+    
+      <a href="/eng-blog/portfolio/robot-motion-system/" class="pagination--pager" title="Computer-aided system to control a moving of a robotic system in an environment with obstacles
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-copyright">&copy; 2020 Ruslan Gainanov. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/eng-blog/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/eng-blog/assets/js/lunr/lunr.min.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-store.js"></script>
+<script src="/eng-blog/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>
