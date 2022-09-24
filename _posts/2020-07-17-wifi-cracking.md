@@ -64,7 +64,7 @@ brew install hcxtools
 brew install wireshark
 ```
 
-8. Install [JamWifi][https://github.com/0x0XDev/JamWiFi] app. It is a deauthenticating application in which unwanted clients from a Wi-Fi network have to keep off, jamming and especially their connection will be departed like dust in a second. Download and unzip by [this][jamwifi] link.
+8. Install [JamWifi](https://github.com/0x0XDev/JamWiFi) app. It is a deauthenticating application in which unwanted clients from a Wi-Fi network have to keep off, jamming and especially their connection will be departed like dust in a second. Download and unzip by [this][jamwifi] link.
 
 9. Test that all tools installed and available. The commands below should success return some help page about itself:
 ```
