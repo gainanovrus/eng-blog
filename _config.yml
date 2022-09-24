@@ -196,6 +196,9 @@ exclude:
   - tmp
   - /docs # ignore Minimal Mistakes /docs
   - /test # ignore Minimal Mistakes /test
+  - docker-compose.yml
+  - Dockerfile
+  - docker-entrypoint.sh
 keep_files:
   - .git
   - .svn
