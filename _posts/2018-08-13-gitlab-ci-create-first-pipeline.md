@@ -23,8 +23,8 @@ pipelines. I wrote an example Java application to demonstrate a possibility of C
 The application code is placed [here][java-servlet-hello].
 
 For using it in GitLab just clone and add as new project.
-![create-new-project]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/create-new-project.png){: .align-center}
-![java-project-info]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/java-project-info.png){: .align-center}
+![create-new-project]({{ site.baseurl }}/assets/images/gitlab-ci/create-new-project.png){: .align-center}
+![java-project-info]({{ site.baseurl }}/assets/images/gitlab-ci/java-project-info.png){: .align-center}
 
 
 ## About project
@@ -57,13 +57,13 @@ gitlab-runner ALL=(ALL) NOPASSWD: ALL
 
 In the end, enable a specific Runner to this project if you didn't do that yet.
 
-![configure-stand-runner]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/configure-stand-runner.png){: .align-center}
+![configure-stand-runner]({{ site.baseurl }}/assets/images/gitlab-ci/configure-stand-runner.png){: .align-center}
 
 ## Writing pipeline
 
 In this project I want to use two stages to build and deploy an application.
 
-![hello-pipeline]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/hello-pipeline.png){: .align-center}
+![hello-pipeline]({{ site.baseurl }}/assets/images/gitlab-ci/hello-pipeline.png){: .align-center}
 
 The stage `deploy` has two jobs to deploy the app into a stand and production
 servers. Runners on these servers have tags `prod-shell` and `stand-shell`.
@@ -124,21 +124,21 @@ deploy:prod:
 In the result we have an automation process that builds and deploy the web app.
 The app is deployed to stand host for test purposes after every commit into a repo.
 
-![hello-gitlab-pipelines]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/hello-gitlab-pipelines.png){: .align-center}
+![hello-gitlab-pipelines]({{ site.baseurl }}/assets/images/gitlab-ci/hello-gitlab-pipelines.png){: .align-center}
 
 The result pipeline is:
 
-![java-project-info]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/java-project-info.png){: .align-center}
-![hello-gitlab-pipeline]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/hello-gitlab-pipeline.png){: .align-center}
+![java-project-info]({{ site.baseurl }}/assets/images/gitlab-ci/java-project-info.png){: .align-center}
+![hello-gitlab-pipeline]({{ site.baseurl }}/assets/images/gitlab-ci/hello-gitlab-pipeline.png){: .align-center}
 
 The app can be accessed by IP and PORT.  The PORT are dynamically generated and
 are showed in the `deploy:stand` job result:
 
-![hello-deploy-job-result]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/hello-deploy-job-result.png){: .align-center}
+![hello-deploy-job-result]({{ site.baseurl }}/assets/images/gitlab-ci/hello-deploy-job-result.png){: .align-center}
 
 In my job output port is `32768`. And the web app can be accessed by:
 
-![hello-result]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/hello-result.png){: .align-center}
+![hello-result]({{ site.baseurl }}/assets/images/gitlab-ci/hello-result.png){: .align-center}
 
 With this configuration you have tried to use CI/CD process with GitLab. Don't
 forget this simple pipeline doesn't provide jobs to stop stands. You should are

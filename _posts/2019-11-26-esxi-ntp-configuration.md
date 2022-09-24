@@ -20,7 +20,7 @@ This tutorial was tested on Vmware ESXi 6.7
 First, you need to access the Vmware web interface.
 After a successful login into ESXi go to **Manage > System > Time & date**. Click on **Edit**.
 
-![edit-ntp]({{ site.url }}{{ site.baseurl }}/assets/images/esxi/ntp/1.png){: .align-center}
+![edit-ntp]({{ site.baseurl }}/assets/images/esxi/ntp/1.png){: .align-center}
 
 Select `Start and stop with host` option.
 
@@ -32,7 +32,7 @@ Insert desired NTP servers comma separated, i.e.:
 Now, we need to start the NTP service. Click on the **Actions** button. Select the NTP service menu.
 Click on the **Start** option.
 
-![start-ntp]({{ site.url }}{{ site.baseurl }}/assets/images/esxi/ntp/2.png){: .align-center}
+![start-ntp]({{ site.baseurl }}/assets/images/esxi/ntp/2.png){: .align-center}
 
 The NTP will start immediately.
 

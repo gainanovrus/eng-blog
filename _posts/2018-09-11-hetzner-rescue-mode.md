@@ -41,11 +41,11 @@ Let's see what I do in this situation.
 *  Activating a rescue mode for selected server in Hetzner [web panel][web-panel].
 Choose your ssh key for connecting to the rescue server without password.
 
-![activate-rescue]({{ site.url }}{{ site.baseurl }}/assets/images/hetzner-rescue/activate-rescue.png){: .align-center}
+![activate-rescue]({{ site.baseurl }}/assets/images/hetzner-rescue/activate-rescue.png){: .align-center}
 
 *  Reset the server: select first or second option
 
-![send-reboot]({{ site.url }}{{ site.baseurl }}/assets/images/hetzner-rescue/send-reboot.png){: .align-center}
+![send-reboot]({{ site.baseurl }}/assets/images/hetzner-rescue/send-reboot.png){: .align-center}
 The rescue system will be loaded after the server reboot.
 And we can connects to it with our ssh key (the key that we inserted on step 1)
 

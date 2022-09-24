@@ -95,8 +95,8 @@ Save the modification `gitlab.rb` file.
 Login as admin and following to the section: **Admin -> Settings -> General** -
 https://gitlab.example.com/admin/application_settings
 
-![signup-disable]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-docker/signup-disable.png){: .align-center}
-![signin-disable]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-docker/signin-disable.png){: .align-center}
+![signup-disable]({{ site.baseurl }}/assets/images/gitlab-docker/signup-disable.png){: .align-center}
+![signin-disable]({{ site.baseurl }}/assets/images/gitlab-docker/signin-disable.png){: .align-center}
 
 This keeps only authorize with our configured OAuth2 Provider.
 

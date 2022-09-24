@@ -29,7 +29,7 @@ The Software Center page will be open. Try to find by switch name - `S4048-ON`.
 
 In the head of table you see the last version of firmware. Download the file with name - [`FTOS-SK-9.14.2.7.bin`](https://www.force10networks.com/CSPortal20/Software/software/FTOS-SK-9.14.2.7.bin). The file `ONIE-FTOS-SK-xxx` need to update system by ONIE loader. We will upgrading system with easy way.
 
-[![last-firmware]({{ site.url }}{{ site.baseurl }}/assets/images/dell-switch/dell-switch-last-firmware.png)]({{ site.url }}{{ site.baseurl }}/assets/images/dell-switch/dell-switch-last-firmware.png){: .align-center}
+[![last-firmware]({{ site.baseurl }}/assets/images/dell-switch/dell-switch-last-firmware.png)]({{ site.baseurl }}/assets/images/dell-switch/dell-switch-last-firmware.png){: .align-center}
 
 Also download and carefully read the [Release Notes](https://www.force10networks.com/CSPortal20/Software/documentation/S4048-ON-9.14.2.7-RN.pdf).
 

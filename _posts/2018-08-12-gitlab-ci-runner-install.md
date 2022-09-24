@@ -72,7 +72,7 @@ Don't forget place your toker. It stored in Admin Area ➔ Overview ➔ Runners:
 
 `https://YOUR_GITLAB_URL/admin/runners`
 
-![runners-admin]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/runners-admin.png){: .align-center}
+![runners-admin]({{ site.baseurl }}/assets/images/gitlab-ci/runners-admin.png){: .align-center}
 
 And set the correct description and tags. I prefer to use a hostname as a description.
 I named it `nginx` because I run it on Nginx server. And set up tags.
@@ -106,7 +106,7 @@ Just choose our new Runner in Admin Area and determine some project or projects 
 Once the Runner has been set up, you should see it on the Runners page of your
 project, following Settings ➔ CI/CD:
 
-![change-runner-type]({{ site.url }}{{ site.baseurl }}/assets/images/gitlab-ci/change-runner-type.png){: .align-center}
+![change-runner-type]({{ site.baseurl }}/assets/images/gitlab-ci/change-runner-type.png){: .align-center}
 
 
 

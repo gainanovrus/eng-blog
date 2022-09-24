@@ -32,7 +32,7 @@ Suitable for personal usage and in big clusters.
 - Ability to send browser logs to centralized log storage
 - Fully isolated and reproducible environment
 
-![selenoid-flow]({{ site.url }}{{ site.baseurl }}/assets/images/selenium/selenoid-animation.gif){: .align-center}
+![selenoid-flow]({{ site.baseurl }}/assets/images/selenium/selenoid-animation.gif){: .align-center}
 
 ## Selenoid Grid composition
 
@@ -184,7 +184,7 @@ firefox.quit()
 If we run it, we could view two sessions in Selenoid UI available at the link:
 [http://localhost:8080/](http://localhost:8080/)
 
-[![selenoid-ui]({{ site.url }}{{ site.baseurl }}/assets/images/selenium/selenoid-ui.png)]({{ site.url }}{{ site.baseurl }}/assets/images/selenium/selenoid-ui.png){: .align-center}
+[![selenoid-ui]({{ site.baseurl }}/assets/images/selenium/selenoid-ui.png)]({{ site.baseurl }}/assets/images/selenium/selenoid-ui.png){: .align-center}
 
 If we talk about simultaneous testing on different devices, e.g: we have a cross-platform web app with a real-life chat function, we can simultaneously test the interaction between them, that is obviously comfortable.
 

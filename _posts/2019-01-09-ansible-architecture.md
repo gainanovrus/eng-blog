@@ -19,7 +19,7 @@ Many thoughts is perfect described in the docs, but I want to explain it in my w
 The main idea of Ansible is one or more the controller server, that needed for sending commands to the remote servers by SSH. It doesn't require agents on remotes.
 All commands send throw secure network and the hosts run it. Only one thing is needed is Python interpreter. And it is installed on the every popular distributive of OS (Centos, Debian, etc.) by default.
 
-![ansible-architecture]({{ site.url }}{{ site.baseurl }}/assets/images/ansible/ansible-architecture.jpg){: .align-center}
+![ansible-architecture]({{ site.baseurl }}/assets/images/ansible/ansible-architecture.jpg){: .align-center}
 
 Ansible based on the next terms: inventory, playbook, task, role, handler, module, template, facts and variables.
 This sequence could be continued but I think if you will know mean of the words you could use Ansible in major cases.

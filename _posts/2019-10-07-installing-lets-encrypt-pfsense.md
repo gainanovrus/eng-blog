@@ -50,7 +50,7 @@ So here’s a little guide on the process to enable signed Let’s Encrypt certs
 Under **System / Package Manager / Available Packages** you should find a package called `acme`.
 Click the install button and allow it to complete.
 
-![acme_package_install]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/acme_package_install.png){: .align-center}
+![acme_package_install]({{ site.baseurl }}/assets/images/pfsense/acme_package_install.png){: .align-center}
 
 ### account key
 
@@ -59,7 +59,7 @@ Once installed you should find **Acme Certificates** under the **Services** menu
 The first step is to create your account keys.
 Enter a name, select the production server if you want this to be live.
 
-![new_account_key_creation]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/new_account_key_creation.png){: .align-center}
+![new_account_key_creation]({{ site.baseurl }}/assets/images/pfsense/new_account_key_creation.png){: .align-center}
 
 Click `Create new account key` to generate a key and insert it into the `Account key` box.
 Finally click the `Register ACME account key`, wait to get successful response, then click `Save`.
@@ -77,7 +77,7 @@ The *method* will be how the Let’s Encrypt server will validate that you contr
 
 I selected [`Standalone HTTP server`][standalone] and in the options set the listen port to `8080`.
 
-![create_certificates]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/create_certificates.png){: .align-center}
+![create_certificates]({{ site.baseurl }}/assets/images/pfsense/create_certificates.png){: .align-center}
 
 We will accomplish this with a port forward rule in the next step.
 This is important because the ACME server needs to be able to access this standalone HTTP server on port 80.
@@ -89,25 +89,25 @@ Under **Firewall / NAT / Port Forward** create a new rule that forwards port
 
 This allows the ACME server to communicate with your device to verify ownership.
 
-[![create_nat_rule]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/create_right_nat_rule.png)]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/create_right_nat_rule.png){: .align-center}
+[![create_nat_rule]({{ site.baseurl }}/assets/images/pfsense/create_right_nat_rule.png)]({{ site.baseurl }}/assets/images/pfsense/create_right_nat_rule.png){: .align-center}
 
 In this picture `8080` port is bound with **Standalone HTTP server** in the ACME certificates page.
 The IP `192.168.100.1` is my pfSense local IP. Don't forget to set **Add associated filter rule** in the option **Filter rule association**.
 
 Open the **Firewall / Rules / WAN** page and check that the rule was automatically created.
 
-[![firewall_rule]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/firewall_rule.png)]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/firewall_rule.png){: .align-center}
+[![firewall_rule]({{ site.baseurl }}/assets/images/pfsense/firewall_rule.png)]({{ site.baseurl }}/assets/images/pfsense/firewall_rule.png){: .align-center}
 
 ### issue certificate
 
 We are ready to request a first certificate. Click an **Issue/Renew** button
 under **Services / Acme / Certificates** on required certificate.
 
-![issue_certificate]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/issue_certificate.png){: .align-center}
+![issue_certificate]({{ site.baseurl }}/assets/images/pfsense/issue_certificate.png){: .align-center}
 
 The gear will turn, and after a bit you’ll see a lot of green text. If there is block that looks like:
 
-[![issue_certificate]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/cert_success_issued.png)]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/cert_success_issued.png){: .align-center}
+[![issue_certificate]({{ site.baseurl }}/assets/images/pfsense/cert_success_issued.png)]({{ site.baseurl }}/assets/images/pfsense/cert_success_issued.png){: .align-center}
 
 The successful message will include this text in the end:
 ```
@@ -140,7 +140,7 @@ After that you should renew certificates. You can do it manually (just a click *
 or set up auto update process. For auto renew enable Acme client renewal job under
 **Services / Acme / Settings**.
 
-![auto_renew_certificates]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/auto_renew_certificates.png ){: .align-center}
+![auto_renew_certificates]({{ site.baseurl }}/assets/images/pfsense/auto_renew_certificates.png ){: .align-center}
 
 I prefer to manually renew because errors is occurred frequently.
 

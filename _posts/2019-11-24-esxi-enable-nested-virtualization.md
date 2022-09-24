@@ -41,7 +41,7 @@ If you are creating a nested ESXi/Proxmox VM, and you enable the checkbox for:
 
 > Hardware virtualization: **Expose hardware assisted virtualization to the guest OS**
 
-![enale-vhv]({{ site.url }}{{ site.baseurl }}/assets/images/esxi/nested/1.png){: .align-center}
+![enale-vhv]({{ site.baseurl }}/assets/images/esxi/nested/1.png){: .align-center}
 
 This sets the same value as if manually adding ​`vhv.enable = “true”​` to the .vmx file. So with that said, if you created a nested ESXi VM using the Web Client and enabled that option then you don’t need to add it manually.
 

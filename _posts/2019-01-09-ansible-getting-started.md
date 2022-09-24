@@ -131,7 +131,7 @@ Setting up nginx (1.10.3-1+deb9u2) ...
 ```
 After that I can see the a 'hello' page from Nginx by `192.168.123.101` local network address (it corresponds to the `websrv1` host).
 
-![ansible-nginx-hello]({{ site.url }}{{ site.baseurl }}/assets/images/ansible/ansible-nginx-hello.png){: .align-center}
+![ansible-nginx-hello]({{ site.baseurl }}/assets/images/ansible/ansible-nginx-hello.png){: .align-center}
 
 Good! Now the host `websrv1` has work as real web server.
 Then write the same with Ansible's playbook. Open the file `~/myansible/nginx-install.yml` and add

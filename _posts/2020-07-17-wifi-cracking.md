@@ -96,7 +96,7 @@ sudo airport -s
 Now, this command will be scanning the available Wi-Fi.
 
 4. Wait till the installation is done.
-[![available-networks]({{ site.url }}{{ site.baseurl }}/assets/images/wifi-crack/airport-scan.png)]({{ site.url }}{{ site.baseurl }}/assets/images/wifi-crack/airport-scan.png){: .align-center}
+[![available-networks]({{ site.baseurl }}/assets/images/wifi-crack/airport-scan.png)]({{ site.baseurl }}/assets/images/wifi-crack/airport-scan.png){: .align-center}
 I want to hack my network named `Ruslan Gainanov` and **BSSID** `6e:57:ca:24:09:8c` and **channel** `1`.
 
 5. Copy the BSSID (my BSSID=`6e:57:ca:24:09:8c`) of the target Access Point.
@@ -133,7 +133,7 @@ sudo tcpdump "type mgt subtype beacon and ether src $BSSID" -I -c 1 -i en0 -w be
 ```
 
 5. Deauth connected devices with **Jam Wi-Fi** app. Open the app. Press **Scan**, chose the target network and press **Monitor**, then press **Do It!** to restart all connections. Wait 15 seconds and press **Done**
-[![deauth-clients]({{ site.url }}{{ site.baseurl }}/assets/images/wifi-crack/jamwifi.png)]({{ site.url }}{{ site.baseurl }}/assets/images/wifi-crack/jamwifi.png){: .align-center}
+[![deauth-clients]({{ site.baseurl }}/assets/images/wifi-crack/jamwifi.png)]({{ site.baseurl }}/assets/images/wifi-crack/jamwifi.png){: .align-center}
 
 6. When you "Done" with death, run quickly next command. You have to capture a **handshake** in time
 ```
@@ -188,7 +188,7 @@ For more examples press [here](https://hashcat.net/wiki/doku.php?id=cracking_wpa
 I use the hashcat with pattern, that works on GPU.
 On my MacBook Pro, it yields a performance of 41kH/s: it tests 41000 passwords in a second.
 
-[![giphy]({{ site.url }}{{ site.baseurl }}/assets/images/wifi-crack/giphy.gif)]({{ site.url }}{{ site.baseurl }}/assets/images/wifi-crack/giphy.gif){: .align-center}
+[![giphy]({{ site.baseurl }}/assets/images/wifi-crack/giphy.gif)]({{ site.baseurl }}/assets/images/wifi-crack/giphy.gif){: .align-center}
 
 ```
 OpenCL Platform #1: Apple

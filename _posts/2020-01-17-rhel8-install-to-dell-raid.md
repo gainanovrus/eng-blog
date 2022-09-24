@@ -56,7 +56,7 @@ So it is the reason why I prefer to add drivers by http link. What we will need 
 Run the installation process. When boot menu window has been shown,
 press the `Tab` key on your keyboard to display the boot command line.
 
-![boot-menu]({{ site.url }}{{ site.baseurl }}/assets/images/dell-centos/boot-menu.png){: .align-center}
+![boot-menu]({{ site.baseurl }}/assets/images/dell-centos/boot-menu.png){: .align-center}
 
 Append the `inst.dd=https://elrepo.org/linux/dud/el8/x86_64/dd-mpt3sas-28.100.00.00-2.el8_1.elrepo.iso`
 boot option to the command line and press `Enter` to execute the boot process.
@@ -64,7 +64,7 @@ boot option to the command line and press `Enter` to execute the boot process.
 The installer should detect the DUD iso and install the proper drivers.
 And raid controller with drives will be accessed as installation destination.
 
-![destination-window-with-raid-controller]({{ site.url }}{{ site.baseurl }}/assets/images/dell-centos/destination-with-raid.png){: .align-center}
+![destination-window-with-raid-controller]({{ site.baseurl }}/assets/images/dell-centos/destination-with-raid.png){: .align-center}
 
 So, now you can install the last RHEL/CentOS into DELL Server.
 After reboot the system the drivers will be included into installed system.

@@ -16,7 +16,7 @@ header:
 
 In my [previous][previous] post I speak about [Traefik][traefik] concepts and designs. I explain the main words used in Traefik as Endpoint, Router, Rule and etc. So in here I will concentrate only on practice.
 
-[![traefik-docker-scheme]({{ site.url }}{{ site.baseurl }}/assets/images/traefik/treafik_docker.png)]({{ site.url }}{{ site.baseurl }}/assets/images/traefik/treafik_docker.png){: .align-center}
+[![traefik-docker-scheme]({{ site.baseurl }}/assets/images/traefik/treafik_docker.png)]({{ site.baseurl }}/assets/images/traefik/treafik_docker.png){: .align-center}
 
 ## What We’ll Do
 * We’ll use a pre-made container — [`containous/whoami`][whoami] — capable of telling you where it is hosted and what it receives when you call it.
@@ -225,7 +225,7 @@ After that we bound the router with internal `api` service. Declaring a [Middlew
 It could be generated with shell command - `echo $(htpasswd -nb username password) | sed -e s/\\$/\\$\\$/g`.
 And at the end, join the middleware to the router `api` (`traefik.http.routers.api.middlewares=auth`).
 
-[![traefik-dashboard]({{ site.url }}{{ site.baseurl }}/assets/images/traefik/dashboard_screenshot.png)]({{ site.url }}{{ site.baseurl }}/assets/images/traefik/dashboard_screenshot.png){: .align-center}
+[![traefik-dashboard]({{ site.baseurl }}/assets/images/traefik/dashboard_screenshot.png)]({{ site.baseurl }}/assets/images/traefik/dashboard_screenshot.png){: .align-center}
 
 ## 4. HTTPS Redirection
 

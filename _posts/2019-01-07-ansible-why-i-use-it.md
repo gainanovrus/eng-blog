@@ -59,7 +59,7 @@ Next config (in Ansible it names a [playbook][playbook]) will copy local config 
 ```
 
 And after run the playbook we have readable output log like this one:
-![ansible-yum-all]({{ site.url }}{{ site.baseurl }}/assets/images/ansible/ansible-yum-all.jpg){: .align-center}
+![ansible-yum-all]({{ site.baseurl }}/assets/images/ansible/ansible-yum-all.jpg){: .align-center}
 
 ## 3. Many modules
 

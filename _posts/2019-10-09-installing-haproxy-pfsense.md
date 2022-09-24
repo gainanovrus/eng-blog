@@ -50,7 +50,7 @@ And it already has free LetsEncrypt SSL certificates (how to get them - read
 Under **System / Package Manager / Available Packages** find a package `haproxy`.
 Click the install button and allow it to complete.
 
-![haproxy_package_install]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/haproxy_package_install.png){: .align-center}
+![haproxy_package_install]({{ site.baseurl }}/assets/images/pfsense/haproxy_package_install.png){: .align-center}
 
 ### configure haproxy
 
@@ -59,7 +59,7 @@ Once the package is installed navigate to **Services > HAProxy > Settings**
 
 My setup is like so:
 
-![haproxy_configure]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/haproxy_configure.png){: .align-center}
+![haproxy_configure]({{ site.baseurl }}/assets/images/pfsense/haproxy_configure.png){: .align-center}
 
 ### create backend
 
@@ -70,7 +70,7 @@ The next step is to create an HAProxy backend for a host.
 
 I have one host with NGINX-service listened `80` port on local IP `192.168.102.3`.
 
-![haproxy_backend]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/haproxy_backend.png){: .align-center}
+![haproxy_backend]({{ site.baseurl }}/assets/images/pfsense/haproxy_backend.png){: .align-center}
 
 Repeat this for each of your seperate backend "apps" or "servers",
 a tip is you can copy one interface to duplicated it, then edit it as needed.
@@ -89,16 +89,16 @@ Use secure (https) connection with LetsEncrypt SSL certificates.
 
 My frontend configuration looks like this:
 
-![haproxy_frontend]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/haproxy_frontend.png){: .align-center}
+![haproxy_frontend]({{ site.baseurl }}/assets/images/pfsense/haproxy_frontend.png){: .align-center}
 
 ### create firewall rule
 
 Now create two firewall rules (**Firewall / Rules /WAN**).
 It is open TCP-ports `80` and `443` through WAN interface  for opening our HAProxy to the external world.
 
-![haproxy_firewall_edit]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/haproxy_firewall_edit.png){: .align-center}
+![haproxy_firewall_edit]({{ site.baseurl }}/assets/images/pfsense/haproxy_firewall_edit.png){: .align-center}
 
-![haproxy_firewall_full]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/haproxy_firewall_full.png){: .align-center}
+![haproxy_firewall_full]({{ site.baseurl }}/assets/images/pfsense/haproxy_firewall_full.png){: .align-center}
 
 ### test everything
 
@@ -107,7 +107,7 @@ You should now be able to hit `http://nginx.example.com` and have it redirect to
 
 The site should have a "green" status because is used a secured connection.
 
-![haproxy_test]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/haproxy_test.png){: .align-center}
+![haproxy_test]({{ site.baseurl }}/assets/images/pfsense/haproxy_test.png){: .align-center}
 
 ## Some notes
 
@@ -121,7 +121,7 @@ This is not error in the first place.
 To fix it change DH value throw HAproxy settings webGUI (**Services / HAProxy / Settings**).
 `Tuning -> Max SSL Diffie-Hellman size = 2048`
 
-![dh_tunning]({{ site.url }}{{ site.baseurl }}/assets/images/pfsense/dh_tunning.png){: .align-center}
+![dh_tunning]({{ site.baseurl }}/assets/images/pfsense/dh_tunning.png){: .align-center}
 
 The solution was founded in the [forum](https://forum.netgate.com/topic/111505/how-do-i-fix-this-error-in-haproxy)
 

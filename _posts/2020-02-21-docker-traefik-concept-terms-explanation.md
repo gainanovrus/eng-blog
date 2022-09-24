@@ -19,7 +19,7 @@ It receives requests on behalf of your system and finds out which components are
 
 Traefik perfectly bound with Docker engine, just attach labels to your containers and let Traefik do the rest!
 
-[![Traefik design in a nutshell]({{ site.url }}{{ site.baseurl }}/assets/images/traefik/traefik-architecture.png)]({{ site.url }}{{ site.baseurl }}/assets/images/traefik/traefik-architecture.png){: .align-center}
+[![Traefik design in a nutshell]({{ site.baseurl }}/assets/images/traefik/traefik-architecture.png)]({{ site.baseurl }}/assets/images/traefik/traefik-architecture.png){: .align-center}
 
 
 But if are new in Traefik you will have some difficulties to understand what does it mean all this specific words.
@@ -85,7 +85,7 @@ There are several available middleware, some can modify the request, the headers
 some add authentication, and so on. The middlewares will take effect only if the route rule matches,
 and before forwarding the request to the service.
 
-[![Traefik Middleware scheme]({{ site.url }}{{ site.baseurl }}/assets/images/traefik/middleware.png)]({{ site.url }}{{ site.baseurl }}/assets/images/traefik/middleware.png){: .align-center}
+[![Traefik Middleware scheme]({{ site.baseurl }}/assets/images/traefik/middleware.png)]({{ site.baseurl }}/assets/images/traefik/middleware.png){: .align-center}
 
 Example of creating and attaching a middleware (add BasicAuth to the Service):
 ```
