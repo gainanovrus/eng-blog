@@ -1,0 +1,12 @@
+# no version needed since 2020
+
+services:
+  jekyll:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: bretfisher/jekyll-serve
+    volumes:
+      - .:/site
+    ports:
+      - '4000:4000'
