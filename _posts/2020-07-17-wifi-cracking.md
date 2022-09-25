@@ -268,4 +268,4 @@ Please be aware that attacking Wi-Fi Protected Access (WPA) is illegal unless yo
 [hcxtools]: https://github.com/ZerBea/hcxtools
 [jamwifi]: http://macheads101.com/pages/downloads/mac/JamWiFi.app.zip
 [tshark]: https://www.wireshark.org/docs/wsug_html_chunked/AppToolstshark.html#:~:text=TShark%20is%20a%20terminal%20oriented,tshark%20)%20or%20the%20online%20version.
-[bettercap-article]: {% post_url 2022-09-25-wifi-deauth-attack.md %}
+[bettercap-article]: {% post_url 2022-09-25-wifi-deauth-attack %}

